@@ -36,7 +36,7 @@ Discord [Channel](https://discord.gg/ssE8eh)
 ## Overview
 Creates page that is dismissed by swipe gestures, with Hero style animations, Inspired by FB, IG stories.
 
-<img src="https://raw.githubusercontent.com/Tkko/Flutter_dismissible_page/master/example/media/dismissible_horizontal.gif" width="300em" /><img src="https://raw.githubusercontent.com/Tkko/Flutter_dismissible_page/master/example/media/dismissible_vertical.gif" width="300em" />
+<img src="https://raw.githubusercontent.com/Tkko/Flutter_dismissible_page/master/example/media/dismissible_horizontal.gif" width="300em" /> <img src="https://raw.githubusercontent.com/Tkko/Flutter_dismissible_page/master/example/media/dismissible_vertical.gif" width="300em" />
 
 ## Installation
 
