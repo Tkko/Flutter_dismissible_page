@@ -11,10 +11,8 @@ class StoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DismissiblePage(
-      key: const Key('dismiss'),
-      backgroundColor: Colors.transparent,
-      onClose: () => Navigator.of(context).pop(),
-      direction: DismissDirection.horizontal,
+      onDismiss: () => Navigator.of(context).pop(),
+      isFullScreen: false,
       child: Material(
         color: Colors.transparent,
         child: Hero(

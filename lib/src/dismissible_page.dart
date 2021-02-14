@@ -7,13 +7,11 @@ typedef DismissDirectionCallback = void Function(DismissDirection direction);
 
 class DismissiblePage extends StatefulWidget {
   DismissiblePage({
-    @required Key key,
     @required this.child,
     this.isFullScreen = true,
     this.disabled = false,
     this.backgroundColor = Colors.black,
-    this.onResize,
-    this.onClose,
+    this.onDismiss,
     this.direction = DismissDirection.vertical,
     this.dismissThresholds = const <DismissDirection, double>{},
     this.crossAxisEndOffset = 0.0,
@@ -21,19 +19,18 @@ class DismissiblePage extends StatefulWidget {
     this.initialRadius = 7,
     this.onDragStart,
     this.onDragEnd,
-  })  : assert(key != null),
-        assert(dragStartBehavior != null),
+    Key key,
+  })  : assert(dragStartBehavior != null),
         super(key: key);
 
   final VoidCallback onDragStart;
   final VoidCallback onDragEnd;
+  final VoidCallback onDismiss;
   final bool isFullScreen;
   final double initialRadius;
   final bool disabled;
   final Widget child;
   final Color backgroundColor;
-  final VoidCallback onClose;
-  final VoidCallback onResize;
   final DismissDirection direction;
   final Map<DismissDirection, double> dismissThresholds;
   final double crossAxisEndOffset;
@@ -44,7 +41,7 @@ class DismissiblePage extends StatefulWidget {
 }
 
 class _DismissibleState extends State<DismissiblePage>
-    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+    with TickerProviderStateMixin {
   AnimationController _moveController;
   Animation<Offset> _moveAnimation;
   AnimationController _resizeController;
@@ -62,13 +59,9 @@ class _DismissibleState extends State<DismissiblePage>
   }
 
   @override
-  bool get wantKeepAlive =>
-      _moveController?.isAnimating == true ||
-      _resizeController?.isAnimating == true;
-
-  @override
   void dispose() {
-    _moveController.dispose();
+    _moveController?.removeStatusListener(_handleDismissStatusChanged);
+    _moveController?.dispose();
     _resizeController?.dispose();
     super.dispose();
   }
@@ -115,15 +108,12 @@ class _DismissibleState extends State<DismissiblePage>
     if (_moveController.isAnimating) {
       _dragExtent =
           _moveController.value * _overallDragAxisExtent * _dragExtent.sign;
-
       _moveController.stop();
     } else {
       _dragExtent = 0.0;
       _moveController.value = 0.0;
     }
-    setState(() {
-      _updateMoveAnimation();
-    });
+    setState(() => _updateMoveAnimation());
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -136,15 +126,12 @@ class _DismissibleState extends State<DismissiblePage>
       case DismissDirection.vertical:
         _dragExtent += delta;
         break;
-
       case DismissDirection.up:
         if (_dragExtent + delta < 0) _dragExtent += delta;
         break;
-
       case DismissDirection.down:
         if (_dragExtent + delta > 0) _dragExtent += delta;
         break;
-
       case DismissDirection.endToStart:
         switch (Directionality.of(context)) {
           case TextDirection.rtl:
@@ -155,7 +142,6 @@ class _DismissibleState extends State<DismissiblePage>
             break;
         }
         break;
-
       case DismissDirection.startToEnd:
         switch (Directionality.of(context)) {
           case TextDirection.rtl:
@@ -167,14 +153,11 @@ class _DismissibleState extends State<DismissiblePage>
         }
         break;
     }
-    if (oldDragExtent.sign != _dragExtent.sign) {
-      setState(() {
-        _updateMoveAnimation();
-      });
-    }
-    if (!_moveController.isAnimating) {
+    if (oldDragExtent.sign != _dragExtent.sign)
+      setState(() => _updateMoveAnimation());
+
+    if (!_moveController.isAnimating)
       _moveController.value = _dragExtent.abs() / _overallDragAxisExtent;
-    }
   }
 
   void _updateMoveAnimation() {
@@ -193,7 +176,7 @@ class _DismissibleState extends State<DismissiblePage>
     if (!_moveController.isDismissed) {
       if (_moveController.value >
           (widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold)) {
-        widget.onClose();
+        widget.onDismiss?.call();
       } else {
         _moveController.reverseDuration = Duration(milliseconds: 500);
         _moveController.reverse();
@@ -202,17 +185,13 @@ class _DismissibleState extends State<DismissiblePage>
     }
   }
 
-  Future<void> _handleDismissStatusChanged(AnimationStatus status) async {
-    if (status == AnimationStatus.completed && !_dragUnderway) {
-      widget.onClose();
-    }
-    updateKeepAlive();
+  void _handleDismissStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed && !_dragUnderway)
+      widget.onDismiss();
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-
     final contentPadding = !widget.isFullScreen
         ? EdgeInsets.only(
             bottom: MediaQuery.of(context).padding.top,
