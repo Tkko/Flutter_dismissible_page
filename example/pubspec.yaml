@@ -23,9 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.0
   dismissible_page:
-    path: ../../dismissible_page
+    path: ../../Flutter_dismissible_page
 
 dev_dependencies:
   flutter_test:
