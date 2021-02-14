@@ -1,3 +1,11 @@
+## 0.6.1 -02/14/2021
+🔥🚀
+Added
+| Property  | Default |
+| ------------- | ------------- |
+| reverseDuration  |  Duration(milliseconds: 500) |
+
+
 ## 0.6.0 -02/14/2021
 🔥🚀
 Added
