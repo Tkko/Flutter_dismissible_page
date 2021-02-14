@@ -12,7 +12,6 @@ class StoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return DismissiblePage(
       onDismiss: () => Navigator.of(context).pop(),
-      direction: DismissDirection.horizontal,
       isFullScreen: false,
       child: Material(
         color: Colors.transparent,

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -13,9 +15,12 @@ class DismissiblePage extends StatefulWidget {
     this.backgroundColor = Colors.black,
     this.direction = DismissDirection.vertical,
     this.dismissThresholds = const <DismissDirection, double>{},
-    this.crossAxisEndOffset = 0.0,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.initialRadius = 7,
+    this.crossAxisEndOffset = 0.0,
+    this.minRadius = 7,
+    this.minScale = .85,
+    this.maxRadius = 30,
+    this.maxTransformValue = .4,
     this.onDismiss,
     this.onDragStart,
     this.onDragEnd,
@@ -27,7 +32,10 @@ class DismissiblePage extends StatefulWidget {
   final VoidCallback onDragEnd;
   final VoidCallback onDismiss;
   final bool isFullScreen;
-  final double initialRadius;
+  final double minScale;
+  final double minRadius;
+  final double maxRadius;
+  final double maxTransformValue;
   final bool disabled;
   final Widget child;
   final Color backgroundColor;
@@ -192,12 +200,8 @@ class _DismissibleState extends State<DismissiblePage>
 
   @override
   Widget build(BuildContext context) {
-    final contentPadding = !widget.isFullScreen
-        ? EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.top,
-            top: MediaQuery.of(context).padding.top,
-          )
-        : EdgeInsets.zero;
+    final contentPadding =
+        widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
 
     if (widget.disabled)
       return Padding(padding: contentPadding, child: widget.child);
@@ -218,10 +222,11 @@ class _DismissibleState extends State<DismissiblePage>
           final k = _directionIsXAxis
               ? _moveAnimation.value.dx
               : _moveAnimation.value.dy;
-          final dx = _moveAnimation.value.dx;
-          final dy = _moveAnimation.value.dy;
-          final scale = 1 - k / 5.6;
-          final radius = widget.initialRadius + k * 20;
+
+          final dx = _moveAnimation.value.dx.clamp(0, widget.maxTransformValue);
+          final dy = _moveAnimation.value.dy.clamp(0, widget.maxTransformValue);
+          final scale = lerpDouble(1, widget.minScale, k);
+          final radius = lerpDouble(widget.minRadius, widget.maxRadius, k);
 
           return Container(
             padding: contentPadding,
