@@ -2,17 +2,11 @@ import 'package:example/_models.dart';
 import 'package:example/_widgets.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(AppView());
-}
+void main() => runApp(AppView());
 
 class AppView extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: AppHome(),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(home: AppHome());
 }
 
 class AppHome extends StatefulWidget {
@@ -40,10 +34,7 @@ class _AppHomeState extends State<AppHome> {
           children: [
             Padding(
               padding: const EdgeInsets.all(20),
-              child: Text(
-                'Dismissible',
-                style: TextStyle(fontSize: 24),
-              ),
+              child: Text('Dismissible', style: TextStyle(fontSize: 24)),
             ),
             SizedBox(
               height: 120,
