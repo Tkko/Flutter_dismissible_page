@@ -7,7 +7,7 @@ import 'package:dismissible_page/dismissible_page.dart';
 class StoryWidget extends StatelessWidget {
   final StoryModel story;
 
-  const StoryWidget({this.story});
+  const StoryWidget({required this.story});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class StoryWidget extends StatelessWidget {
             story.title,
             style: Theme.of(context)
                 .textTheme
-                .button
+                .button!
                 .copyWith(color: Colors.white),
           ),
           clipBehavior: Clip.antiAlias,
@@ -34,7 +34,7 @@ class StoryWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             image: DecorationImage(
               fit: BoxFit.cover,
-              image: NetworkImage(story.imageUrl),
+              image: NetworkImage(story.imageUrl!),
             ),
           ),
         ),

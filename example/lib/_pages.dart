@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 class StoryPage extends StatelessWidget {
   final StoryModel story;
 
-  const StoryPage({this.story});
+  const StoryPage({required this.story});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class StoryPage extends StatelessWidget {
               story.title,
               style: Theme.of(context)
                   .textTheme
-                  .button
+                  .button!
                   .copyWith(color: Colors.white),
             ),
             clipBehavior: Clip.antiAlias,
@@ -31,7 +31,7 @@ class StoryPage extends StatelessWidget {
             decoration: BoxDecoration(
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image: NetworkImage(story.imageUrl),
+                image: NetworkImage(story.imageUrl!),
               ),
             ),
           ),

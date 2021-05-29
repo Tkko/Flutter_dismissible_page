@@ -5,7 +5,7 @@ class TransparentRoute<T> extends PageRoute<T>
   final WidgetBuilder builder;
 
   @override
-  final String title;
+  final String? title;
 
   /// Builds the primary contents of the route.
   @override
@@ -14,16 +14,13 @@ class TransparentRoute<T> extends PageRoute<T>
   final Color backgroundColor;
 
   TransparentRoute({
-    @required this.builder,
-    @required this.backgroundColor,
+    required this.builder,
+    required this.backgroundColor,
     this.title,
-    RouteSettings settings,
+    RouteSettings? settings,
     this.maintainState = true,
     bool fullscreenDialog = true,
-  })  : assert(builder != null),
-        assert(maintainState != null),
-        assert(fullscreenDialog != null),
-        super(settings: settings, fullscreenDialog: fullscreenDialog);
+  }) : super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   @override
   Duration get transitionDuration => Duration(milliseconds: 250);
