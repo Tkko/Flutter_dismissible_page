@@ -1,4 +1,10 @@
-## 0.6.1 -02/14/2021
+## 0.6.2 -05/29/2021
+
+🔥🚀
+Migrated to Null safety
+
+
+
 🔥🚀
 Added
 | Property  | Default |
