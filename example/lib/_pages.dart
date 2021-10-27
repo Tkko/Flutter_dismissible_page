@@ -13,6 +13,9 @@ class StoryPage extends StatelessWidget {
     return DismissiblePage(
       onDismiss: () => Navigator.of(context).pop(),
       isFullScreen: false,
+      dragSensitivity: .4,
+      maxTransformValue: 4,
+      direction: DismissDirection.vertical,
       child: Material(
         color: Colors.transparent,
         child: Hero(

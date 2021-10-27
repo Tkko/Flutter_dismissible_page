@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -18,6 +19,7 @@ class DismissiblePage extends StatefulWidget {
     this.dismissThresholds = const <DismissDirection, double>{},
     this.dragStartBehavior = DragStartBehavior.start,
     this.crossAxisEndOffset = 0.0,
+    this.dragSensitivity = 0.7,
     this.minRadius = 7,
     this.minScale = .85,
     this.maxRadius = 30,
@@ -45,6 +47,7 @@ class DismissiblePage extends StatefulWidget {
   final DismissDirection direction;
   final Map<DismissDirection, double> dismissThresholds;
   final double crossAxisEndOffset;
+  final double dragSensitivity;
   final DragStartBehavior dragStartBehavior;
   final Duration reverseDuration;
 
@@ -167,12 +170,13 @@ class _DismissibleState extends State<DismissiblePage>
   }
 
   void _updateMoveAnimation() {
+    final end = _dragExtent.sign * widget.dragSensitivity;
     _moveAnimation = _moveController!.drive(
       Tween<Offset>(
         begin: Offset.zero,
         end: _directionIsXAxis
-            ? Offset(0.7, widget.crossAxisEndOffset)
-            : Offset(widget.crossAxisEndOffset, 0.7),
+            ? Offset(end, widget.crossAxisEndOffset)
+            : Offset(widget.crossAxisEndOffset, end),
       ),
     );
   }
@@ -204,7 +208,16 @@ class _DismissibleState extends State<DismissiblePage>
         widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
 
     if (widget.disabled) {
-      return Padding(padding: contentPadding, child: widget.child);
+      return DecoratedBox(
+        decoration: BoxDecoration(color: widget.backgroundColor),
+        child: Padding(
+          padding: contentPadding,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(widget.minRadius),
+            child: widget.child,
+          ),
+        ),
+      );
     }
 
     return GestureDetector(
@@ -220,26 +233,52 @@ class _DismissibleState extends State<DismissiblePage>
         animation: _moveAnimation,
         builder: (BuildContext context, Widget? child) {
           final k = _directionIsXAxis
-              ? _moveAnimation.value.dx
-              : _moveAnimation.value.dy;
+              ? _moveAnimation.value.dx.abs()
+              : _moveAnimation.value.dy.abs();
 
-          final dx = _moveAnimation.value.dx.clamp(0, widget.maxTransformValue);
-          final dy = _moveAnimation.value.dy.clamp(0, widget.maxTransformValue);
+          double getDx() {
+            if (_directionIsXAxis) {
+              if (_moveAnimation.value.dx.isNegative) {
+                // return lerpDouble(_moveAnimation.value.dx,
+                //     -widget.maxTransformValue, widget.dragSensitivity)!;
+                return max(_moveAnimation.value.dx, -widget.maxTransformValue);
+              } else {
+                // return lerpDouble(_moveAnimation.value.dx,
+                //     widget.maxTransformValue, 1 - widget.dragSensitivity)!;
+                return min(_moveAnimation.value.dx, widget.maxTransformValue);
+              }
+            }
+            return _moveAnimation.value.dx;
+          }
+
+          double getDy() {
+            if (!_directionIsXAxis) {
+              if (_moveAnimation.value.dy.isNegative) {
+                return max(_moveAnimation.value.dy, -widget.maxTransformValue);
+              } else {
+                return min(_moveAnimation.value.dy, widget.maxTransformValue);
+              }
+            }
+            return _moveAnimation.value.dy;
+          }
+
+          final offset = Offset(getDx(), getDy());
           final scale = lerpDouble(1, widget.minScale, k);
           final radius = lerpDouble(widget.minRadius, widget.maxRadius, k)!;
+          final opacity = (widget.startingOpacity - k).clamp(.0, 1.0);
 
           return Container(
             padding: contentPadding,
-            color: widget.backgroundColor
-                .withOpacity((widget.startingOpacity - k).clamp(.0, 1.0)),
-            child: Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.identity()
-                ..translate(dx * _dragExtent, dy * _dragExtent)
-                ..scale(scale, scale),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(radius),
-                child: child,
+            color: widget.backgroundColor.withOpacity(opacity),
+            child: FractionalTranslation(
+              translation: offset,
+              child: Transform.scale(
+                scale: scale!,
+                alignment: Alignment.center,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(radius),
+                  child: child,
+                ),
               ),
             ),
           );
