@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  pedantic: ^1.11.0
+  pedantic: ^1.11.1
 
 
 dev_dependencies:
