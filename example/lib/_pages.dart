@@ -19,13 +19,6 @@ class StoryPage extends StatelessWidget {
           tag: story.storyId,
           child: Container(
             padding: const EdgeInsets.all(20),
-            child: Text(
-              story.title,
-              style: Theme.of(context)
-                  .textTheme
-                  .button!
-                  .copyWith(color: Colors.white),
-            ),
             clipBehavior: Clip.antiAlias,
             alignment: Alignment.bottomLeft,
             decoration: BoxDecoration(
@@ -33,6 +26,13 @@ class StoryPage extends StatelessWidget {
                 fit: BoxFit.cover,
                 image: NetworkImage(story.imageUrl!),
               ),
+            ),
+            child: Text(
+              story.title,
+              style: Theme.of(context)
+                  .textTheme
+                  .button!
+                  .copyWith(color: Colors.white),
             ),
           ),
         ),

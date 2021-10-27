@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:pedantic/pedantic.dart';
 
 const double _kDismissThreshold = 0.15;
 
@@ -185,7 +186,7 @@ class _DismissibleState extends State<DismissiblePage>
         widget.onDismiss?.call();
       } else {
         _moveController!.reverseDuration = widget.reverseDuration;
-        _moveController!.reverse();
+        unawaited(_moveController!.reverse());
         widget.onDragEnd?.call();
       }
     }
@@ -229,7 +230,8 @@ class _DismissibleState extends State<DismissiblePage>
 
           return Container(
             padding: contentPadding,
-            color: widget.backgroundColor.withOpacity(widget.startingOpacity - k),
+            color: widget.backgroundColor
+                .withOpacity((widget.startingOpacity - k).clamp(.0, 1.0)),
             child: Transform(
               alignment: Alignment.center,
               transform: Matrix4.identity()
