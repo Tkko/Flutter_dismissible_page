@@ -80,7 +80,7 @@ import 'package:dismissible_page/dismissible_page.dart';
 
 ```dart
   DismissiblePage({
-    @required this.child,
+    required this.child,
     this.isFullScreen = true,
     this.disabled = false,
     this.backgroundColor = Colors.black,
@@ -88,16 +88,18 @@ import 'package:dismissible_page/dismissible_page.dart';
     this.dismissThresholds = const <DismissDirection, double>{},
     this.dragStartBehavior = DragStartBehavior.start,
     this.crossAxisEndOffset = 0.0,
+    this.dragSensitivity = 0.7,
     this.minRadius = 7,
     this.minScale = .85,
     this.maxRadius = 30,
     this.maxTransformValue = .4,
+    this.startingOpacity = 1,
     this.onDismiss,
     this.onDragStart,
     this.onDragEnd,
-    Key key,
-  })  : assert(dragStartBehavior != null),
-        super(key: key);
+    this.reverseDuration = const Duration(milliseconds: 500),
+    Key? key,
+  }) : super(key: key);
 ```
 
 ## Example
@@ -211,6 +213,9 @@ class StoryPage extends StatelessWidget {
     return DismissiblePage(
       onDismiss: () => Navigator.of(context).pop(),
       isFullScreen: false,
+      dragSensitivity: .4,
+      maxTransformValue: 4,
+      direction: DismissDirection.vertical,
       child: Material(
         color: Colors.transparent,
         child: Hero(
