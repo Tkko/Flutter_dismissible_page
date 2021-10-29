@@ -24,7 +24,8 @@ dependencies:
   flutter:
     sdk: flutter
   dismissible_page:
-    path: ../../Flutter_dismissible_page
+    git:
+      url: https://github.com/Tkko/Flutter_dismissible_page
 
 dev_dependencies:
   flutter_test:
