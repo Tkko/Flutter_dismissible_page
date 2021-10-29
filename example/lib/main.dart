@@ -7,12 +7,29 @@ import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(AppView());
 
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  // Override behavior methods and getters like dragDevices
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+      };
+}
+
 class AppView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        print(constraints);
+        final app = MaterialApp(
+          scrollBehavior: MyCustomScrollBehavior(),
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            scaffoldBackgroundColor: Colors.white,
+            appBarTheme: AppBarTheme(color: Colors.white),
+          ),
+          home: AppHome(),
+        );
         if (constraints.maxWidth > 600 && constraints.maxHeight > 600) {
           return Container(
             color: Colors.white,
@@ -29,24 +46,12 @@ class AppView extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: MaterialApp(
-                  theme: ThemeData(
-                    scaffoldBackgroundColor: Colors.white,
-                    appBarTheme: AppBarTheme(color: Colors.white),
-                  ),
-                  home: AppHome(),
-                ),
+                child: app,
               ),
             ),
           );
         }
-        return MaterialApp(
-          theme: ThemeData(
-            scaffoldBackgroundColor: Colors.white,
-            appBarTheme: AppBarTheme(color: Colors.white),
-          ),
-          home: AppHome(),
-        );
+        return app;
       },
     );
   }
@@ -60,8 +65,6 @@ class AppHome extends StatefulWidget {
 class _AppHomeState extends State<AppHome> {
   DismissDirection direction = DismissDirection.down;
   final stories = [
-    StoryModel(title: 'STORY'),
-    StoryModel(title: 'STORY'),
     StoryModel(title: 'STORY'),
     StoryModel(title: 'STORY'),
     StoryModel(title: 'STORY'),
@@ -141,6 +144,7 @@ class _AppHomeState extends State<AppHome> {
                       width: itemWidth,
                       child: StoryWidget(
                         story: stories[i]..direction = direction,
+                        stories: stories,
                       ),
                     );
                   },

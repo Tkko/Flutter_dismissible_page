@@ -6,14 +6,20 @@ import 'package:dismissible_page/dismissible_page.dart';
 
 class StoryWidget extends StatelessWidget {
   final StoryModel story;
+  final List<StoryModel> stories;
 
-  const StoryWidget({required this.story});
+  const StoryWidget({required this.story, required this.stories});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.pushTransparentRoute(StoryPage(story: story));
+        context.pushTransparentRoute(
+          StoriesWrapper(
+            parentIndex: stories.indexOf(story),
+            stories: stories,
+          ),
+        );
       },
       child: Hero(
         tag: story.storyId,
