@@ -46,10 +46,12 @@ packages:
   dismissible_page:
     dependency: "direct main"
     description:
-      path: ".."
-      relative: true
-    source: path
-    version: "0.6.3"
+      path: "."
+      ref: HEAD
+      resolved-ref: bf260d417eaccfb780f2d65e07677648f327db0c
+      url: "https://github.com/Tkko/Flutter_dismissible_page"
+    source: git
+    version: "0.6.4"
   fake_async:
     dependency: transitive
     description:

@@ -15,7 +15,7 @@ class StoryPage extends StatelessWidget {
       isFullScreen: false,
       dragSensitivity: .4,
       maxTransformValue: 4,
-      direction: DismissDirection.vertical,
+      direction: story.direction,
       child: Material(
         color: Colors.transparent,
         child: Hero(
