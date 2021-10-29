@@ -18,8 +18,6 @@ class StoryWidget extends StatelessWidget {
       child: Hero(
         tag: story.storyId,
         child: Container(
-          height: 160,
-          width: 120,
           padding: const EdgeInsets.all(8),
           clipBehavior: Clip.antiAlias,
           alignment: Alignment.bottomLeft,
