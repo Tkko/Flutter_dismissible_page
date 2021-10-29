@@ -9,22 +9,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(AppView());
 
-class MyCustomScrollBehavior extends MaterialScrollBehavior {
-  // Override behavior methods and getters like dragDevices
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-      };
-}
-
 class AppView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final app = MaterialApp(
-          scrollBehavior: MyCustomScrollBehavior(),
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             scaffoldBackgroundColor: Colors.white,
@@ -65,11 +55,11 @@ class AppHome extends StatefulWidget {
 }
 
 class _AppHomeState extends State<AppHome> {
-  String get randomGirl =>
-      'https://source.unsplash.com/collection/8909560/${Random().nextInt(20) + 1000}x${Random().nextInt(20) + 1000}';
+  String get randomFood =>
+      'https://source.unsplash.com/collection/1424340/${Random().nextInt(20) + 1000}x${Random().nextInt(20) + 1000}';
 
-  String get randomMan =>
-      'https://source.unsplash.com/collection/3733842/${Random().nextInt(20) + 1000}x${Random().nextInt(20) + 1000}';
+  String get randomNature =>
+      'https://source.unsplash.com/collection/1319040/${Random().nextInt(20) + 1000}x${Random().nextInt(20) + 1000}';
 
   DismissDirection direction = DismissDirection.down;
   final List<StoryModel> stories = [];
@@ -83,10 +73,10 @@ class _AppHomeState extends State<AppHome> {
   @override
   void initState() {
     stories.addAll([
-      StoryModel(title: 'Follow', imageUrl: randomGirl),
-      StoryModel(title: 'For', imageUrl: randomMan),
-      StoryModel(title: 'More', imageUrl: randomGirl),
-      StoryModel(title: 'Stories', imageUrl: randomMan),
+      StoryModel(title: 'Random', imageUrl: randomFood),
+      StoryModel(title: 'Photos', imageUrl: randomNature),
+      StoryModel(title: 'From', imageUrl: randomFood),
+      StoryModel(title: 'Unsplash', imageUrl: randomNature),
     ]);
     super.initState();
   }
