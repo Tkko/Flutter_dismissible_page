@@ -4,6 +4,7 @@ import 'package:dismissible_page/dismissible_page.dart';
 import 'package:example/_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class StoriesWrapper extends StatefulWidget {
   final int parentIndex;
@@ -114,10 +115,10 @@ class StoryPage extends StatelessWidget {
 
     return GestureDetector(
       onTapUp: _onTap,
-      child: Material(
-        color: Colors.transparent,
-        child: Hero(
-          tag: story.storyId,
+      child: Hero(
+        tag: story.storyId,
+        child: Material(
+          color: Colors.transparent,
           child: Container(
             padding: const EdgeInsets.all(20),
             clipBehavior: Clip.antiAlias,
@@ -130,10 +131,7 @@ class StoryPage extends StatelessWidget {
             ),
             child: Text(
               story.title,
-              style: Theme.of(context)
-                  .textTheme
-                  .button!
-                  .copyWith(color: Colors.white),
+              style: GoogleFonts.poppins(color: Colors.white),
             ),
           ),
         ),

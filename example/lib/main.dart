@@ -1,8 +1,10 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:example/_models.dart';
 import 'package:example/_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(AppView());
@@ -63,19 +65,31 @@ class AppHome extends StatefulWidget {
 }
 
 class _AppHomeState extends State<AppHome> {
+  String get randomGirl =>
+      'https://source.unsplash.com/collection/8909560/${Random().nextInt(20) + 1000}x${Random().nextInt(20) + 1000}';
+
+  String get randomMan =>
+      'https://source.unsplash.com/collection/3733842/${Random().nextInt(20) + 1000}x${Random().nextInt(20) + 1000}';
+
   DismissDirection direction = DismissDirection.down;
-  final stories = [
-    StoryModel(title: 'STORY'),
-    StoryModel(title: 'STORY'),
-    StoryModel(title: 'STORY'),
-    StoryModel(title: 'STORY'),
-  ];
+  final List<StoryModel> stories = [];
   final contacts = {
     'GitHub': 'https://github.com/Tkko',
     'LinkedIn': 'https://www.linkedin.com/in/thornike/',
-    'Pub': 'https://pub.dev/publishers/fman.ge/packages',
     'Medium': 'https://thornike.medium.com/',
+    'Pub': 'https://pub.dev/publishers/fman.ge/packages',
   };
+
+  @override
+  void initState() {
+    stories.addAll([
+      StoryModel(title: 'Follow', imageUrl: randomGirl),
+      StoryModel(title: 'For', imageUrl: randomMan),
+      StoryModel(title: 'More', imageUrl: randomGirl),
+      StoryModel(title: 'Stories', imageUrl: randomMan),
+    ]);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,17 +101,32 @@ class _AppHomeState extends State<AppHome> {
           SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text('Contact me', style: TextStyle(fontSize: 24)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Tornike', style: GoogleFonts.poppins(fontSize: 24)),
+                Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: Text(
+                    'Find me on',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Wrap(
               spacing: 10,
               runSpacing: 10,
               children: contacts.entries.map((item) {
                 return ActionChip(
                   onPressed: () => launch(item.value),
-                  label: Text(item.key),
+                  label: Text(item.key, style: GoogleFonts.poppins()),
                 );
               }).toList(),
             ),
@@ -105,7 +134,8 @@ class _AppHomeState extends State<AppHome> {
           Spacer(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text('Dismiss Direction', style: TextStyle(fontSize: 24)),
+            child: Text('Dismiss Direction',
+                style: GoogleFonts.poppins(fontSize: 24)),
           ),
           Padding(
             padding: const EdgeInsets.all(20),
@@ -120,6 +150,7 @@ class _AppHomeState extends State<AppHome> {
                   selected: item == direction,
                   label: Text(
                     '$item'.replaceAll('DismissDirection.', ''),
+                    style: GoogleFonts.poppins(),
                   ),
                 );
               }).toList(),
@@ -127,7 +158,7 @@ class _AppHomeState extends State<AppHome> {
           ),
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Text('Stories', style: TextStyle(fontSize: 24)),
+            child: Text('Stories', style: GoogleFonts.poppins(fontSize: 24)),
           ),
           LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
