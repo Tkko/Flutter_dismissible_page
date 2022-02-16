@@ -16,8 +16,8 @@ class TransparentRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixi
   TransparentRoute({
     required this.builder,
     required this.backgroundColor,
-    this.transitionDuration = const Duration(milliseconds: 250),
-    this.reverseTransitionDuration = const Duration(milliseconds: 250),
+    required this.transitionDuration,
+    required this.reverseTransitionDuration,
     this.title,
     RouteSettings? settings,
     this.maintainState = true,
