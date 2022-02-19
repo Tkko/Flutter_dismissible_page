@@ -48,7 +48,7 @@ Add this to your package's `pubspec.yaml` file:
   
 ```yaml  
 dependencies:  
-  dismissible_page: ^0.5.5  
+  dismissible_page: ^0.6.5
 ```  
   
 ### 2. Install it  
