@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
-class TransparentRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
+class TransparentRoute<T> extends PageRoute<T>
+    with CupertinoRouteTransitionMixin<T> {
   final WidgetBuilder builder;
 
   @override

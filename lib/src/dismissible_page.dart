@@ -54,7 +54,8 @@ class DismissiblePage extends StatefulWidget {
   _DismissibleState createState() => _DismissibleState();
 }
 
-class _DismissibleState extends State<DismissiblePage> with TickerProviderStateMixin {
+class _DismissibleState extends State<DismissiblePage>
+    with TickerProviderStateMixin {
   AnimationController? _moveController;
   late Animation<Offset> _moveAnimation;
   AnimationController? _resizeController;
@@ -90,9 +91,13 @@ class _DismissibleState extends State<DismissiblePage> with TickerProviderStateM
     if (_directionIsXAxis) {
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
-          return extent < 0 ? DismissDirection.startToEnd : DismissDirection.endToStart;
+          return extent < 0
+              ? DismissDirection.startToEnd
+              : DismissDirection.endToStart;
         case TextDirection.ltr:
-          return extent > 0 ? DismissDirection.startToEnd : DismissDirection.endToStart;
+          return extent > 0
+              ? DismissDirection.startToEnd
+              : DismissDirection.endToStart;
       }
     }
     return extent > 0 ? DismissDirection.down : DismissDirection.up;
@@ -113,7 +118,8 @@ class _DismissibleState extends State<DismissiblePage> with TickerProviderStateM
     widget.onDragStart?.call();
     _dragUnderway = true;
     if (_moveController!.isAnimating) {
-      _dragExtent = _moveController!.value * _overallDragAxisExtent * _dragExtent.sign;
+      _dragExtent =
+          _moveController!.value * _overallDragAxisExtent * _dragExtent.sign;
       _moveController!.stop();
     } else {
       _dragExtent = 0.0;
@@ -167,7 +173,9 @@ class _DismissibleState extends State<DismissiblePage> with TickerProviderStateM
     _moveAnimation = _moveController!.drive(
       Tween<Offset>(
         begin: Offset.zero,
-        end: _directionIsXAxis ? Offset(end, widget.crossAxisEndOffset) : Offset(widget.crossAxisEndOffset, end),
+        end: _directionIsXAxis
+            ? Offset(end, widget.crossAxisEndOffset)
+            : Offset(widget.crossAxisEndOffset, end),
       ),
     );
   }
@@ -175,7 +183,9 @@ class _DismissibleState extends State<DismissiblePage> with TickerProviderStateM
   void _handleDragEnd(DragEndDetails details) {
     if (!_isActive || _moveController!.isAnimating) return;
     if (!_moveController!.isDismissed) {
-      if (_moveController!.value > (widget.dismissThresholds[_dismissDirection!] ?? _kDismissThreshold)) {
+      if (_moveController!.value >
+          (widget.dismissThresholds[_dismissDirection!] ??
+              _kDismissThreshold)) {
         widget.onDismiss?.call();
       } else {
         _moveController!.reverseDuration = widget.reverseDuration;
@@ -193,7 +203,8 @@ class _DismissibleState extends State<DismissiblePage> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    final contentPadding = widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
+    final contentPadding =
+        widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
 
     if (widget.disabled) {
       return DecoratedBox(
@@ -220,7 +231,9 @@ class _DismissibleState extends State<DismissiblePage> with TickerProviderStateM
       child: AnimatedBuilder(
         animation: _moveAnimation,
         builder: (BuildContext context, Widget? child) {
-          final k = _directionIsXAxis ? _moveAnimation.value.dx.abs() : _moveAnimation.value.dy.abs();
+          final k = _directionIsXAxis
+              ? _moveAnimation.value.dx.abs()
+              : _moveAnimation.value.dy.abs();
 
           double getDx() {
             if (_directionIsXAxis) {
@@ -249,7 +262,8 @@ class _DismissibleState extends State<DismissiblePage> with TickerProviderStateM
           }
 
           final offset = Offset(getDx(), getDy());
-          final scale = lerpDouble(1, widget.minScale, k);
+          // For pub analyzer
+          final double? scale = lerpDouble(1, widget.minScale, k);
           final radius = lerpDouble(widget.minRadius, widget.maxRadius, k)!;
           final opacity = (widget.startingOpacity - k).clamp(.0, 1.0);
 
@@ -259,7 +273,7 @@ class _DismissibleState extends State<DismissiblePage> with TickerProviderStateM
             child: FractionalTranslation(
               translation: offset,
               child: Transform.scale(
-                scale: scale,
+                scale: scale!,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(radius),
                   child: child,

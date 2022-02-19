@@ -135,7 +135,8 @@ class _AppHomeState extends State<AppHome> {
           Spacer(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text('Dismiss Direction', style: GoogleFonts.poppins(fontSize: 24)),
+            child: Text('Dismiss Direction',
+                style: GoogleFonts.poppins(fontSize: 24)),
           ),
           Padding(
             padding: const EdgeInsets.all(20),
@@ -218,7 +219,8 @@ class DurationSlider extends StatelessWidget {
   final Duration duration;
   final ValueChanged<Duration> onChanged;
 
-  DurationSlider({required this.title, required this.duration, required this.onChanged});
+  DurationSlider(
+      {required this.title, required this.duration, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
