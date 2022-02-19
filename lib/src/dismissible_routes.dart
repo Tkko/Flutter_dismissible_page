@@ -9,9 +9,14 @@ class TransparentRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixi
   /// Builds the primary contents of the route.
   @override
   final bool maintainState;
-  final Color backgroundColor;
+
+  @override
   final Duration transitionDuration;
+
+  @override
   final Duration reverseTransitionDuration;
+
+  final Color backgroundColor;
 
   TransparentRoute({
     required this.builder,

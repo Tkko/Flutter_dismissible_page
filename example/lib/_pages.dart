@@ -124,7 +124,7 @@ class StoryPage extends StatelessWidget {
             decoration: BoxDecoration(
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image: NetworkImage(story.imageUrl!),
+                image: NetworkImage(story.imageUrl),
               ),
             ),
             child: Text(

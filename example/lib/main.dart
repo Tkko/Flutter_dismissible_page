@@ -61,6 +61,8 @@ class _AppHomeState extends State<AppHome> {
       'https://source.unsplash.com/collection/1319040/${Random().nextInt(20) + 1000}x${Random().nextInt(20) + 1000}';
 
   DismissDirection direction = DismissDirection.down;
+  Duration transitionDuration = const Duration(milliseconds: 250);
+  Duration reverseTransitionDuration = const Duration(milliseconds: 250);
   final List<StoryModel> stories = [];
   final contacts = {
     'GitHub': 'https://github.com/Tkko',
@@ -144,6 +146,20 @@ class _AppHomeState extends State<AppHome> {
               }).toList(),
             ),
           ),
+          DurationSlider(
+            title: 'Transition Duration',
+            duration: transitionDuration,
+            onChanged: (value) {
+              setState(() => transitionDuration = value);
+            },
+          ),
+          DurationSlider(
+            title: 'Reverse Transition Duration',
+            duration: reverseTransitionDuration,
+            onChanged: (value) {
+              setState(() => reverseTransitionDuration = value);
+            },
+          ),
           Padding(
             padding: const EdgeInsets.all(20),
             child: Text('Stories', style: GoogleFonts.poppins(fontSize: 24)),
@@ -158,11 +174,18 @@ class _AppHomeState extends State<AppHome> {
                 child: ListView.separated(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   scrollDirection: Axis.horizontal,
-                  itemBuilder: (_, int i) {
+                  itemBuilder: (_, int index) {
+                    final item = stories.elementAt(index);
+                    item.withParams(
+                      transitionDuration: transitionDuration,
+                      reverseTransitionDuration: reverseTransitionDuration,
+                      direction: direction,
+                    );
+
                     return SizedBox(
                       width: itemWidth,
                       child: StoryWidget(
-                        story: stories[i]..direction = direction,
+                        story: item,
                         stories: stories,
                       ),
                     );
@@ -176,6 +199,40 @@ class _AppHomeState extends State<AppHome> {
           SizedBox(height: 50),
         ],
       ),
+    );
+  }
+}
+
+class DurationSlider extends StatelessWidget {
+  final String title;
+  final Duration duration;
+  final ValueChanged<Duration> onChanged;
+
+  DurationSlider({required this.title, required this.duration, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            '$title - ${duration.inMilliseconds}ms',
+            style: GoogleFonts.poppins(fontSize: 24),
+          ),
+        ),
+        Slider(
+          value: duration.inMilliseconds.toDouble(),
+          min: 0,
+          max: 1000,
+          divisions: 20,
+          label: duration.inMilliseconds.toString(),
+          onChanged: (value) {
+            onChanged.call(Duration(milliseconds: value.round()));
+          },
+        ),
+      ],
     );
   }
 }

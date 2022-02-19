@@ -19,6 +19,8 @@ class StoryWidget extends StatelessWidget {
             parentIndex: stories.indexOf(story),
             stories: stories,
           ),
+          transitionDuration: story.transitionDuration!,
+          reverseTransitionDuration: story.reverseTransitionDuration!,
         );
       },
       child: Hero(
@@ -33,7 +35,7 @@ class StoryWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image: NetworkImage(story.imageUrl!),
+                image: NetworkImage(story.imageUrl),
               ),
             ),
             child: Text(
