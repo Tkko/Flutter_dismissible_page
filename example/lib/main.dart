@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:example/_models.dart';
 import 'package:example/_widgets.dart';
@@ -124,8 +123,7 @@ class _AppHomeState extends State<AppHome> {
           Spacer(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text('Dismiss Direction',
-                style: GoogleFonts.poppins(fontSize: 24)),
+            child: Text('Dismiss Direction', style: GoogleFonts.poppins(fontSize: 24)),
           ),
           Padding(
             padding: const EdgeInsets.all(20),

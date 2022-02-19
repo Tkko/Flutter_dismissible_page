@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:example/_models.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class StoriesWrapper extends StatefulWidget {
@@ -19,8 +18,7 @@ class StoriesWrapper extends StatefulWidget {
   _StoriesWrapperState createState() => _StoriesWrapperState();
 }
 
-class _StoriesWrapperState extends State<StoriesWrapper>
-    with TickerProviderStateMixin {
+class _StoriesWrapperState extends State<StoriesWrapper> with TickerProviderStateMixin {
   late int dWidth;
   late PageController pageCtrl;
 
