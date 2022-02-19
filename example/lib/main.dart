@@ -8,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(AppView());
 
+const accentColor = Color(0xff00d573);
+
 class AppView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -16,8 +18,16 @@ class AppView extends StatelessWidget {
         final app = MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
+            primaryColor: accentColor,
             scaffoldBackgroundColor: Colors.white,
             appBarTheme: AppBarTheme(color: Colors.white),
+            chipTheme: ChipThemeData(selectedColor: accentColor),
+            sliderTheme: SliderThemeData(
+              activeTrackColor: accentColor,
+              activeTickMarkColor: accentColor,
+              thumbColor: accentColor,
+              inactiveTrackColor: accentColor.withOpacity(.2),
+            ),
           ),
           home: AppHome(),
         );

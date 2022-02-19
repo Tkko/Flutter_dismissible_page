@@ -11,10 +11,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  pedantic: ^1.11.1
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  lint: ^1.8.2
 
