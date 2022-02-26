@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'dart:ui';
-import 'package:dismissible_page/dismissible_page.dart';
 import 'package:example/models.dart';
 import 'package:example/widgets.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +30,7 @@ class AppView extends StatelessWidget {
             primaryColor: accentColor,
             scaffoldBackgroundColor: Colors.white,
             appBarTheme: AppBarTheme(color: Colors.white),
-            // chipTheme: ChipThemeData(selectedColor: accentColor),
+            chipTheme: ChipThemeData(selectedColor: accentColor),
             sliderTheme: SliderThemeData(
               activeTrackColor: accentColor,
               activeTickMarkColor: accentColor,
@@ -94,10 +93,10 @@ class AppHome extends StatefulWidget {
 
 class _AppHomeState extends State<AppHome> {
   String get randomFood =>
-      'https://source.unsplash.com/collection/1424340/${Random().nextInt(20) + 1000}x${Random().nextInt(20) + 1000}';
+      'https://source.unsplash.com/collection/1424340/${Random().nextInt(20) + 400}x${Random().nextInt(20) + 600}';
 
   String get randomNature =>
-      'https://source.unsplash.com/collection/1319040/${Random().nextInt(20) + 1000}x${Random().nextInt(20) + 1000}';
+      'https://source.unsplash.com/collection/1319040/${Random().nextInt(20) + 400}x${Random().nextInt(20) + 600}';
 
   DismissDirection direction = DismissDirection.down;
   Duration transitionDuration = const Duration(milliseconds: 250);
@@ -113,7 +112,7 @@ class _AppHomeState extends State<AppHome> {
   @override
   void initState() {
     stories.addAll([
-      StoryModel(title: 'Random', imageUrl: randomFood),
+      StoryModel(title: 'Random'),
       StoryModel(title: 'Photos', imageUrl: randomNature),
       StoryModel(title: 'From', imageUrl: randomFood),
       StoryModel(title: 'Unsplash', imageUrl: randomNature),
@@ -222,24 +221,6 @@ class _AppHomeState extends State<AppHome> {
                   setState(() => reverseTransitionDuration = value);
                 },
               ),
-              GestureDetector(
-                onTap: () {
-                  context.pushTransparentRoute(ScrollablePage(stories.first));
-                },
-                child: Container(
-                  margin: EdgeInsets.all(100),
-                  width: 100,
-                  height: 140,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Image.network(
-                    stories.first.imageUrl,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -283,36 +264,6 @@ class _AppHomeState extends State<AppHome> {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class ScrollablePage extends StatelessWidget {
-  final StoryModel story;
-
-  ScrollablePage(this.story);
-
-  @override
-  Widget build(BuildContext context) {
-    // DraggableScrollableSheet(
-    //   builder: (BuildContext context, ScrollController scrollController) {
-    //
-    //   },
-    // );
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Image.network(story.imageUrl),
-            ...List.generate(100, (_) {
-              return Padding(
-                padding: const EdgeInsets.all(10),
-                child: FlutterLogo(size: 50),
-              );
-            }),
-          ],
-        ),
       ),
     );
   }

@@ -23,25 +23,54 @@ class StoryWidget extends StatelessWidget {
           reverseTransitionDuration: story.reverseTransitionDuration!,
         );
       },
-      child: Hero(
-        tag: story.storyId,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            clipBehavior: Clip.antiAlias,
-            alignment: Alignment.bottomLeft,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              image: DecorationImage(
-                fit: BoxFit.cover,
-                image: NetworkImage(story.imageUrl),
-              ),
+      child: StoryImage(story),
+    );
+  }
+}
+
+class StoryImage extends StatefulWidget {
+  final StoryModel story;
+  final bool isFullScreen;
+
+  StoryImage(this.story, {this.isFullScreen = false});
+
+  @override
+  _StoryImageState createState() => _StoryImageState();
+}
+
+class _StoryImageState extends State<StoryImage> {
+  late String imageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    imageUrl = widget.story.imageUrl ?? widget.story.altUrl;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Hero(
+      tag: widget.story.storyId,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          clipBehavior: Clip.antiAlias,
+          alignment: Alignment.bottomLeft,
+          padding: EdgeInsets.all(widget.isFullScreen ? 20 : 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(widget.isFullScreen ? 0 : 8),
+            color: Color.fromRGBO(237, 241, 248, 1),
+            image: DecorationImage(
+              onError: (_, __) {
+                setState(() => imageUrl = widget.story.altUrl);
+              },
+              fit: BoxFit.cover,
+              image: NetworkImage(imageUrl),
             ),
-            child: Text(
-              story.title,
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
+          ),
+          child: Text(
+            widget.story.title,
+            style: GoogleFonts.poppins(color: Colors.white),
           ),
         ),
       ),

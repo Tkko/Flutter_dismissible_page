@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:example/models.dart';
+import 'package:example/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class StoriesWrapper extends StatefulWidget {
   final int parentIndex;
@@ -114,27 +114,28 @@ class StoryPage extends StatelessWidget {
 
     return GestureDetector(
       onTapUp: _onTap,
-      child: Hero(
-        tag: story.storyId,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            clipBehavior: Clip.antiAlias,
-            alignment: Alignment.bottomLeft,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                fit: BoxFit.cover,
-                image: NetworkImage(story.imageUrl),
-              ),
-            ),
-            child: Text(
-              story.title,
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-          ),
-        ),
-      ),
+      child: StoryImage(story, isFullScreen: true),
+      // child: Hero(
+      //   tag: story.storyId,
+      //   child: Material(
+      //     color: Colors.transparent,
+      //     child: Container(
+      //       padding: const EdgeInsets.all(20),
+      //       clipBehavior: Clip.antiAlias,
+      //       alignment: Alignment.bottomLeft,
+      //       decoration: BoxDecoration(
+      //         image: DecorationImage(
+      //           fit: BoxFit.cover,
+      //           image: NetworkImage(story.imageUrl),
+      //         ),
+      //       ),
+      //       child: Text(
+      //         story.title,
+      //         style: GoogleFonts.poppins(color: Colors.white),
+      //       ),
+      //     ),
+      //   ),
+      // ),
     );
   }
 }
