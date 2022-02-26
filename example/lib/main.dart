@@ -1,10 +1,20 @@
 import 'dart:math';
+import 'dart:ui';
 
-import 'package:example/_models.dart';
-import 'package:example/_widgets.dart';
+import 'package:example/models.dart';
+import 'package:example/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  // Override behavior methods and getters like dragDevices
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+      };
+}
 
 void main() => runApp(AppView());
 
@@ -31,24 +41,43 @@ class AppView extends StatelessWidget {
           ),
           home: AppHome(),
         );
-        if (constraints.maxWidth > 600 && constraints.maxHeight > 600) {
+
+        final shortestSide =
+            min(constraints.maxWidth.abs(), constraints.maxHeight.abs());
+
+        if (shortestSide > 600) {
           return Container(
             color: Colors.white,
             alignment: Alignment.center,
-            child: AspectRatio(
-              aspectRatio: .5,
-              child: Container(
-                margin: EdgeInsets.all(20),
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 20,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(
+                    'Dismissible Example',
+                    style: GoogleFonts.poppins(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: app,
-              ),
+                Container(
+                  width: 400,
+                  height: 900,
+                  margin: EdgeInsets.all(20),
+                  clipBehavior: Clip.antiAlias,
+                  foregroundDecoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Colors.black, width: 15),
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black, width: 15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: app,
+                ),
+              ],
             ),
           );
         }
@@ -94,121 +123,143 @@ class _AppHomeState extends State<AppHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Tornike', style: GoogleFonts.poppins(fontSize: 24)),
-                Padding(
-                  padding: const EdgeInsets.all(2),
-                  child: Text(
-                    'Find me on',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.black54,
+    return ScrollConfiguration(
+      behavior: MyCustomScrollBehavior(),
+      child: Scaffold(
+        bottomNavigationBar: _stories(),
+        body: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Tornike',
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w500,
+                        )),
+                    Padding(
+                      padding: const EdgeInsets.all(2),
+                      child: Text(
+                        'Find me on',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.black54,
+                        ),
+                      ),
                     ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: contacts.entries.map((item) {
+                    return ActionChip(
+                      onPressed: () => launch(item.value),
+                      label: Text(item.key, style: GoogleFonts.poppins()),
+                    );
+                  }).toList(),
+                ),
+              ),
+              SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Dismiss Direction',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: contacts.entries.map((item) {
-                return ActionChip(
-                  onPressed: () => launch(item.value),
-                  label: Text(item.key, style: GoogleFonts.poppins()),
-                );
-              }).toList(),
-            ),
-          ),
-          Spacer(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text('Dismiss Direction',
-                style: GoogleFonts.poppins(fontSize: 24)),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: DismissDirection.values.map((item) {
-                return ChoiceChip(
-                  onSelected: (_) {
-                    setState(() => direction = item);
-                  },
-                  selected: item == direction,
-                  label: Text(
-                    '$item'.replaceAll('DismissDirection.', ''),
-                    style: GoogleFonts.poppins(),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          DurationSlider(
-            title: 'Transition Duration',
-            duration: transitionDuration,
-            onChanged: (value) {
-              setState(() => transitionDuration = value);
-            },
-          ),
-          DurationSlider(
-            title: 'Reverse Transition Duration',
-            duration: reverseTransitionDuration,
-            onChanged: (value) {
-              setState(() => reverseTransitionDuration = value);
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text('Stories', style: GoogleFonts.poppins(fontSize: 24)),
-          ),
-          LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              final width = constraints.maxWidth;
-              final itemHeight = width / 3;
-              final itemWidth = width / 4;
-              return SizedBox(
-                height: itemHeight,
-                child: ListView.separated(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (_, int index) {
-                    final item = stories.elementAt(index);
-                    item.withParams(
-                      transitionDuration: transitionDuration,
-                      reverseTransitionDuration: reverseTransitionDuration,
-                      direction: direction,
-                    );
-
-                    return SizedBox(
-                      width: itemWidth,
-                      child: StoryWidget(
-                        story: item,
-                        stories: stories,
+              ),
+              SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: DismissDirection.values.map((item) {
+                    return ChoiceChip(
+                      onSelected: (_) {
+                        setState(() => direction = item);
+                      },
+                      selected: item == direction,
+                      label: Text(
+                        '$item'.replaceAll('DismissDirection.', ''),
+                        style: GoogleFonts.poppins(
+                          color:
+                              item == direction ? Colors.white : Colors.black,
+                        ),
                       ),
                     );
-                  },
-                  separatorBuilder: (_, int i) => SizedBox(width: 10),
-                  itemCount: stories.length,
+                  }).toList(),
                 ),
-              );
-            },
+              ),
+              SizedBox(height: 30),
+              DurationSlider(
+                title: 'Transition Duration',
+                duration: transitionDuration,
+                onChanged: (value) {
+                  setState(() => transitionDuration = value);
+                },
+              ),
+              DurationSlider(
+                title: 'Reverse Transition Duration',
+                duration: reverseTransitionDuration,
+                onChanged: (value) {
+                  setState(() => reverseTransitionDuration = value);
+                },
+              ),
+            ],
           ),
-          SizedBox(height: 50),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _stories() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final width = constraints.maxWidth;
+          final itemHeight = width / 3;
+          final itemWidth = width / 4;
+          return SizedBox(
+            height: itemHeight,
+            child: ListView.separated(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (_, int index) {
+                final item = stories.elementAt(index);
+                item.withParams(
+                  transitionDuration: transitionDuration,
+                  reverseTransitionDuration: reverseTransitionDuration,
+                  direction: direction,
+                );
+
+                return SizedBox(
+                  width: itemWidth,
+                  child: StoryWidget(
+                    story: item,
+                    stories: stories,
+                  ),
+                );
+              },
+              separatorBuilder: (_, int i) => SizedBox(width: 10),
+              itemCount: stories.length,
+            ),
+          );
+        },
       ),
     );
   }
@@ -229,9 +280,20 @@ class DurationSlider extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            '$title - ${duration.inMilliseconds}ms',
-            style: GoogleFonts.poppins(fontSize: 24),
+          child: Row(
+            children: [
+              Text(
+                '$title - ',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                '${duration.inMilliseconds}ms',
+                style: GoogleFonts.poppins(fontSize: 16),
+              ),
+            ],
           ),
         ),
         Slider(

@@ -1,6 +1,6 @@
 import 'package:dismissible_page/dismissible_page.dart';
-import 'package:example/_models.dart';
-import 'package:example/_pages.dart';
+import 'package:example/models.dart';
+import 'package:example/pages.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
