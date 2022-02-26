@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+part of 'dismissible_page.dart';
 
 class TransparentRoute<T> extends PageRoute<T>
     with CupertinoRouteTransitionMixin<T> {

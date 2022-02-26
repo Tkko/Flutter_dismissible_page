@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
-
+import 'package:dismissible_page/dismissible_page.dart';
 import 'package:example/models.dart';
 import 'package:example/widgets.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +31,7 @@ class AppView extends StatelessWidget {
             primaryColor: accentColor,
             scaffoldBackgroundColor: Colors.white,
             appBarTheme: AppBarTheme(color: Colors.white),
-            chipTheme: ChipThemeData(selectedColor: accentColor),
+            // chipTheme: ChipThemeData(selectedColor: accentColor),
             sliderTheme: SliderThemeData(
               activeTrackColor: accentColor,
               activeTickMarkColor: accentColor,
@@ -132,17 +132,19 @@ class _AppHomeState extends State<AppHome> {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 20),
+              SizedBox(height: max(20, MediaQuery.of(context).padding.top)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Tornike',
-                        style: GoogleFonts.poppins(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w500,
-                        )),
+                    Text(
+                      'Tornike',
+                      style: GoogleFonts.poppins(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.all(2),
                       child: Text(
@@ -212,12 +214,31 @@ class _AppHomeState extends State<AppHome> {
                   setState(() => transitionDuration = value);
                 },
               ),
+              SizedBox(height: 30),
               DurationSlider(
                 title: 'Reverse Transition Duration',
                 duration: reverseTransitionDuration,
                 onChanged: (value) {
                   setState(() => reverseTransitionDuration = value);
                 },
+              ),
+              GestureDetector(
+                onTap: () {
+                  context.pushTransparentRoute(ScrollablePage(stories.first));
+                },
+                child: Container(
+                  margin: EdgeInsets.all(100),
+                  width: 100,
+                  height: 140,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Image.network(
+                    stories.first.imageUrl,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             ],
           ),
@@ -228,7 +249,9 @@ class _AppHomeState extends State<AppHome> {
 
   Widget _stories() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.only(
+        bottom: max(24, MediaQuery.of(context).padding.bottom),
+      ),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final width = constraints.maxWidth;
@@ -265,13 +288,46 @@ class _AppHomeState extends State<AppHome> {
   }
 }
 
+class ScrollablePage extends StatelessWidget {
+  final StoryModel story;
+
+  ScrollablePage(this.story);
+
+  @override
+  Widget build(BuildContext context) {
+    // DraggableScrollableSheet(
+    //   builder: (BuildContext context, ScrollController scrollController) {
+    //
+    //   },
+    // );
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Image.network(story.imageUrl),
+            ...List.generate(100, (_) {
+              return Padding(
+                padding: const EdgeInsets.all(10),
+                child: FlutterLogo(size: 50),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class DurationSlider extends StatelessWidget {
   final String title;
   final Duration duration;
   final ValueChanged<Duration> onChanged;
 
-  DurationSlider(
-      {required this.title, required this.duration, required this.onChanged});
+  DurationSlider({
+    required this.title,
+    required this.duration,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {

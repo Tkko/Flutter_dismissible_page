@@ -1,8 +1,12 @@
 import 'dart:math';
 import 'dart:ui';
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+part 'dismissible_extensions.dart';
+
+part 'dismissible_routes.dart';
 
 const double _kDismissThreshold = 0.15;
 
