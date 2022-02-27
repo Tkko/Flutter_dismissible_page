@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:example/models.dart';
 import 'package:example/widgets.dart';

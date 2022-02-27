@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
+import 'package:dismissible_page/dismissible_page.dart';
 import 'package:example/models.dart';
 import 'package:example/widgets.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +99,8 @@ class _AppHomeState extends State<AppHome> {
   String get randomNature =>
       'https://source.unsplash.com/collection/1319040/${Random().nextInt(20) + 400}x${Random().nextInt(20) + 600}';
 
-  DismissDirection direction = DismissDirection.down;
+  DismissiblePageDismissDirection direction =
+      DismissiblePageDismissDirection.down;
   Duration transitionDuration = const Duration(milliseconds: 250);
   Duration reverseTransitionDuration = const Duration(milliseconds: 250);
   final List<StoryModel> stories = [];
@@ -122,10 +124,11 @@ class _AppHomeState extends State<AppHome> {
 
   @override
   Widget build(BuildContext context) {
+    final showStories = true;
     return ScrollConfiguration(
       behavior: MyCustomScrollBehavior(),
       child: Scaffold(
-        bottomNavigationBar: _stories(),
+        bottomNavigationBar: showStories ? _stories() : null,
         body: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -183,19 +186,45 @@ class _AppHomeState extends State<AppHome> {
                 ),
               ),
               SizedBox(height: 10),
+              if (!showStories)
+                Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      context
+                          .pushTransparentRoute(ScrollablePage(stories.last));
+                    },
+                    child: Container(
+                      width: 100,
+                      height: 150,
+                      margin: EdgeInsets.all(20),
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Hero(
+                        tag: stories.last.storyId,
+                        child: Image.network(
+                          stories.last.imageUrl!,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Wrap(
                   spacing: 10,
                   runSpacing: 10,
-                  children: DismissDirection.values.map((item) {
+                  children: DismissiblePageDismissDirection.values.map((item) {
                     return ChoiceChip(
                       onSelected: (_) {
                         setState(() => direction = item);
                       },
                       selected: item == direction,
                       label: Text(
-                        '$item'.replaceAll('DismissDirection.', ''),
+                        '$item'
+                            .replaceAll('DismissiblePageDismissDirection.', ''),
                         style: GoogleFonts.poppins(
                           color:
                               item == direction ? Colors.white : Colors.black,
@@ -265,6 +294,49 @@ class _AppHomeState extends State<AppHome> {
           );
         },
       ),
+    );
+  }
+}
+
+class ScrollablePage extends StatefulWidget {
+  final StoryModel story;
+
+  ScrollablePage(this.story);
+
+  @override
+  State<ScrollablePage> createState() => _ScrollablePageState();
+}
+
+class _ScrollablePageState extends State<ScrollablePage> {
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    final child = SizedBox(
+      width: size.width,
+      height: size.height,
+      child: Material(
+        color: Colors.transparent,
+        child: Hero(
+          tag: widget.story.storyId,
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Image.network(
+              widget.story.imageUrl!,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return DismissiblePage(
+      child: child,
+      isFullScreen: false,
+      direction: DismissiblePageDismissDirection.multi,
+      onDismiss: () {
+        Navigator.of(context).pop();
+      },
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/cupertino.dart';
 
 class StoryModel {
@@ -6,7 +7,7 @@ class StoryModel {
   final storyId = UniqueKey();
   final String title;
   final String? imageUrl;
-  DismissDirection direction;
+  DismissiblePageDismissDirection direction;
   Duration? transitionDuration;
   Duration? reverseTransitionDuration;
 
@@ -15,11 +16,11 @@ class StoryModel {
     this.imageUrl,
     this.transitionDuration,
     this.reverseTransitionDuration,
-    this.direction = DismissDirection.down,
+    this.direction = DismissiblePageDismissDirection.down,
   });
 
   void withParams({
-    required DismissDirection direction,
+    required DismissiblePageDismissDirection direction,
     required Duration transitionDuration,
     required Duration reverseTransitionDuration,
   }) {
