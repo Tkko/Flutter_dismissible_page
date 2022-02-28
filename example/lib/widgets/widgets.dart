@@ -1,14 +1,14 @@
 import 'package:dismissible_page/dismissible_page.dart';
-import 'package:example/models.dart';
-import 'package:example/pages.dart';
+import 'package:example/models/models.dart';
+import 'package:example/pages/stories_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class StoryWidget extends StatelessWidget {
   final StoryModel story;
-  final List<StoryModel> stories;
+  final DismissiblePageModel pageModel;
 
-  const StoryWidget({required this.story, required this.stories});
+  const StoryWidget({required this.story, required this.pageModel});
 
   @override
   Widget build(BuildContext context) {
@@ -16,11 +16,11 @@ class StoryWidget extends StatelessWidget {
       onTap: () {
         context.pushTransparentRoute(
           StoriesWrapper(
-            parentIndex: stories.indexOf(story),
-            stories: stories,
+            parentIndex: pageModel.stories.indexOf(story),
+            pageModel: pageModel,
           ),
-          transitionDuration: story.transitionDuration!,
-          reverseTransitionDuration: story.reverseTransitionDuration!,
+          transitionDuration: pageModel.transitionDuration,
+          reverseTransitionDuration: pageModel.reverseTransitionDuration,
         );
       },
       child: StoryImage(story),
@@ -74,6 +74,52 @@ class _StoryImageState extends State<StoryImage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class DurationSlider extends StatelessWidget {
+  final String title;
+  final Duration duration;
+  final ValueChanged<Duration> onChanged;
+
+  DurationSlider({
+    required this.title,
+    required this.duration,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              '$title - ',
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              '${duration.inMilliseconds}ms',
+              style: GoogleFonts.poppins(fontSize: 16),
+            ),
+          ],
+        ),
+        Slider(
+          value: duration.inMilliseconds.toDouble(),
+          min: 0,
+          max: 1000,
+          divisions: 20,
+          label: duration.inMilliseconds.toString(),
+          onChanged: (value) {
+            onChanged.call(Duration(milliseconds: value.round()));
+          },
+        ),
+      ],
     );
   }
 }

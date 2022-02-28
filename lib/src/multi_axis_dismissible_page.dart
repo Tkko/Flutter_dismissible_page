@@ -10,7 +10,6 @@ class MultiAxisDismissiblePage extends StatefulWidget {
     required this.direction,
     required this.dismissThresholds,
     required this.dragStartBehavior,
-    required this.crossAxisEndOffset,
     required this.dragSensitivity,
     required this.minRadius,
     required this.minScale,
@@ -20,6 +19,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
     required this.onDragStart,
     required this.onDragEnd,
     required this.reverseDuration,
+    required this.behavior,
     Key? key,
   }) : super(key: key);
 
@@ -37,10 +37,10 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   final Color backgroundColor;
   final DismissiblePageDismissDirection direction;
   final Map<DismissiblePageDismissDirection, double> dismissThresholds;
-  final double crossAxisEndOffset;
   final double dragSensitivity;
   final DragStartBehavior dragStartBehavior;
   final Duration reverseDuration;
+  final HitTestBehavior behavior;
 
   @protected
   MultiDragGestureRecognizer createRecognizer(
@@ -56,10 +56,10 @@ class MultiAxisDismissiblePage extends StatefulWidget {
 
 class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
     with Drag, SingleTickerProviderStateMixin {
+  late final GestureRecognizer _recognizer;
   late final AnimationController _moveController;
   final _offsetNotifier = ValueNotifier(Offset.zero);
   Offset _startOffset = Offset.zero;
-  late final GestureRecognizer _recognizer;
   int _activeCount = 0;
   bool _dragUnderway = false;
 
@@ -116,7 +116,8 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   @override
   void update(DragUpdateDetails details) {
     if (_activeCount > 1) return;
-    _offsetNotifier.value = details.globalPosition - _startOffset;
+    _offsetNotifier.value =
+        (details.globalPosition - _startOffset) * widget.dragSensitivity;
   }
 
   @override
@@ -181,7 +182,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
     return Listener(
       onPointerDown: _routePointer,
       onPointerUp: (_) => --_activeCount,
-      behavior: HitTestBehavior.opaque,
+      behavior: widget.behavior,
       child: content,
     );
   }

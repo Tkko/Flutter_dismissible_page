@@ -5,13 +5,14 @@ const _transitionDuration = Duration(milliseconds: 250);
 extension DismissibleContextExt on BuildContext {
   Future pushTransparentRoute(
     Widget page, {
+    final Color backgroundColor = Colors.black38,
     final Duration transitionDuration = _transitionDuration,
     final Duration reverseTransitionDuration = _transitionDuration,
   }) =>
       Navigator.of(this).push(
         TransparentRoute(
-          backgroundColor: Colors.black.withOpacity(0.35),
           builder: (_) => page,
+          backgroundColor: backgroundColor,
           transitionDuration: transitionDuration,
           reverseTransitionDuration: reverseTransitionDuration,
         ),

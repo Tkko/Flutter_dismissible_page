@@ -25,7 +25,7 @@ class DismissiblePage extends StatelessWidget {
     this.backgroundColor = Colors.black,
     this.direction = DismissiblePageDismissDirection.vertical,
     this.dismissThresholds = const <DismissiblePageDismissDirection, double>{},
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragStartBehavior = DragStartBehavior.down,
     this.crossAxisEndOffset = 0.0,
     this.dragSensitivity = 0.7,
     this.minRadius = 7,
@@ -35,6 +35,7 @@ class DismissiblePage extends StatelessWidget {
     this.startingOpacity = 1,
     this.onDragStart,
     this.onDragEnd,
+    this.behavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
     Key? key,
   }) : super(key: key);
@@ -57,6 +58,7 @@ class DismissiblePage extends StatelessWidget {
   final double dragSensitivity;
   final DragStartBehavior dragStartBehavior;
   final Duration reverseDuration;
+  final HitTestBehavior behavior;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +71,6 @@ class DismissiblePage extends StatelessWidget {
         direction: direction,
         dismissThresholds: dismissThresholds,
         dragStartBehavior: dragStartBehavior,
-        crossAxisEndOffset: crossAxisEndOffset,
         dragSensitivity: dragSensitivity,
         minRadius: minRadius,
         minScale: minScale,
@@ -79,6 +80,7 @@ class DismissiblePage extends StatelessWidget {
         onDragStart: onDragStart,
         onDragEnd: onDragEnd,
         reverseDuration: reverseDuration,
+        behavior: behavior,
         child: child,
       );
     }
@@ -91,7 +93,6 @@ class DismissiblePage extends StatelessWidget {
       direction: direction,
       dismissThresholds: dismissThresholds,
       dragStartBehavior: dragStartBehavior,
-      crossAxisEndOffset: crossAxisEndOffset,
       dragSensitivity: dragSensitivity,
       minRadius: minRadius,
       minScale: minScale,
@@ -101,6 +102,7 @@ class DismissiblePage extends StatelessWidget {
       onDragStart: onDragStart,
       onDragEnd: onDragEnd,
       reverseDuration: reverseDuration,
+      behavior: behavior,
       child: child,
     );
   }

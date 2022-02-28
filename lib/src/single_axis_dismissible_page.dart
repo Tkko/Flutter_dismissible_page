@@ -10,7 +10,6 @@ class SingleAxisDismissiblePage extends StatefulWidget {
     required this.direction,
     required this.dismissThresholds,
     required this.dragStartBehavior,
-    required this.crossAxisEndOffset,
     required this.dragSensitivity,
     required this.minRadius,
     required this.minScale,
@@ -20,6 +19,7 @@ class SingleAxisDismissiblePage extends StatefulWidget {
     required this.onDragStart,
     required this.onDragEnd,
     required this.reverseDuration,
+    required this.behavior,
     Key? key,
   }) : super(key: key);
 
@@ -37,10 +37,10 @@ class SingleAxisDismissiblePage extends StatefulWidget {
   final Color backgroundColor;
   final DismissiblePageDismissDirection direction;
   final Map<DismissiblePageDismissDirection, double> dismissThresholds;
-  final double crossAxisEndOffset;
   final double dragSensitivity;
   final DragStartBehavior dragStartBehavior;
   final Duration reverseDuration;
+  final HitTestBehavior behavior;
 
   @override
   _SingleAxisDismissiblePageState createState() =>
@@ -168,9 +168,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
     _moveAnimation = _moveController!.drive(
       Tween<Offset>(
         begin: Offset.zero,
-        end: _directionIsXAxis
-            ? Offset(end, widget.crossAxisEndOffset)
-            : Offset(widget.crossAxisEndOffset, end),
+        end: _directionIsXAxis ? Offset(end, .0) : Offset(.0, end),
       ),
     );
   }
@@ -222,7 +220,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
       onVerticalDragStart: _directionIsXAxis ? null : _handleDragStart,
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
-      behavior: HitTestBehavior.opaque,
+      behavior: widget.behavior,
       dragStartBehavior: widget.dragStartBehavior,
       child: AnimatedBuilder(
         animation: _moveAnimation,
