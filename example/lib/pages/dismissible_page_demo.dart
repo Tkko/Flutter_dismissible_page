@@ -75,14 +75,12 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
             Title('Bool Parameters'),
             Wrap(spacing: 10, runSpacing: 10, children: [
               AppChip(
-                onSelected: () => setState(
-                    () => pageModel.isFullScreen = !pageModel.isFullScreen),
+                onSelected: () => setState(() => pageModel.isFullScreen = !pageModel.isFullScreen),
                 isSelected: pageModel.isFullScreen,
                 title: 'isFullscreen',
               ),
               AppChip(
-                onSelected: () =>
-                    setState(() => pageModel.disabled = !pageModel.disabled),
+                onSelected: () => setState(() => pageModel.disabled = !pageModel.disabled),
                 isSelected: pageModel.disabled,
                 title: 'disabled',
               ),
@@ -99,8 +97,7 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
                     setState(() => pageModel.direction = item);
                   },
                   isSelected: item == pageModel.direction,
-                  title: '$item'
-                      .replaceAll('DismissiblePageDismissDirection.', ''),
+                  title: '$item'.replaceAll('DismissiblePageDismissDirection.', ''),
                 );
               }).toList(),
             ),
@@ -209,6 +206,54 @@ class AppChip extends StatelessWidget {
         title,
         style: GoogleFonts.poppins(
           color: isSelected ? Colors.white : Colors.black,
+        ),
+      ),
+    );
+  }
+}
+
+const imageUrl =
+    'https://user-images.githubusercontent.com/26390946/155666045-aa93bf48-f8e7-407c-bb19-bc247d9e12bd.png';
+
+class FirstPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      body: GestureDetector(
+        onTap: () {
+          context.pushTransparentRoute(SecondPage());
+        },
+        child: Center(
+          child: SizedBox(
+            width: 200,
+            child: Hero(
+              tag: 'Unique tag',
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SecondPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DismissiblePage(
+      onDismissed: () {
+        Navigator.of(context).pop();
+      },
+      isFullScreen: false,
+      child: Hero(
+        tag: 'Unique tag',
+        child: Image.network(
+          'https://user-images.githubusercontent.com/26390946/155666045-aa93bf48-f8e7-407c-bb19-bc247d9e12bd.png',
+          fit: BoxFit.cover,
         ),
       ),
     );

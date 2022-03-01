@@ -38,7 +38,7 @@ class _ScrollablePageState extends State<ScrollablePage> {
       child: child,
       isFullScreen: false,
       direction: DismissiblePageDismissDirection.multi,
-      onDismiss: () {
+      onDismissed: () {
         Navigator.of(context).pop();
       },
     );

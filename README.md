@@ -1,256 +1,190 @@
+<div align="center">
+  <h1 align="center" style="font-size: 70px;">Flutter Pinput From <a href="https://www.linkedin.com/in/thornike/" target="_blank">Tornike</a> </h1>
 
-# dismissible_page  
+<a href="https://www.buymeacoffee.com/fman" target="_blank"><img src="https://img.buymeacoffee.com/button-api/?text=Thank me with a coffee&emoji=&slug=fman&button_colour=40DCA5&font_colour=ffffff&font_family=Poppins&outline_colour=000000&coffee_colour=FFDD00"></a>
+
+</div>
+
+Flutter package to navigate to page that is dismissed by swipe gestures, with Hero style animations, Inspired by FB, IG stories.
+
   
-🔥🚀  
-Creates page that is dismissed by swipe gestures, with Hero style animations, Inspired by FB, IG stories. 
-### [**Live Demo**](https://rebrand.ly/gw8nktq)
+## Features:
+-    Dismiss to any direction
+-    Animating border
+-    Animating background
+-    Animating scale
   
+
+## Support
+PRs Welcome
+Discord [Channel](https://discord.gg/gw8nktq)
+Don't forget to give it a star ⭐
   
-## Contents  
+| [Live Demo](https://rebrand.ly/6390b8) | Vertical | Horizontal |
+|--|--|--|
+| <a href="https://rebrand.ly/6390b8"> ![Live Demo](https://user-images.githubusercontent.com/26390946/155666045-aa93bf48-f8e7-407c-bb19-bc247d9e12bd.png) <a/> | ![Vertical](https://raw.githubusercontent.com/Tkko/Flutter_dismissible_page/master/example/media/dismissible_horizontal.gif) | ![Horizontal](https://raw.githubusercontent.com/Tkko/Flutter_dismissible_page/master/example/media/dismissible_vertical.gif) |
+
   
-- [Support](#support)  
-  
-- [Contribute](#contribute)  
-  
-- [Overview](#overview)  
-  
-- [Installation](#installation)  
-  
-- [Properties](#properties)  
-  
-- [Example](#example)  
-  
-  
-## Support  
-First thing first give it a star ⭐  
-  
-Discord [Channel](https://discord.gg/ssE8eh)  
-  
-  
-## Contribute  
-  
-1. Fork it  
-2. Create your feature branch (git checkout -b my-new-feature)  
-3. Commit your changes (git commit -am 'Add some feature')  
-4. Push to the branch (git push origin my-new-feature)  
-5. Create new Pull Request  
-  
-## Overview  
-Creates page that is dismissed by swipe gestures, with Hero style animations, Inspired by FB, IG stories.  
-  
-<img src="https://raw.githubusercontent.com/Tkko/Flutter_dismissible_page/master/example/media/dismissible_horizontal.gif" width="300em" /> <img src="https://raw.githubusercontent.com/Tkko/Flutter_dismissible_page/master/example/media/dismissible_vertical.gif" width="300em" />  
+## Getting Started
+ Navigate to desired page
+```dart
+const imageUrl =
+    'https://user-images.githubusercontent.com/26390946/155666045-aa93bf48-f8e7-407c-bb19-bc247d9e12bd.png';
+    return Scaffold(
+      body: GestureDetector(
+        onTap: () {
+          context.pushTransparentRoute(SecondPage());
+        },
+        child: Center(
+          child: SizedBox(
+            width: 200,
+            child: Hero(
+              tag: 'Unique tag',
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+```
+
+
+```dart
+const imageUrl =
+    'https://user-images.githubusercontent.com/26390946/155666045-aa93bf48-f8e7-407c-bb19-bc247d9e12bd.png';
+class SecondPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DismissiblePage(
+      onDismiss: () {
+        Navigator.of(context).pop();
+      },
+      isFullScreen: false,
+      child: Hero(
+        tag: 'Unique tag',
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+}
+```
+
+
   
 ## Installation  
   
-  
-### 1. Depend on it  
 Add this to your package's `pubspec.yaml` file:  
   
 ```yaml  
 dependencies:  
   dismissible_page: ^0.6.5
 ```  
-  
-### 2. Install it  
-  
 You can install packages from the command line:  
-  
-with `pub`:  
-  
-```css  
-$ pub get  
-```  
-  
-with `Flutter`:  
   
 ```css  
 $ flutter packages get  
 ```  
   
-### 3. Import it  
-  
 Now in your `Dart` code, you can use:  
   
 ```dart  
-import 'package:dismissible_page/dismissible_page.dart';  
+import 'package:dismissible_page/dismissible_page.dart';
 ```  
-  
-  
   
 ## Properties  
-  
-  
-```dart  
-  DismissiblePage({  
- required this.child, this.isFullScreen = true, this.disabled = false, this.backgroundColor = Colors.black, this.direction = DismissDirection.vertical, this.dismissThresholds = const <DismissDirection, double>{},  
-    this.dragStartBehavior = DragStartBehavior.start,  
-    this.crossAxisEndOffset = 0.0,  
-    this.dragSensitivity = 0.7,  
-    this.minRadius = 7,  
-    this.minScale = .85,  
-    this.maxRadius = 30,  
-    this.maxTransformValue = .4,  
-    this.startingOpacity = 1,  
-    this.onDismiss,  
-    this.onDragStart,  
-    this.onDragEnd,  
-    this.reverseDuration = const Duration(milliseconds: 500),  
-    Key? key,  
-  }) : super(key: key);  
-```  
-  
-## Example  
-  
-Import the package:  
-  
-```dart  
-import 'package:dismissible_page/dismissible_page.dart';  
-import 'package:example/_models.dart';  
-import 'package:flutter/material.dart';  
-import 'package:flutter/widgets.dart';  
-  
-void main() => runApp(AppView());  
-  
-class AppView extends StatelessWidget {  
-  @override  
-  Widget build(BuildContext context) => MaterialApp(home: AppHome());  
-}  
-  
-class AppHome extends StatefulWidget {  
-  @override  
-  _AppHomeState createState() => _AppHomeState();  
-}  
-  
-class _AppHomeState extends State<AppHome> {  
-  final stories = [  
-    StoryModel(title: 'STORY'),  
-    StoryModel(title: 'STORY'),  
-    StoryModel(title: 'STORY'),  
-    StoryModel(title: 'STORY'),  
-    StoryModel(title: 'STORY'),  
-    StoryModel(title: 'STORY'),  
-  ];  
-  
-  @override  
-  Widget build(BuildContext context) {  
-    final padding = MediaQuery.of(context).padding;  
-    return Scaffold(  
-      body: SingleChildScrollView(  
-        padding: padding,  
-        child: Column(  
-          children: [  
-            Padding(  
-              padding: const EdgeInsets.all(20),  
-              child: Text('Dismissible', style: TextStyle(fontSize: 24)),  
-            ),  
-            SizedBox(  
-              height: 120,  
-              child: ListView.separated(  
-                padding: EdgeInsets.symmetric(horizontal: 20),  
-                scrollDirection: Axis.horizontal,  
-                itemBuilder: (_, int i) => StoryWidget(story: stories[i]),  
-                separatorBuilder: (_, int i) => SizedBox(width: 10),  
-                itemCount: stories.length,  
-              ),  
-            ),  
-          ],  
-        ),  
-      ),  
-    );  
-  }  
-}  
-  
-  
-class StoryWidget extends StatelessWidget {  
-  final StoryModel story;  
-  
-  const StoryWidget({this.story});  
-  
-  @override  
-  Widget build(BuildContext context) {  
-    return GestureDetector(  
-      onTap: () {  
-        context.pushTransparentRoute(StoryPage(story: story));  
-      },  
-      child: Hero(  
-        tag: story.storyId,  
-        child: Container(  
-          height: 120,  
-          width: 88,  
-          padding: const EdgeInsets.all(8),  
-          child: Text(  
-            story.title,  
-            style: Theme.of(context)  
-                .textTheme  
-                .button  
-                .copyWith(color: Colors.white),  
-          ),  
-          clipBehavior: Clip.antiAlias,  
-          alignment: Alignment.bottomLeft,  
-          decoration: BoxDecoration(  
-            borderRadius: BorderRadius.circular(12),  
-            image: DecorationImage(  
-              fit: BoxFit.cover,  
-              image: NetworkImage(story.imageUrl),  
-            ),  
-          ),  
-        ),  
-      ),  
-    );  
-  }  
-}  
-  
-  
-class StoryPage extends StatelessWidget {  
-  final StoryModel story;  
-  const StoryPage({this.story});  
-  
-  @override  
-  Widget build(BuildContext context) {  
-    return DismissiblePage(  
-      onDismiss: () => Navigator.of(context).pop(),  
-      isFullScreen: false,  
-      dragSensitivity: .4,  
-      maxTransformValue: 4,  
-      direction: DismissDirection.vertical,  
-      child: Material(  
-        color: Colors.transparent,  
-        child: Hero(  
-          tag: story.storyId,  
-          child: Container(  
-            padding: const EdgeInsets.all(20),  
-            child: Text(  
-              story.title,  
-              style: Theme.of(context)  
-                  .textTheme  
-                  .button  
-                  .copyWith(color: Colors.white),  
-            ),  
-            clipBehavior: Clip.antiAlias,  
-            alignment: Alignment.bottomLeft,  
-            decoration: BoxDecoration(  
-              image: DecorationImage(  
-                fit: BoxFit.cover,  
-                image: NetworkImage(story.imageUrl),  
-              ),  
-            ),  
-          ),  
-        ),  
-      ),  
-    );  
-  }  
-}  
-  
-class StoryModel {  
-  final storyId = UniqueKey();  
-  final String title;  
-  String imageUrl;  
-  
-  String get nextVehicleUrl =>  
-      'https://source.unsplash.com/collection/1989985/${Random().nextInt(20) + 400}x${Random().nextInt(20) + 800}';  
-  
-  StoryModel({this.title, this.imageUrl}) {  
-    imageUrl = nextVehicleUrl;  
-  }  
-}  
+
+``` dart
+  const DismissiblePage({
+    required this.child,
+    required this.onDismissed,
+    this.onDragStart,
+    this.onDragEnd,
+    this.onDragUpdate,
+    this.isFullScreen = true,
+    this.disabled = false,
+    this.backgroundColor = Colors.black,
+    this.direction = DismissiblePageDismissDirection.vertical,
+    this.dismissThresholds = const <DismissiblePageDismissDirection, double>{},
+    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragSensitivity = 0.7,
+    this.minRadius = 7,
+    this.minScale = .85,
+    this.maxRadius = 30,
+    this.maxTransformValue = .4,
+    this.startingOpacity = 1,
+    this.behavior = HitTestBehavior.opaque,
+    this.reverseDuration = const Duration(milliseconds: 200),
+    Key? key,
+  }) : super(key: key);
+
+  /// Called when the widget has been dismissed.
+  final VoidCallback onDismissed;
+
+  /// Called when the user starts dragging the widget.
+  final VoidCallback? onDragStart;
+
+  /// Called when the user ends dragging the widget.
+  final VoidCallback? onDragEnd;
+
+  /// Called when the user drags the widget. [0.0 - 1.0]
+  final ValueChanged<double>? onDragUpdate;
+
+  /// If true widget will ignore device padding
+  /// [MediaQuery.of(context).padding]
+  final bool isFullScreen;
+
+  /// The minimum amount of scale widget can have while dragging
+  /// Note that scale decreases as user drags
+  final double minScale;
+
+  /// The minimum amount fo border radius widget can have
+  final double minRadius;
+
+  /// The maximum amount of border radius widget can have while dragging
+  /// Note that radius increases as user drags
+  final double maxRadius;
+
+  /// The amount of distance widget is able to drag. value [0.0 - 1.0]
+  final double maxTransformValue;
+
+  /// If true the widget will ignore gestures
+  final bool disabled;
+
+  /// Widget that should be dismissed
+  final Widget child;
+
+  /// Background color of [DismissiblePage]
+  final Color backgroundColor;
+
+  /// The amount of opacity [backgroundColor] will have when start dragging the widget.
+  final double startingOpacity;
+
+  /// The direction in which the widget can be dismissed.
+  final DismissiblePageDismissDirection direction;
+
+  /// The offset threshold the item has to be dragged in order to be considered
+  /// dismissed. default is [_kDismissThreshold], value [0.0 - 1.0]
+  final Map<DismissiblePageDismissDirection, double> dismissThresholds;
+
+  /// Represents how much responsive dragging the widget will be
+  /// Doesn't work on [DismissiblePageDismissDirection.multi]
+  final double dragSensitivity;
+
+  /// Determines the way that drag start behavior is handled.
+  final DragStartBehavior dragStartBehavior;
+
+  /// The amount of time the widget will spend returning to initial position if widget is not dismissed after drag
+  final Duration reverseDuration;
+
+  /// How to behave during hit tests.
+  ///
+  /// This defaults to [HitTestBehavior.opaque].
+  final HitTestBehavior behavior;
 ```
+

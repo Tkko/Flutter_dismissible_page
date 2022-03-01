@@ -71,7 +71,7 @@ class _StoriesWrapperState extends State<StoriesWrapper>
   @override
   Widget build(BuildContext context) {
     return DismissiblePage(
-      onDismiss: () => Navigator.of(context).pop(),
+      onDismissed: () => Navigator.of(context).pop(),
       isFullScreen: widget.pageModel.isFullScreen,
       minRadius: widget.pageModel.minRadius,
       maxRadius: widget.pageModel.maxRadius,

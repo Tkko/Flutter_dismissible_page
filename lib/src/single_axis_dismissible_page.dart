@@ -3,7 +3,7 @@ part of 'dismissible_page.dart';
 class SingleAxisDismissiblePage extends StatefulWidget {
   const SingleAxisDismissiblePage({
     required this.child,
-    required this.onDismiss,
+    required this.onDismissed,
     required this.isFullScreen,
     required this.disabled,
     required this.backgroundColor,
@@ -18,6 +18,7 @@ class SingleAxisDismissiblePage extends StatefulWidget {
     required this.startingOpacity,
     required this.onDragStart,
     required this.onDragEnd,
+    required this.onDragUpdate,
     required this.reverseDuration,
     required this.behavior,
     Key? key,
@@ -26,7 +27,8 @@ class SingleAxisDismissiblePage extends StatefulWidget {
   final double startingOpacity;
   final VoidCallback? onDragStart;
   final VoidCallback? onDragEnd;
-  final VoidCallback onDismiss;
+  final VoidCallback onDismissed;
+  final ValueChanged<double>? onDragUpdate;
   final bool isFullScreen;
   final double minScale;
   final double minRadius;
@@ -43,12 +45,10 @@ class SingleAxisDismissiblePage extends StatefulWidget {
   final HitTestBehavior behavior;
 
   @override
-  _SingleAxisDismissiblePageState createState() =>
-      _SingleAxisDismissiblePageState();
+  _SingleAxisDismissiblePageState createState() => _SingleAxisDismissiblePageState();
 }
 
-class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
-    with TickerProviderStateMixin {
+class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage> with TickerProviderStateMixin {
   AnimationController? _moveController;
   late Animation<Offset> _moveAnimation;
   double _dragExtent = 0.0;
@@ -82,22 +82,15 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
     if (_directionIsXAxis) {
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
-          return extent < 0
-              ? DismissiblePageDismissDirection.startToEnd
-              : DismissiblePageDismissDirection.endToStart;
+          return extent < 0 ? DismissiblePageDismissDirection.startToEnd : DismissiblePageDismissDirection.endToStart;
         case TextDirection.ltr:
-          return extent > 0
-              ? DismissiblePageDismissDirection.startToEnd
-              : DismissiblePageDismissDirection.endToStart;
+          return extent > 0 ? DismissiblePageDismissDirection.startToEnd : DismissiblePageDismissDirection.endToStart;
       }
     }
-    return extent > 0
-        ? DismissiblePageDismissDirection.down
-        : DismissiblePageDismissDirection.up;
+    return extent > 0 ? DismissiblePageDismissDirection.down : DismissiblePageDismissDirection.up;
   }
 
-  DismissiblePageDismissDirection? get _dismissDirection =>
-      _extentToDirection(_dragExtent);
+  DismissiblePageDismissDirection? get _dismissDirection => _extentToDirection(_dragExtent);
 
   bool get _isActive {
     return _dragUnderway || _moveController!.isAnimating;
@@ -112,8 +105,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
     widget.onDragStart?.call();
     _dragUnderway = true;
     if (_moveController!.isAnimating) {
-      _dragExtent =
-          _moveController!.value * _overallDragAxisExtent * _dragExtent.sign;
+      _dragExtent = _moveController!.value * _overallDragAxisExtent * _dragExtent.sign;
       _moveController!.stop();
     } else {
       _dragExtent = 0.0;
@@ -129,8 +121,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
     final oldDragExtent = _dragExtent;
     bool _(DismissiblePageDismissDirection d) => widget.direction == d;
 
-    if (_(DismissiblePageDismissDirection.horizontal) ||
-        _(DismissiblePageDismissDirection.vertical)) {
+    if (_(DismissiblePageDismissDirection.horizontal) || _(DismissiblePageDismissDirection.vertical)) {
       _dragExtent += delta!;
     } else if (_(DismissiblePageDismissDirection.up)) {
       if (_dragExtent + delta! < 0) _dragExtent += delta;
@@ -152,6 +143,10 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
         default:
           if (_dragExtent + delta! > 0) _dragExtent += delta;
       }
+    }
+
+    if (widget.onDragUpdate != null) {
+      widget.onDragUpdate?.call(min(_dragExtent / context.size!.height, widget.maxTransformValue));
     }
 
     if (oldDragExtent.sign != _dragExtent.sign) {
@@ -177,10 +172,8 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
     if (!_isActive || _moveController!.isAnimating) return;
     _dragUnderway = false;
     if (!_moveController!.isDismissed) {
-      if (_moveController!.value >
-          (widget.dismissThresholds[_dismissDirection!] ??
-              _kDismissThreshold)) {
-        widget.onDismiss.call();
+      if (_moveController!.value > (widget.dismissThresholds[_dismissDirection!] ?? _kDismissThreshold)) {
+        widget.onDismissed.call();
       } else {
         _moveController!.reverseDuration = widget.reverseDuration;
         _moveController!.reverse();
@@ -191,14 +184,13 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
 
   void _handleDismissStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.completed && !_dragUnderway) {
-      widget.onDismiss();
+      widget.onDismissed();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final contentPadding =
-        widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
+    final contentPadding = widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
 
     if (widget.disabled) {
       return DecoratedBox(
@@ -225,9 +217,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
       child: AnimatedBuilder(
         animation: _moveAnimation,
         builder: (BuildContext context, Widget? child) {
-          final k = _directionIsXAxis
-              ? _moveAnimation.value.dx.abs()
-              : _moveAnimation.value.dy.abs();
+          final k = _directionIsXAxis ? _moveAnimation.value.dx.abs() : _moveAnimation.value.dy.abs();
 
           double getDx() {
             if (_directionIsXAxis) {

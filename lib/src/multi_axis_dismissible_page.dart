@@ -3,7 +3,7 @@ part of 'dismissible_page.dart';
 class MultiAxisDismissiblePage extends StatefulWidget {
   const MultiAxisDismissiblePage({
     required this.child,
-    required this.onDismiss,
+    required this.onDismissed,
     required this.isFullScreen,
     required this.disabled,
     required this.backgroundColor,
@@ -18,6 +18,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
     required this.startingOpacity,
     required this.onDragStart,
     required this.onDragEnd,
+    required this.onDragUpdate,
     required this.reverseDuration,
     required this.behavior,
     Key? key,
@@ -26,7 +27,8 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   final double startingOpacity;
   final VoidCallback? onDragStart;
   final VoidCallback? onDragEnd;
-  final VoidCallback onDismiss;
+  final VoidCallback onDismissed;
+  final ValueChanged<double>? onDragUpdate;
   final bool isFullScreen;
   final double minScale;
   final double minRadius;
@@ -50,12 +52,10 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   }
 
   @override
-  _MultiAxisDismissiblePageState createState() =>
-      _MultiAxisDismissiblePageState();
+  _MultiAxisDismissiblePageState createState() => _MultiAxisDismissiblePageState();
 }
 
-class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
-    with Drag, SingleTickerProviderStateMixin {
+class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> with Drag, SingleTickerProviderStateMixin {
   late final GestureRecognizer _recognizer;
   late final AnimationController _moveController;
   final _offsetNotifier = ValueNotifier(Offset.zero);
@@ -66,8 +66,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   @override
   void initState() {
     super.initState();
-    _moveController =
-        AnimationController(duration: widget.reverseDuration, vsync: this);
+    _moveController = AnimationController(duration: widget.reverseDuration, vsync: this);
     _moveController.addStatusListener(statusListener);
     _moveController.addListener(animationListener);
     _recognizer = widget.createRecognizer(_startDrag);
@@ -79,6 +78,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
       Offset.zero,
       Curves.easeInOut.transform(_moveController.value),
     )!;
+    widget.onDragUpdate?.call(overallDrag());
   }
 
   void statusListener(AnimationStatus status) {
@@ -116,8 +116,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   @override
   void update(DragUpdateDetails details) {
     if (_activeCount > 1) return;
-    _offsetNotifier.value =
-        (details.globalPosition - _startOffset) * widget.dragSensitivity;
+    _offsetNotifier.value = (details.globalPosition - _startOffset) * widget.dragSensitivity;
   }
 
   @override
@@ -127,10 +126,9 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   void end(DragEndDetails details) {
     if (!_dragUnderway) return;
     _dragUnderway = false;
-    final shouldDismiss = overallDrag() >
-        (widget.dismissThresholds[_extentToDirection()] ?? _kDismissThreshold);
+    final shouldDismiss = overallDrag() > (widget.dismissThresholds[_extentToDirection()] ?? _kDismissThreshold);
     if (shouldDismiss) {
-      widget.onDismiss();
+      widget.onDismissed();
     } else {
       _moveController.animateTo(1);
     }
@@ -151,8 +149,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
 
   @override
   Widget build(BuildContext context) {
-    final contentPadding =
-        widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
+    final contentPadding = widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
 
     final content = ValueListenableBuilder<Offset>(
       valueListenable: _offsetNotifier,
