@@ -19,7 +19,7 @@ Flutter package to navigate to page that is dismissed by swipe gestures, with He
 
 ## Support
 PRs Welcome
-Discord [Channel](https://discord.gg/gw8nktq)
+Discord [Channel](https://rebrand.ly/qwc3s0d)
 Don't forget to give it a star ⭐
 
 | [Live Demo](https://rebrand.ly/gw8nktq) | Multi Direction | Vertical |
