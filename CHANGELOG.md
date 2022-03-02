@@ -1,3 +1,8 @@
+## 0.7.0 -02/03/2022
+- Added Multi direction dismiss
+- Improved example
+- Improved readme
+
 
 ## 0.6.5 -19/02/2022
 - Removed media from pub

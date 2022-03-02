@@ -1,5 +1,6 @@
 
 
+
 <div align="center">
   <h1 align="center" style="font-size: 70px;">Flutter Pinput From <a href="https://www.linkedin.com/in/thornike/" target="_blank">Tornike</a> </h1>
 
@@ -85,28 +86,6 @@ class SecondPage extends StatelessWidget {
   }
 }
 ```
-
-
-  
-## Installation  
-  
-Add this to your package's `pubspec.yaml` file:  
-  
-```yaml  
-dependencies:  
-  dismissible_page: ^0.6.5
-```  
-You can install packages from the command line:  
-  
-```css  
-$ flutter packages get  
-```  
-  
-Now in your `Dart` code, you can use:  
-  
-```dart  
-import 'package:dismissible_page/dismissible_page.dart';
-```  
   
 ## Properties  
 
