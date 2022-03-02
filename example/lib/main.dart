@@ -15,6 +15,7 @@ const accentColor = Color(0xff00d573);
 
 void main() => runApp(
       MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primaryColor: accentColor,
           scaffoldBackgroundColor: Colors.white,

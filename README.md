@@ -1,3 +1,4 @@
+
 <div align="center">
   <h1 align="center" style="font-size: 70px;">Flutter Pinput From <a href="https://www.linkedin.com/in/thornike/" target="_blank">Tornike</a> </h1>
 
@@ -7,37 +8,46 @@
 
 Flutter package to navigate to page that is dismissed by swipe gestures, with Hero style animations, Inspired by FB, IG stories.
 
-  
+
 ## Features:
 -    Dismiss to any direction
 -    Animating border
 -    Animating background
 -    Animating scale
-  
+
 
 ## Support
 PRs Welcome
 Discord [Channel](https://discord.gg/gw8nktq)
 Don't forget to give it a star ⭐
-  
-| [Live Demo](https://rebrand.ly/6390b8) | Vertical | Horizontal |
-|--|--|--|
-| <a href="https://rebrand.ly/6390b8"> ![Live Demo](https://user-images.githubusercontent.com/26390946/155666045-aa93bf48-f8e7-407c-bb19-bc247d9e12bd.png) <a/> | ![Vertical](https://raw.githubusercontent.com/Tkko/Flutter_dismissible_page/master/example/media/dismissible_horizontal.gif) | ![Horizontal](https://raw.githubusercontent.com/Tkko/Flutter_dismissible_page/master/example/media/dismissible_vertical.gif) |
 
-  
+| [Live Demo](https://rebrand.ly/6390b8) | Multi Direction | Vertical |
+|--|--|--|
+| <a href="https://rebrand.ly/6390b8"><img width="400" src="https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png" /><a/> | <img src="https://user-images.githubusercontent.com/26390946/156391454-a78e8a69-53dd-45f1-9fad-6724343bfe13.gif" /> | <img src="https://user-images.githubusercontent.com/26390946/156391449-a9235d05-bc87-4f51-8a5d-50c44fd0c582.gif"/> |
+
+
+
+
 ## Getting Started
- Navigate to desired page
 ```dart
 const imageUrl =
     'https://user-images.githubusercontent.com/26390946/155666045-aa93bf48-f8e7-407c-bb19-bc247d9e12bd.png';
+
+class FirstPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(228, 217, 236, 1),
       body: GestureDetector(
         onTap: () {
+          // Use extension method to use [TransparentRoute]
+          // This will push page without route background
           context.pushTransparentRoute(SecondPage());
         },
         child: Center(
           child: SizedBox(
             width: 200,
+            // Hero widget is needed to animate page transition
             child: Hero(
               tag: 'Unique tag',
               child: Image.network(
@@ -49,19 +59,19 @@ const imageUrl =
         ),
       ),
     );
-```
+  }
+}
 
-
-```dart
-const imageUrl =
-    'https://user-images.githubusercontent.com/26390946/155666045-aa93bf48-f8e7-407c-bb19-bc247d9e12bd.png';
 class SecondPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DismissiblePage(
-      onDismiss: () {
+      onDismissed: () {
         Navigator.of(context).pop();
       },
+      // Note that scrollable widget inside DismissiblePage might limit the functionality
+      // If scroll direction matches DismissiblePage direction
+      direction: DismissiblePageDismissDirection.multi,
       isFullScreen: false,
       child: Hero(
         tag: 'Unique tag',

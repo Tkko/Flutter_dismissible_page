@@ -62,6 +62,7 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
 
   @override
   Widget build(BuildContext context) {
+    // return FirstPage();
     return Scaffold(
       bottomNavigationBar: _stories(),
       body: SingleChildScrollView(
@@ -213,20 +214,23 @@ class AppChip extends StatelessWidget {
 }
 
 const imageUrl =
-    'https://user-images.githubusercontent.com/26390946/155666045-aa93bf48-f8e7-407c-bb19-bc247d9e12bd.png';
+    'https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png';
 
 class FirstPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
+      backgroundColor: Color.fromRGBO(228, 217, 236, 1),
       body: GestureDetector(
         onTap: () {
+          // Use extension method to use [TransparentRoute]
+          // This will push page without route background
           context.pushTransparentRoute(SecondPage());
         },
         child: Center(
           child: SizedBox(
             width: 200,
+            // Hero widget is needed to animate page transition
             child: Hero(
               tag: 'Unique tag',
               child: Image.network(
@@ -248,11 +252,14 @@ class SecondPage extends StatelessWidget {
       onDismissed: () {
         Navigator.of(context).pop();
       },
+      // Note that scrollable widget inside DismissiblePage might limit the functionality
+      // If scroll direction matches DismissiblePage direction
+      direction: DismissiblePageDismissDirection.multi,
       isFullScreen: false,
       child: Hero(
         tag: 'Unique tag',
         child: Image.network(
-          'https://user-images.githubusercontent.com/26390946/155666045-aa93bf48-f8e7-407c-bb19-bc247d9e12bd.png',
+          imageUrl,
           fit: BoxFit.cover,
         ),
       ),
