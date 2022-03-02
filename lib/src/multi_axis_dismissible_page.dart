@@ -52,12 +52,10 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   }
 
   @override
-  _MultiAxisDismissiblePageState createState() =>
-      _MultiAxisDismissiblePageState();
+  _MultiAxisDismissiblePageState createState() => _MultiAxisDismissiblePageState();
 }
 
-class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
-    with Drag, SingleTickerProviderStateMixin {
+class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> with Drag, SingleTickerProviderStateMixin {
   late final GestureRecognizer _recognizer;
   late final AnimationController _moveController;
   final _offsetNotifier = ValueNotifier(Offset.zero);
@@ -68,11 +66,11 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   @override
   void initState() {
     super.initState();
-    _moveController =
-        AnimationController(duration: widget.reverseDuration, vsync: this);
+    _moveController = AnimationController(duration: widget.reverseDuration, vsync: this);
     _moveController.addStatusListener(statusListener);
     _moveController.addListener(animationListener);
     _recognizer = widget.createRecognizer(_startDrag);
+    _offsetNotifier.addListener(_offsetListener);
   }
 
   void animationListener() {
@@ -81,6 +79,9 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
       Offset.zero,
       Curves.easeInOut.transform(_moveController.value),
     )!;
+  }
+
+  void _offsetListener() {
     widget.onDragUpdate?.call(overallDrag());
   }
 
@@ -88,10 +89,6 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
     if (status == AnimationStatus.completed) {
       _moveController.value = 0;
     }
-  }
-
-  DismissiblePageDismissDirection _extentToDirection() {
-    return DismissiblePageDismissDirection.multi;
   }
 
   double overallDrag() {
@@ -119,8 +116,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   @override
   void update(DragUpdateDetails details) {
     if (_activeCount > 1) return;
-    _offsetNotifier.value =
-        (details.globalPosition - _startOffset) * widget.dragSensitivity;
+    _offsetNotifier.value = (details.globalPosition - _startOffset) * widget.dragSensitivity;
   }
 
   @override
@@ -130,8 +126,8 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   void end(DragEndDetails details) {
     if (!_dragUnderway) return;
     _dragUnderway = false;
-    final shouldDismiss = overallDrag() >
-        (widget.dismissThresholds[_extentToDirection()] ?? _kDismissThreshold);
+    final shouldDismiss =
+        overallDrag() > (widget.dismissThresholds[DismissiblePageDismissDirection.multi] ?? _kDismissThreshold);
     if (shouldDismiss) {
       widget.onDismissed();
     } else {
@@ -154,8 +150,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
 
   @override
   Widget build(BuildContext context) {
-    final contentPadding =
-        widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
+    final contentPadding = widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
 
     final content = ValueListenableBuilder<Offset>(
       valueListenable: _offsetNotifier,
