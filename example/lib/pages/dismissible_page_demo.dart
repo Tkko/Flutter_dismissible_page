@@ -254,7 +254,7 @@ class SecondPage extends StatelessWidget {
       },
       // Note that scrollable widget inside DismissiblePage might limit the functionality
       // If scroll direction matches DismissiblePage direction
-      // direction: DismissiblePageDismissDirection.multi,
+      direction: DismissiblePageDismissDirection.multi,
       onDragUpdate: (s) {
         print(s);
       },

@@ -14,6 +14,8 @@ part 'dismissible_page_dismiss_direction.dart';
 
 part 'single_axis_dismissible_page.dart';
 
+part 'dismissible_page_drag_update_details.dart';
+
 const double _kDismissThreshold = 0.15;
 
 class DismissiblePage extends StatelessWidget {

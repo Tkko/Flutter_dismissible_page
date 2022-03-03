@@ -58,7 +58,8 @@ class MultiAxisDismissiblePage extends StatefulWidget {
 class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> with Drag, SingleTickerProviderStateMixin {
   late final GestureRecognizer _recognizer;
   late final AnimationController _moveController;
-  final _offsetNotifier = ValueNotifier(Offset.zero);
+  late final ValueNotifier<DismissiblePageDragUpdateDetails> _offsetNotifier;
+
   Offset _startOffset = Offset.zero;
   int _activeCount = 0;
   bool _dragUnderway = false;
@@ -66,6 +67,11 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> wit
   @override
   void initState() {
     super.initState();
+    final initialDetails = DismissiblePageDragUpdateDetails(
+      radius: widget.minRadius,
+      opacity: widget.startingOpacity,
+    );
+    _offsetNotifier = ValueNotifier(initialDetails);
     _moveController = AnimationController(duration: widget.reverseDuration, vsync: this);
     _moveController.addStatusListener(statusListener);
     _moveController.addListener(animationListener);
@@ -74,15 +80,27 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> wit
   }
 
   void animationListener() {
-    _offsetNotifier.value = Offset.lerp(
-      _offsetNotifier.value,
+    final offset = Offset.lerp(
+      _offsetNotifier.value.offset,
       Offset.zero,
       Curves.easeInOut.transform(_moveController.value),
     )!;
+    _updateOffset(offset);
+  }
+
+  void _updateOffset(Offset offset) {
+    final k = overallDrag(offset);
+    _offsetNotifier.value = DismissiblePageDragUpdateDetails(
+      offset: offset,
+      overallDragValue: k,
+      radius: lerpDouble(widget.minRadius, widget.maxRadius, k)!,
+      opacity: (widget.startingOpacity - k).clamp(.0, 1.0),
+      scale: lerpDouble(1, widget.minScale, k)!,
+    );
   }
 
   void _offsetListener() {
-    widget.onDragUpdate?.call(overallDrag());
+    // widget.onDragUpdate?.call(overallDrag());
   }
 
   void statusListener(AnimationStatus status) {
@@ -91,9 +109,10 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> wit
     }
   }
 
-  double overallDrag() {
+  double overallDrag([Offset? offset]) {
+    final _offset = offset ?? _offsetNotifier.value.offset;
     final size = MediaQuery.of(context).size;
-    final distanceOffset = _offsetNotifier.value - Offset.zero;
+    final distanceOffset = _offset - Offset.zero;
     final w = distanceOffset.dx.abs() / size.width;
     final h = distanceOffset.dy.abs() / size.height;
     return max(w, h);
@@ -116,7 +135,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> wit
   @override
   void update(DragUpdateDetails details) {
     if (_activeCount > 1) return;
-    _offsetNotifier.value = (details.globalPosition - _startOffset) * widget.dragSensitivity;
+    _updateOffset((details.globalPosition - _startOffset) * widget.dragSensitivity);
   }
 
   @override
@@ -152,24 +171,19 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> wit
   Widget build(BuildContext context) {
     final contentPadding = widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
 
-    final content = ValueListenableBuilder<Offset>(
+    final content = ValueListenableBuilder<DismissiblePageDragUpdateDetails>(
       valueListenable: _offsetNotifier,
       child: widget.child,
-      builder: (_, Offset offset, Widget? child) {
-        final k = overallDrag();
-        final scale = lerpDouble(1, widget.minScale, k);
-        final radius = lerpDouble(widget.minRadius, widget.maxRadius, k)!;
-        final opacity = (widget.startingOpacity - k).clamp(.0, 1.0);
-
+      builder: (_, DismissiblePageDragUpdateDetails details, Widget? child) {
         return Container(
           padding: contentPadding,
-          color: widget.backgroundColor.withOpacity(opacity),
+          color: widget.backgroundColor.withOpacity(details.opacity),
           child: Transform(
             transform: Matrix4.identity()
-              ..translate(offset.dx, offset.dy)
-              ..scale(scale, scale),
+              ..translate(details.offset.dx, details.offset.dy)
+              ..scale(details.scale, details.scale),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(radius),
+              borderRadius: BorderRadius.circular(details.radius),
               child: child,
             ),
           ),
