@@ -103,7 +103,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   }
 
   Drag? _startDrag(Offset position) {
-    if (_activeCount > 1) return null;
+    if (_activeCount > 1 || widget.disabled) return null;
     _dragUnderway = true;
     final renderObject = context.findRenderObject()! as RenderBox;
     _startOffset = renderObject.globalToLocal(position);
@@ -112,13 +112,13 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
 
   void _routePointer(PointerDownEvent event) {
     ++_activeCount;
-    if (_activeCount > 1) return;
+    if (_activeCount > 1 || widget.disabled) return;
     _recognizer.addPointer(event);
   }
 
   @override
   void update(DragUpdateDetails details) {
-    if (_activeCount > 1) return;
+    if (_activeCount > 1 || widget.disabled) return;
     _offsetNotifier.value =
         (details.globalPosition - _startOffset) * widget.dragSensitivity;
   }
