@@ -62,7 +62,6 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return FirstPage();
     return Scaffold(
       bottomNavigationBar: _stories(),
       body: SingleChildScrollView(
@@ -76,12 +75,14 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
             Title('Bool Parameters'),
             Wrap(spacing: 10, runSpacing: 10, children: [
               AppChip(
-                onSelected: () => setState(() => pageModel.isFullScreen = !pageModel.isFullScreen),
+                onSelected: () => setState(
+                    () => pageModel.isFullScreen = !pageModel.isFullScreen),
                 isSelected: pageModel.isFullScreen,
                 title: 'isFullscreen',
               ),
               AppChip(
-                onSelected: () => setState(() => pageModel.disabled = !pageModel.disabled),
+                onSelected: () =>
+                    setState(() => pageModel.disabled = !pageModel.disabled),
                 isSelected: pageModel.disabled,
                 title: 'disabled',
               ),
@@ -98,7 +99,8 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
                     setState(() => pageModel.direction = item);
                   },
                   isSelected: item == pageModel.direction,
-                  title: '$item'.replaceAll('DismissiblePageDismissDirection.', ''),
+                  title: '$item'
+                      .replaceAll('DismissiblePageDismissDirection.', ''),
                 );
               }).toList(),
             ),

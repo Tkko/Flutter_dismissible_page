@@ -5,7 +5,6 @@ class SingleAxisDismissiblePage extends StatefulWidget {
     required this.child,
     required this.onDismissed,
     required this.isFullScreen,
-    required this.disabled,
     required this.backgroundColor,
     required this.direction,
     required this.dismissThresholds,
@@ -21,6 +20,7 @@ class SingleAxisDismissiblePage extends StatefulWidget {
     required this.onDragUpdate,
     required this.reverseDuration,
     required this.behavior,
+    required this.contentPadding,
     Key? key,
   }) : super(key: key);
 
@@ -34,7 +34,6 @@ class SingleAxisDismissiblePage extends StatefulWidget {
   final double minRadius;
   final double maxRadius;
   final double maxTransformValue;
-  final bool disabled;
   final Widget child;
   final Color backgroundColor;
   final DismissiblePageDismissDirection direction;
@@ -43,12 +42,15 @@ class SingleAxisDismissiblePage extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
   final Duration reverseDuration;
   final HitTestBehavior behavior;
+  final EdgeInsetsGeometry contentPadding;
 
   @override
-  _SingleAxisDismissiblePageState createState() => _SingleAxisDismissiblePageState();
+  _SingleAxisDismissiblePageState createState() =>
+      _SingleAxisDismissiblePageState();
 }
 
-class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage> with TickerProviderStateMixin {
+class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
+    with TickerProviderStateMixin {
   late final AnimationController _moveController;
   late Animation<Offset> _moveAnimation;
   double _dragExtent = 0.0;
@@ -68,7 +70,8 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage> w
 
   void _moveAnimationListener() {
     if (widget.onDragUpdate != null) {
-      widget.onDragUpdate?.call(min(_dragExtent / context.size!.height, widget.maxTransformValue));
+      widget.onDragUpdate?.call(
+          min(_dragExtent / context.size!.height, widget.maxTransformValue));
     }
   }
 
@@ -91,15 +94,22 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage> w
     if (_directionIsXAxis) {
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
-          return extent < 0 ? DismissiblePageDismissDirection.startToEnd : DismissiblePageDismissDirection.endToStart;
+          return extent < 0
+              ? DismissiblePageDismissDirection.startToEnd
+              : DismissiblePageDismissDirection.endToStart;
         case TextDirection.ltr:
-          return extent > 0 ? DismissiblePageDismissDirection.startToEnd : DismissiblePageDismissDirection.endToStart;
+          return extent > 0
+              ? DismissiblePageDismissDirection.startToEnd
+              : DismissiblePageDismissDirection.endToStart;
       }
     }
-    return extent > 0 ? DismissiblePageDismissDirection.down : DismissiblePageDismissDirection.up;
+    return extent > 0
+        ? DismissiblePageDismissDirection.down
+        : DismissiblePageDismissDirection.up;
   }
 
-  DismissiblePageDismissDirection? get _dismissDirection => _extentToDirection(_dragExtent);
+  DismissiblePageDismissDirection? get _dismissDirection =>
+      _extentToDirection(_dragExtent);
 
   bool get _isActive {
     return _dragUnderway || _moveController.isAnimating;
@@ -114,7 +124,8 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage> w
     widget.onDragStart?.call();
     _dragUnderway = true;
     if (_moveController.isAnimating) {
-      _dragExtent = _moveController.value * _overallDragAxisExtent * _dragExtent.sign;
+      _dragExtent =
+          _moveController.value * _overallDragAxisExtent * _dragExtent.sign;
       _moveController.stop();
     } else {
       _dragExtent = 0.0;
@@ -124,13 +135,14 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage> w
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (!_isActive || _moveController.isAnimating || widget.disabled) return;
+    if (!_isActive || _moveController.isAnimating) return;
 
     final delta = details.primaryDelta;
     final oldDragExtent = _dragExtent;
     bool _(DismissiblePageDismissDirection d) => widget.direction == d;
 
-    if (_(DismissiblePageDismissDirection.horizontal) || _(DismissiblePageDismissDirection.vertical)) {
+    if (_(DismissiblePageDismissDirection.horizontal) ||
+        _(DismissiblePageDismissDirection.vertical)) {
       _dragExtent += delta!;
     } else if (_(DismissiblePageDismissDirection.up)) {
       if (_dragExtent + delta! < 0) _dragExtent += delta;
@@ -177,7 +189,9 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage> w
     if (!_isActive || _moveController.isAnimating) return;
     _dragUnderway = false;
     if (!_moveController.isDismissed) {
-      if (_moveController.value > (widget.dismissThresholds[_dismissDirection!] ?? _kDismissThreshold)) {
+      if (_moveController.value >
+          (widget.dismissThresholds[_dismissDirection!] ??
+              _kDismissThreshold)) {
         widget.onDismissed.call();
       } else {
         _moveController.reverseDuration = widget.reverseDuration;
@@ -195,21 +209,6 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage> w
 
   @override
   Widget build(BuildContext context) {
-    final contentPadding = widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
-
-    if (widget.disabled) {
-      return DecoratedBox(
-        decoration: BoxDecoration(color: widget.backgroundColor),
-        child: Padding(
-          padding: contentPadding,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(widget.minRadius),
-            child: widget.child,
-          ),
-        ),
-      );
-    }
-
     return GestureDetector(
       onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,
       onHorizontalDragUpdate: _directionIsXAxis ? _handleDragUpdate : null,
@@ -222,7 +221,9 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage> w
       child: AnimatedBuilder(
         animation: _moveAnimation,
         builder: (BuildContext context, Widget? child) {
-          final k = _directionIsXAxis ? _moveAnimation.value.dx.abs() : _moveAnimation.value.dy.abs();
+          final k = _directionIsXAxis
+              ? _moveAnimation.value.dx.abs()
+              : _moveAnimation.value.dy.abs();
 
           double getDx() {
             if (_directionIsXAxis) {
@@ -251,10 +252,13 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage> w
           final double? scale = lerpDouble(1, widget.minScale, k);
           final radius = lerpDouble(widget.minRadius, widget.maxRadius, k)!;
           final opacity = (widget.startingOpacity - k).clamp(.0, 1.0);
+          final backgroundColor = widget.backgroundColor == Colors.transparent
+              ? Colors.transparent
+              : widget.backgroundColor.withOpacity(opacity);
 
           return Container(
-            padding: contentPadding,
-            color: widget.backgroundColor.withOpacity(opacity),
+            padding: widget.contentPadding,
+            color: backgroundColor,
             child: FractionalTranslation(
               translation: offset,
               child: Transform.scale(

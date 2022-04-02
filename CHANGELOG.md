@@ -1,3 +1,8 @@
+## 0.7.0
+- Fixed disabled Dismissible
+- Improved readme
+
+
 ## 0.7.0 -02/03/2022
 - Added Multi direction dismiss
 - Improved example

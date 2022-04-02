@@ -108,11 +108,26 @@ class DismissiblePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final contentPadding =
+        isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
+
+    if (disabled) {
+      return DecoratedBox(
+        decoration: BoxDecoration(color: backgroundColor),
+        child: Padding(
+          padding: contentPadding,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(minRadius),
+            child: child,
+          ),
+        ),
+      );
+    }
+
     if (direction == DismissiblePageDismissDirection.multi) {
       return MultiAxisDismissiblePage(
         onDismissed: onDismissed,
         isFullScreen: isFullScreen,
-        disabled: disabled,
         backgroundColor: backgroundColor,
         direction: direction,
         dismissThresholds: dismissThresholds,
@@ -128,13 +143,13 @@ class DismissiblePage extends StatelessWidget {
         onDragUpdate: onDragUpdate,
         reverseDuration: reverseDuration,
         behavior: behavior,
+        contentPadding: contentPadding,
         child: child,
       );
     }
     return SingleAxisDismissiblePage(
       onDismissed: onDismissed,
       isFullScreen: isFullScreen,
-      disabled: disabled,
       backgroundColor: backgroundColor,
       direction: direction,
       dismissThresholds: dismissThresholds,
@@ -150,6 +165,7 @@ class DismissiblePage extends StatelessWidget {
       onDragUpdate: onDragUpdate,
       reverseDuration: reverseDuration,
       behavior: behavior,
+      contentPadding: contentPadding,
       child: child,
     );
   }

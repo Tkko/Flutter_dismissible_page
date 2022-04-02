@@ -5,7 +5,6 @@ class MultiAxisDismissiblePage extends StatefulWidget {
     required this.child,
     required this.onDismissed,
     required this.isFullScreen,
-    required this.disabled,
     required this.backgroundColor,
     required this.direction,
     required this.dismissThresholds,
@@ -21,6 +20,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
     required this.onDragUpdate,
     required this.reverseDuration,
     required this.behavior,
+    required this.contentPadding,
     Key? key,
   }) : super(key: key);
 
@@ -34,7 +34,6 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   final double minRadius;
   final double maxRadius;
   final double maxTransformValue;
-  final bool disabled;
   final Widget child;
   final Color backgroundColor;
   final DismissiblePageDismissDirection direction;
@@ -43,6 +42,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
   final Duration reverseDuration;
   final HitTestBehavior behavior;
+  final EdgeInsetsGeometry contentPadding;
 
   @protected
   MultiDragGestureRecognizer createRecognizer(
@@ -52,10 +52,12 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   }
 
   @override
-  _MultiAxisDismissiblePageState createState() => _MultiAxisDismissiblePageState();
+  _MultiAxisDismissiblePageState createState() =>
+      _MultiAxisDismissiblePageState();
 }
 
-class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> with Drag, SingleTickerProviderStateMixin {
+class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
+    with Drag, SingleTickerProviderStateMixin {
   late final GestureRecognizer _recognizer;
   late final AnimationController _moveController;
   late final ValueNotifier<DismissiblePageDragUpdateDetails> _offsetNotifier;
@@ -72,7 +74,8 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> wit
       opacity: widget.startingOpacity,
     );
     _offsetNotifier = ValueNotifier(initialDetails);
-    _moveController = AnimationController(duration: widget.reverseDuration, vsync: this);
+    _moveController =
+        AnimationController(duration: widget.reverseDuration, vsync: this);
     _moveController.addStatusListener(statusListener);
     _moveController.addListener(animationListener);
     _recognizer = widget.createRecognizer(_startDrag);
@@ -135,7 +138,8 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> wit
   @override
   void update(DragUpdateDetails details) {
     if (_activeCount > 1) return;
-    _updateOffset((details.globalPosition - _startOffset) * widget.dragSensitivity);
+    _updateOffset(
+        (details.globalPosition - _startOffset) * widget.dragSensitivity);
   }
 
   @override
@@ -145,8 +149,9 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> wit
   void end(DragEndDetails details) {
     if (!_dragUnderway) return;
     _dragUnderway = false;
-    final shouldDismiss =
-        overallDrag() > (widget.dismissThresholds[DismissiblePageDismissDirection.multi] ?? _kDismissThreshold);
+    final shouldDismiss = overallDrag() >
+        (widget.dismissThresholds[DismissiblePageDismissDirection.multi] ??
+            _kDismissThreshold);
     if (shouldDismiss) {
       widget.onDismissed();
     } else {
@@ -169,15 +174,16 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage> wit
 
   @override
   Widget build(BuildContext context) {
-    final contentPadding = widget.isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
-
     final content = ValueListenableBuilder<DismissiblePageDragUpdateDetails>(
       valueListenable: _offsetNotifier,
       child: widget.child,
       builder: (_, DismissiblePageDragUpdateDetails details, Widget? child) {
+        final backgroundColor = widget.backgroundColor == Colors.transparent
+            ? Colors.transparent
+            : widget.backgroundColor.withOpacity(details.opacity);
         return Container(
-          padding: contentPadding,
-          color: widget.backgroundColor.withOpacity(details.opacity),
+          padding: widget.contentPadding,
+          color: backgroundColor,
           child: Transform(
             transform: Matrix4.identity()
               ..translate(details.offset.dx, details.offset.dy)
