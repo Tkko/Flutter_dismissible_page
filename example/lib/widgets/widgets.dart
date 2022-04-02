@@ -40,11 +40,12 @@ class StoryImage extends StatefulWidget {
 
 class _StoryImageState extends State<StoryImage> {
   late String imageUrl;
+  bool hasError = false;
 
   @override
   void initState() {
     super.initState();
-    imageUrl = widget.story.imageUrl ?? widget.story.altUrl;
+    imageUrl = widget.story.imageUrl;
   }
 
   @override
@@ -62,10 +63,13 @@ class _StoryImageState extends State<StoryImage> {
             color: Color.fromRGBO(237, 241, 248, 1),
             image: DecorationImage(
               onError: (_, __) {
-                setState(() => imageUrl = widget.story.altUrl);
+                setState(() {
+                  imageUrl = widget.story.altUrl;
+                  hasError = true;
+                });
               },
               fit: BoxFit.cover,
-              image: NetworkImage(imageUrl),
+              image: hasError ? AssetImage(widget.story.altUrl) : NetworkImage(imageUrl) as ImageProvider,
             ),
           ),
           child: Text(

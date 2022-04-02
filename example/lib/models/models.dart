@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class DismissiblePageModel {
   DismissiblePageModel() {
     stories = [
-      StoryModel(title: 'Random'),
+      StoryModel(title: 'Random', imageUrl: randomNature),
       StoryModel(title: 'Photos', imageUrl: randomNature),
       StoryModel(title: 'From', imageUrl: randomFood),
       StoryModel(title: 'Unsplash', imageUrl: randomNature),
@@ -39,24 +39,21 @@ class DismissiblePageModel {
   double maxTransformValue = .5;
   double dragSensitivity = .7;
   Color backgroundColor = Colors.black;
-  DismissiblePageDismissDirection direction =
-      DismissiblePageDismissDirection.vertical;
-  Map<DismissiblePageDismissDirection, double> dismissThresholds =
-      const <DismissiblePageDismissDirection, double>{};
+  DismissiblePageDismissDirection direction = DismissiblePageDismissDirection.vertical;
+  Map<DismissiblePageDismissDirection, double> dismissThresholds = const <DismissiblePageDismissDirection, double>{};
   DragStartBehavior dragStartBehavior = DragStartBehavior.down;
   Duration reverseDuration = const Duration(milliseconds: 200);
   HitTestBehavior behavior = HitTestBehavior.opaque;
 }
 
 class StoryModel {
-  final String altUrl =
-      'https://user-images.githubusercontent.com/26390946/155841439-cba70441-0c45-4a28-806d-9234aa66bea0.png';
+  final String altUrl ='assets/images/photo_not_found.png';
   final storyId = UniqueKey();
   final String title;
-  final String? imageUrl;
+  final String imageUrl;
 
   StoryModel({
     required this.title,
-    this.imageUrl,
+    required this.imageUrl,
   });
 }
