@@ -39,8 +39,7 @@ Don't forget to give it a star ⭐
 
 | [Live Demo](https://rebrand.ly/gw8nktq) | Multi Direction | Vertical |
 |--|--|--|
-| <a href="https://rebrand.ly/gw8nktq"><img width="400" src="https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png" /><a/> | <img src="https://user-images.githubusercontent.com/26390946/156391454-a78e8a69-53dd-45f1-9fad-6724343bfe13.gif" /> | <img src="https://user-images.githubusercontent.com/26390946/156391449-a9235d05-bc87-4f51-8a5d-50c44fd0c582.gif"/> |
-
+| <a href="https://rebrand.ly/gw8nktq"><img width="400" src="https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png" /><a/> | <img src="https://user-images.githubusercontent.com/26390946/161377483-78e5dbaf-678f-4381-a393-52af8180bbcb.gif" /> | <img src="https://user-images.githubusercontent.com/26390946/156391449-a9235d05-bc87-4f51-8a5d-50c44fd0c582.gif"/> |
 
 
 
