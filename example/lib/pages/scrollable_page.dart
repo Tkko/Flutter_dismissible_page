@@ -26,7 +26,7 @@ class _ScrollablePageState extends State<ScrollablePage> {
           child: GestureDetector(
             onTap: () => Navigator.of(context).pop(),
             child: Image.network(
-              widget.story.imageUrl!,
+              widget.story.imageUrl,
               fit: BoxFit.cover,
             ),
           ),

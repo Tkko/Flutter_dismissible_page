@@ -69,7 +69,9 @@ class _StoryImageState extends State<StoryImage> {
                 });
               },
               fit: BoxFit.cover,
-              image: hasError ? AssetImage(widget.story.altUrl) : NetworkImage(imageUrl) as ImageProvider,
+              image: hasError
+                  ? AssetImage(widget.story.altUrl)
+                  : NetworkImage(imageUrl) as ImageProvider,
             ),
           ),
           child: Text(

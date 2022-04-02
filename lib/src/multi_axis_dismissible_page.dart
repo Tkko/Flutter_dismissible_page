@@ -139,7 +139,8 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   void update(DragUpdateDetails details) {
     if (_activeCount > 1) return;
     _updateOffset(
-        (details.globalPosition - _startOffset) * widget.dragSensitivity);
+      (details.globalPosition - _startOffset) * widget.dragSensitivity,
+    );
   }
 
   @override

@@ -71,7 +71,8 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
   void _moveAnimationListener() {
     if (widget.onDragUpdate != null) {
       widget.onDragUpdate?.call(
-          min(_dragExtent / context.size!.height, widget.maxTransformValue));
+        min(_dragExtent / context.size!.height, widget.maxTransformValue),
+      );
     }
   }
 
@@ -248,8 +249,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
           }
 
           final offset = Offset(getDx(), getDy());
-          // For pub analyzer
-          final double? scale = lerpDouble(1, widget.minScale, k);
+          final scale = lerpDouble(1, widget.minScale, k);
           final radius = lerpDouble(widget.minRadius, widget.maxRadius, k)!;
           final opacity = (widget.startingOpacity - k).clamp(.0, 1.0);
           final backgroundColor = widget.backgroundColor == Colors.transparent
@@ -262,7 +262,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
             child: FractionalTranslation(
               translation: offset,
               child: Transform.scale(
-                scale: scale!,
+                scale: scale,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(radius),
                   child: child,
