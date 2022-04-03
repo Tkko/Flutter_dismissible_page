@@ -8,8 +8,9 @@ extension DismissibleContextExt on BuildContext {
     final Color backgroundColor = Colors.black38,
     final Duration transitionDuration = _transitionDuration,
     final Duration reverseTransitionDuration = _transitionDuration,
+    final bool rootNavigator = false,
   }) =>
-      Navigator.of(this).push(
+      Navigator.of(this, rootNavigator: rootNavigator).push(
         TransparentRoute(
           builder: (_) => page,
           backgroundColor: backgroundColor,
