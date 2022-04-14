@@ -1,5 +1,6 @@
 part of 'dismissible_page.dart';
 
+@visibleForTesting
 class MultiAxisDismissiblePage extends StatefulWidget {
   const MultiAxisDismissiblePage({
     required this.child,
@@ -28,7 +29,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   final VoidCallback? onDragStart;
   final VoidCallback? onDragEnd;
   final VoidCallback onDismissed;
-  final ValueChanged<double>? onDragUpdate;
+  final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
   final bool isFullScreen;
   final double minScale;
   final double minRadius;
@@ -60,7 +61,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
     with Drag, SingleTickerProviderStateMixin {
   late final GestureRecognizer _recognizer;
   late final AnimationController _moveController;
-  late final ValueNotifier<DismissiblePageDragUpdateDetails> _offsetNotifier;
+  late final ValueNotifier<DismissiblePageDragUpdateDetails> _dragNotifier;
 
   Offset _startOffset = Offset.zero;
   int _activeCount = 0;
@@ -73,18 +74,18 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
       radius: widget.minRadius,
       opacity: widget.startingOpacity,
     );
-    _offsetNotifier = ValueNotifier(initialDetails);
+    _dragNotifier = ValueNotifier(initialDetails);
     _moveController =
         AnimationController(duration: widget.reverseDuration, vsync: this);
     _moveController.addStatusListener(statusListener);
     _moveController.addListener(animationListener);
     _recognizer = widget.createRecognizer(_startDrag);
-    _offsetNotifier.addListener(_offsetListener);
+    _dragNotifier.addListener(_dragListener);
   }
 
   void animationListener() {
     final offset = Offset.lerp(
-      _offsetNotifier.value.offset,
+      _dragNotifier.value.offset,
       Offset.zero,
       Curves.easeInOut.transform(_moveController.value),
     )!;
@@ -93,7 +94,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
 
   void _updateOffset(Offset offset) {
     final k = overallDrag(offset);
-    _offsetNotifier.value = DismissiblePageDragUpdateDetails(
+    _dragNotifier.value = DismissiblePageDragUpdateDetails(
       offset: offset,
       overallDragValue: k,
       radius: lerpDouble(widget.minRadius, widget.maxRadius, k)!,
@@ -102,8 +103,8 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
     );
   }
 
-  void _offsetListener() {
-    // widget.onDragUpdate?.call(overallDrag());
+  void _dragListener() {
+    widget.onDragUpdate?.call(_dragNotifier.value);
   }
 
   void statusListener(AnimationStatus status) {
@@ -113,7 +114,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   }
 
   double overallDrag([Offset? offset]) {
-    final _offset = offset ?? _offsetNotifier.value.offset;
+    final _offset = offset ?? _dragNotifier.value.offset;
     final size = MediaQuery.of(context).size;
     final distanceOffset = _offset - Offset.zero;
     final w = distanceOffset.dx.abs() / size.width;
@@ -169,14 +170,14 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   void dispose() {
     _disposeRecognizerIfInactive();
     _moveController.dispose();
-    _offsetNotifier.dispose();
+    _dragNotifier.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final content = ValueListenableBuilder<DismissiblePageDragUpdateDetails>(
-      valueListenable: _offsetNotifier,
+      valueListenable: _dragNotifier,
       child: widget.child,
       builder: (_, DismissiblePageDragUpdateDetails details, Widget? child) {
         final backgroundColor = widget.backgroundColor == Colors.transparent

@@ -75,14 +75,12 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
             Title('Bool Parameters'),
             Wrap(spacing: 10, runSpacing: 10, children: [
               AppChip(
-                onSelected: () => setState(
-                    () => pageModel.isFullScreen = !pageModel.isFullScreen),
+                onSelected: () => setState(() => pageModel.isFullScreen = !pageModel.isFullScreen),
                 isSelected: pageModel.isFullScreen,
                 title: 'isFullscreen',
               ),
               AppChip(
-                onSelected: () =>
-                    setState(() => pageModel.disabled = !pageModel.disabled),
+                onSelected: () => setState(() => pageModel.disabled = !pageModel.disabled),
                 isSelected: pageModel.disabled,
                 title: 'disabled',
               ),
@@ -99,8 +97,7 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
                     setState(() => pageModel.direction = item);
                   },
                   isSelected: item == pageModel.direction,
-                  title: '$item'
-                      .replaceAll('DismissiblePageDismissDirection.', ''),
+                  title: '$item'.replaceAll('DismissiblePageDismissDirection.', ''),
                 );
               }).toList(),
             ),
@@ -256,7 +253,7 @@ class SecondPage extends StatelessWidget {
       },
       // Note that scrollable widget inside DismissiblePage might limit the functionality
       // If scroll direction matches DismissiblePage direction
-      direction: DismissiblePageDismissDirection.multi,
+      // direction: DismissiblePageDismissDirection.multi,
       onDragUpdate: (s) {
         print(s);
       },

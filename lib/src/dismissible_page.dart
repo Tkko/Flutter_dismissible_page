@@ -52,7 +52,7 @@ class DismissiblePage extends StatelessWidget {
   final VoidCallback? onDragEnd;
 
   /// Called when the widget has been dragged. [0.0 - 1.0]
-  final ValueChanged<double>? onDragUpdate;
+  final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
 
   /// If true widget will ignore device padding
   /// [MediaQuery.of(context).padding]

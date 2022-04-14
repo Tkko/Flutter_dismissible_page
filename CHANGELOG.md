@@ -1,4 +1,8 @@
-## 0.7.0
+## 0.7.2
+- rootNavigator [PR](https://github.com/Tkko/Flutter_dismissible_page/pull/13)
+
+
+## 0.7.1
 - Fixed disabled Dismissible
 - Improved readme
 
