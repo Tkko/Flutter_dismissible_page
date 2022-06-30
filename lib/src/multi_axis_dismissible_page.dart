@@ -77,8 +77,9 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
     _dragNotifier = ValueNotifier(initialDetails);
     _moveController =
         AnimationController(duration: widget.reverseDuration, vsync: this);
-    _moveController.addStatusListener(statusListener);
-    _moveController.addListener(animationListener);
+    _moveController
+      ..addStatusListener(statusListener)
+      ..addListener(animationListener);
     _recognizer = widget.createRecognizer(_startDrag);
     _dragNotifier.addListener(_dragListener);
   }

@@ -1,4 +1,4 @@
-include: package:lint/analysis_options.yaml
+include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
   strong-mode:
@@ -14,17 +14,10 @@ analyzer:
 
 linter:
   rules:
-    - always_declare_return_types
-    - camel_case_types
-    - empty_constructor_bodies
-    - annotate_overrides
-    - avoid_init_to_null
-    - constant_identifier_names
-    - one_member_abstracts
-    - slash_for_doc_comments
-    - unnecessary_brace_in_string_interps
-    - cancel_subscriptions
-    - close_sinks
-    - unnecessary_const
-    - unnecessary_new
-    - prefer_single_quotes
+    lines_longer_than_80_chars: false
+    sort_pub_dependencies: false
+    sort_constructors_first: false
+    public_member_api_docs: false
+    library_private_types_in_public_api: false
+    no_default_cases: false
+    omit_local_variable_types: false

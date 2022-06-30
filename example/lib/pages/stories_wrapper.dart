@@ -86,6 +86,7 @@ class _StoriesWrapperState extends State<StoriesWrapper>
       startingOpacity: widget.pageModel.startingOpacity,
       behavior: widget.pageModel.behavior,
       reverseDuration: widget.pageModel.reverseDuration,
+      onDragUpdate: (d) => print(d.offset.dy),
       child: CubicPageView(
         controller: pageCtrl,
         children: stories.map((story) {

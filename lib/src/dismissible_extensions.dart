@@ -2,8 +2,10 @@ part of 'dismissible_page.dart';
 
 const _transitionDuration = Duration(milliseconds: 250);
 
+/// BuildContext Helper methods
 extension DismissibleContextExt on BuildContext {
-  Future pushTransparentRoute(
+  /// Navigates to desired page with transparent transition background
+  Future<T?> pushTransparentRoute<T>(
     Widget page, {
     final Color backgroundColor = Colors.black38,
     final Duration transitionDuration = _transitionDuration,
@@ -20,7 +22,9 @@ extension DismissibleContextExt on BuildContext {
       );
 }
 
+/// GlobalKey Helper methods
 extension GlobalKeyExtension on GlobalKey {
+  ///
   Rect? get globalPaintBounds {
     final renderObject = currentContext?.findRenderObject();
     final translation = renderObject?.getTransformTo(null).getTranslation();

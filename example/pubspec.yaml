@@ -27,8 +27,8 @@ dependencies:
     path: ../
   #    git:
   #      url: https://github.com/Tkko/Flutter_dismissible_page
-  url_launcher:
-  google_fonts:
+  url_launcher: ^6.1.4
+  google_fonts: ^3.0.1
 
 
 dev_dependencies:

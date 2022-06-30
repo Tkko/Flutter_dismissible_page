@@ -18,7 +18,9 @@ part 'dismissible_page_drag_update_details.dart';
 
 const double _kDismissThreshold = 0.15;
 
+/// Creates page that is dismissed by swipe gestures, with Hero style animations
 class DismissiblePage extends StatelessWidget {
+  ///
   const DismissiblePage({
     required this.child,
     required this.onDismissed,

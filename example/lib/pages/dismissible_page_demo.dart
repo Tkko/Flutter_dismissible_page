@@ -51,7 +51,7 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
             runSpacing: 10,
             children: pageModel.contacts.entries.map((item) {
               return ActionChip(
-                onPressed: () => launch(item.value),
+                onPressed: () => launchUrl(Uri.parse(item.value)),
                 label: Text(item.key, style: GoogleFonts.poppins()),
               );
             }).toList(),
@@ -75,12 +75,14 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
             Title('Bool Parameters'),
             Wrap(spacing: 10, runSpacing: 10, children: [
               AppChip(
-                onSelected: () => setState(() => pageModel.isFullScreen = !pageModel.isFullScreen),
+                onSelected: () => setState(
+                    () => pageModel.isFullScreen = !pageModel.isFullScreen),
                 isSelected: pageModel.isFullScreen,
                 title: 'isFullscreen',
               ),
               AppChip(
-                onSelected: () => setState(() => pageModel.disabled = !pageModel.disabled),
+                onSelected: () =>
+                    setState(() => pageModel.disabled = !pageModel.disabled),
                 isSelected: pageModel.disabled,
                 title: 'disabled',
               ),
@@ -97,7 +99,8 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
                     setState(() => pageModel.direction = item);
                   },
                   isSelected: item == pageModel.direction,
-                  title: '$item'.replaceAll('DismissiblePageDismissDirection.', ''),
+                  title: '$item'
+                      .replaceAll('DismissiblePageDismissDirection.', ''),
                 );
               }).toList(),
             ),

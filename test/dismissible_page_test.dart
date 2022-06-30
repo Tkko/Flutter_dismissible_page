@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Should create SingleAxisDismissiblePage', (WidgetTester tester) async {
+  testWidgets('Should create SingleAxisDismissiblePage',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       DismissiblePage(
         onDismissed: () {},
@@ -15,7 +16,8 @@ void main() {
     expect(find.byType(MultiAxisDismissiblePage), findsNothing);
   });
 
-  testWidgets('Should create MultiAxisDismissiblePage', (WidgetTester tester) async {
+  testWidgets('Should create MultiAxisDismissiblePage',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       DismissiblePage(
         direction: DismissiblePageDismissDirection.multi,
@@ -28,7 +30,8 @@ void main() {
     expect(find.byType(MultiAxisDismissiblePage), findsOneWidget);
   });
 
-  testWidgets('Should create DecoratedBox when disabled', (WidgetTester tester) async {
+  testWidgets('Should create DecoratedBox when disabled',
+      (WidgetTester tester) async {
     const backgroundColor = Colors.greenAccent;
     await tester.pumpWidget(
       DismissiblePage(
@@ -53,7 +56,7 @@ void main() {
   });
 
   testWidgets('onDragUpdate is called', (WidgetTester tester) async {
-    double dragValue = 0.0;
+    double dragValue = 0;
 
     await tester.pumpWidget(
       DismissiblePage(

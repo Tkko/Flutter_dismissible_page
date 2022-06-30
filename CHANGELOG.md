@@ -1,3 +1,7 @@
+## 0.7.3
+- Implemented [onDragUpdate](https://github.com/Tkko/Flutter_dismissible_page/issues/15) 
+
+
 ## 0.7.2
 - rootNavigator [PR](https://github.com/Tkko/Flutter_dismissible_page/pull/13)
 
