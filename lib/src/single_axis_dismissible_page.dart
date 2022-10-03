@@ -278,7 +278,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
             child: FractionalTranslation(
               translation: _offset,
               child: Transform.scale(
-                scale: _scale,
+                scale: _scale ?? 0.0,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(_radius),
                   child: child,
