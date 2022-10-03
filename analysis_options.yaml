@@ -21,3 +21,4 @@ linter:
     library_private_types_in_public_api: false
     no_default_cases: false
     omit_local_variable_types: false
+    rquire_trailing_comma: true
