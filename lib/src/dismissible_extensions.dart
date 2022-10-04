@@ -7,10 +7,10 @@ extension DismissibleContextExt on BuildContext {
   /// Navigates to desired page with transparent transition background
   Future<T?> pushTransparentRoute<T>(
     Widget page, {
-    final Color backgroundColor = Colors.black38,
-    final Duration transitionDuration = _transitionDuration,
-    final Duration reverseTransitionDuration = _transitionDuration,
-    final bool rootNavigator = false,
+    Color backgroundColor = Colors.black38,
+    Duration transitionDuration = _transitionDuration,
+    Duration reverseTransitionDuration = _transitionDuration,
+    bool rootNavigator = false,
   }) =>
       Navigator.of(this, rootNavigator: rootNavigator).push(
         TransparentRoute(

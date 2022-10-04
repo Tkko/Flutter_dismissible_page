@@ -127,7 +127,34 @@ class DismissiblePage extends StatelessWidget {
     }
 
     if (direction == DismissiblePageDismissDirection.multi) {
-      return MultiAxisDismissiblePage(
+      return ScrollConfiguration(
+        behavior: const DismissiblePageScrollBehavior(),
+        child: MultiAxisDismissiblePage(
+          onDismissed: onDismissed,
+          isFullScreen: isFullScreen,
+          backgroundColor: backgroundColor,
+          direction: direction,
+          dismissThresholds: dismissThresholds,
+          dragStartBehavior: dragStartBehavior,
+          dragSensitivity: dragSensitivity,
+          minRadius: minRadius,
+          minScale: minScale,
+          maxRadius: maxRadius,
+          maxTransformValue: maxTransformValue,
+          startingOpacity: startingOpacity,
+          onDragStart: onDragStart,
+          onDragEnd: onDragEnd,
+          onDragUpdate: onDragUpdate,
+          reverseDuration: reverseDuration,
+          behavior: behavior,
+          contentPadding: contentPadding,
+          child: child,
+        ),
+      );
+    }
+    return ScrollConfiguration(
+      behavior: const DismissiblePageScrollBehavior(),
+      child: SingleAxisDismissiblePage(
         onDismissed: onDismissed,
         isFullScreen: isFullScreen,
         backgroundColor: backgroundColor,
@@ -147,28 +174,21 @@ class DismissiblePage extends StatelessWidget {
         behavior: behavior,
         contentPadding: contentPadding,
         child: child,
-      );
-    }
-    return SingleAxisDismissiblePage(
-      onDismissed: onDismissed,
-      isFullScreen: isFullScreen,
-      backgroundColor: backgroundColor,
-      direction: direction,
-      dismissThresholds: dismissThresholds,
-      dragStartBehavior: dragStartBehavior,
-      dragSensitivity: dragSensitivity,
-      minRadius: minRadius,
-      minScale: minScale,
-      maxRadius: maxRadius,
-      maxTransformValue: maxTransformValue,
-      startingOpacity: startingOpacity,
-      onDragStart: onDragStart,
-      onDragEnd: onDragEnd,
-      onDragUpdate: onDragUpdate,
-      reverseDuration: reverseDuration,
-      behavior: behavior,
-      contentPadding: contentPadding,
-      child: child,
+      ),
     );
   }
+}
+
+class DismissiblePageScrollBehavior extends ScrollBehavior {
+  const DismissiblePageScrollBehavior();
+
+  @override
+  Widget buildOverscrollIndicator(_, Widget child, __) => child;
+
+  @override
+  TargetPlatform getPlatform(BuildContext context) => TargetPlatform.android;
+
+  @override
+  ScrollPhysics getScrollPhysics(_) =>
+      const BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
 }

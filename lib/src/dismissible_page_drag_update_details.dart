@@ -3,12 +3,6 @@ part of 'dismissible_page.dart';
 /// Details outputted by [DismissiblePage.onDragUpdate] method
 @immutable
 class DismissiblePageDragUpdateDetails {
-  final double overallDragValue;
-  final double radius;
-  final double opacity;
-  final double scale;
-  final Offset offset;
-
   ///
   const DismissiblePageDragUpdateDetails({
     this.offset = Offset.zero,
@@ -17,6 +11,12 @@ class DismissiblePageDragUpdateDetails {
     required this.radius,
     required this.opacity,
   });
+
+  final double overallDragValue;
+  final double radius;
+  final double opacity;
+  final double scale;
+  final Offset offset;
 
   @override
   bool operator ==(Object other) =>

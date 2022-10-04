@@ -51,11 +51,12 @@ class SingleAxisDismissiblePage extends StatefulWidget {
 }
 
 class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
-    with TickerProviderStateMixin {
-  late final AnimationController _moveController;
+    with TickerProviderStateMixin, DismissibleDragMixin {
+  // late final AnimationController _moveController;
   late Animation<Offset> _moveAnimation;
   double _dragExtent = 0;
-  bool _dragUnderway = false;
+
+  // bool _dragUnderway = false;
 
   @override
   void initState() {
@@ -122,16 +123,16 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
   DismissiblePageDismissDirection? get _dismissDirection =>
       _extentToDirection(_dragExtent);
 
-  bool get _isActive {
-    return _dragUnderway || _moveController.isAnimating;
-  }
+  // bool get _isActive {
+  //   return _dragUnderway || _moveController.isAnimating;
+  // }
 
   double get _overallDragAxisExtent {
     final size = context.size;
     return _directionIsXAxis ? size!.width : size!.height;
   }
 
-  void _handleDragStart(DragStartDetails details) {
+  void _handleDragStart([DragStartDetails? _]) {
     widget.onDragStart?.call();
     _dragUnderway = true;
     if (_moveController.isAnimating) {
@@ -196,7 +197,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
     );
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd([DragEndDetails? _]) {
     if (!_isActive || _moveController.isAnimating) return;
     _dragUnderway = false;
     if (!_moveController.isDismissed) {
@@ -265,29 +266,134 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
       behavior: widget.behavior,
       dragStartBehavior: widget.dragStartBehavior,
-      child: AnimatedBuilder(
-        animation: _moveAnimation,
-        builder: (BuildContext context, Widget? child) {
-          final backgroundColor = widget.backgroundColor == Colors.transparent
-              ? Colors.transparent
-              : widget.backgroundColor.withOpacity(_opacity);
+      child: DismissibleScrollNotification(
+        onStart: (_) => _handleDragStart(),
+        onUpdate: _handleDragUpdate,
+        onEnd: _handleDragEnd,
+        parentState: this,
+        child: AnimatedBuilder(
+          animation: _moveAnimation,
+          builder: (BuildContext context, Widget? child) {
+            final backgroundColor = widget.backgroundColor == Colors.transparent
+                ? Colors.transparent
+                : widget.backgroundColor.withOpacity(_opacity);
 
-          return Container(
-            padding: widget.contentPadding,
-            color: backgroundColor,
-            child: FractionalTranslation(
-              translation: _offset,
-              child: Transform.scale(
-                scale: _scale ?? 0.0,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(_radius),
-                  child: child,
+            return Container(
+              padding: widget.contentPadding,
+              color: backgroundColor,
+              child: FractionalTranslation(
+                translation: _offset,
+                child: Transform.scale(
+                  scale: _scale ?? 0.0,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(_radius),
+                    child: child,
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-        child: widget.child,
+            );
+          },
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+}
+
+mixin DismissibleDragMixin {
+  late final AnimationController _moveController;
+  bool _dragUnderway = false;
+  int _activePointerCount = 0;
+
+  bool get _isActive => _dragUnderway || _moveController.isAnimating;
+}
+
+class DismissibleScrollNotification extends StatelessWidget {
+  const DismissibleScrollNotification({
+    required this.parentState,
+    required this.onStart,
+    required this.onUpdate,
+    required this.onEnd,
+    required this.child,
+    this.onPointerDown,
+    this.onPointerUp,
+    Key? key,
+  }) : super(key: key);
+
+  final DismissibleDragMixin parentState;
+  final ValueChanged<Offset> onStart;
+  final ValueChanged<DragEndDetails> onEnd;
+  final ValueChanged<DragUpdateDetails> onUpdate;
+  final ValueChanged<PointerDownEvent>? onPointerDown;
+  final VoidCallback? onPointerUp;
+  final Widget child;
+
+  bool get _dragUnderway => parentState._dragUnderway;
+
+  void _startOrUpdateDrag(DragUpdateDetails? details) {
+    if (details == null) return;
+    if (_dragUnderway) {
+      onUpdate(details);
+    } else {
+      onStart(details.globalPosition);
+    }
+  }
+
+  void _updateDrag(DragUpdateDetails? details) {
+    if (details != null && details.primaryDelta != null) {
+      if (_dragUnderway) {
+        onUpdate(details);
+      }
+    }
+  }
+
+  bool _onScrollNotification(ScrollNotification scrollInfo) {
+    final shouldEndDrag = _dragUnderway &&
+        (scrollInfo.metrics.atEdge || !scrollInfo.metrics.outOfRange);
+
+    if (shouldEndDrag) {
+      onEnd(DragEndDetails());
+      return false;
+    }
+
+    // if (scrollInfo is OverscrollNotification) {
+    //   _startOrUpdateDrag(scrollInfo.dragDetails);
+    //   return false;
+    // }
+
+    if (scrollInfo is ScrollUpdateNotification) {
+      if (scrollInfo.metrics.outOfRange) {
+        _startOrUpdateDrag(scrollInfo.dragDetails);
+      } else {
+        _updateDrag(scrollInfo.dragDetails);
+      }
+      return false;
+    }
+
+    return false;
+  }
+
+  void _onPointerDown(PointerDownEvent event) {
+    parentState._activePointerCount++;
+    onPointerDown?.call(event);
+  }
+
+  void _onPointerUp(_) {
+    parentState._activePointerCount--;
+    if (_dragUnderway && parentState._activePointerCount == 0) {
+      onEnd(DragEndDetails());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: _onPointerDown,
+      onPointerCancel: _onPointerUp,
+      onPointerUp: _onPointerUp,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _onScrollNotification,
+        child: child,
       ),
     );
   }

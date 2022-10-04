@@ -51,7 +51,7 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
             runSpacing: 10,
             children: pageModel.contacts.entries.map((item) {
               return ActionChip(
-                onPressed: () => launchUrl(Uri.parse(item.value)),
+                onPressed: () => launch(item.value),
                 label: Text(item.key, style: GoogleFonts.poppins()),
               );
             }).toList(),
@@ -62,6 +62,7 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
 
   @override
   Widget build(BuildContext context) {
+    return FirstPage();
     return Scaffold(
       bottomNavigationBar: _stories(),
       body: SingleChildScrollView(
@@ -215,31 +216,58 @@ class AppChip extends StatelessWidget {
   }
 }
 
-const imageUrl =
-    'https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png';
+const imagePath = 'assets/images/demo.png';
+const home1ImagePath = 'assets/images/home_1.png';
+const home2ImagePath = 'assets/images/home_2.png';
+const images = [home1ImagePath, home2ImagePath];
 
 class FirstPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(228, 217, 236, 1),
-      body: GestureDetector(
-        onTap: () {
-          // Use extension method to use [TransparentRoute]
-          // This will push page without route background
-          context.pushTransparentRoute(SecondPage());
-        },
-        child: Center(
-          child: SizedBox(
-            width: 200,
-            // Hero widget is needed to animate page transition
-            child: Hero(
-              tag: 'Unique tag',
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-              ),
-            ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              ...images.map((imagePath) {
+                return GestureDetector(
+                  onTap: () {
+                    // Use extension method to use [TransparentRoute]
+                    // This will push page without route background
+                    context
+                        .pushTransparentRoute(SecondPage(imagePath: imagePath));
+                  },
+                  behavior: HitTestBehavior.translucent,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Stack(
+                      children: [
+                        Hero(
+                          tag: imagePath,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              imagePath,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: Icon(
+                            Icons.favorite_border,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
           ),
         ),
       ),
@@ -248,25 +276,44 @@ class FirstPage extends StatelessWidget {
 }
 
 class SecondPage extends StatelessWidget {
+  const SecondPage({
+    required this.imagePath,
+  });
+
+  final String imagePath;
+
   @override
   Widget build(BuildContext context) {
     return DismissiblePage(
-      onDismissed: () {
-        Navigator.of(context).pop();
-      },
+      onDismissed: () => Navigator.of(context).pop(),
       // Note that scrollable widget inside DismissiblePage might limit the functionality
       // If scroll direction matches DismissiblePage direction
       // direction: DismissiblePageDismissDirection.multi,
-      onDragUpdate: (s) {
-        print(s);
-      },
+      // onDragUpdate: print,
+      // direction: DismissiblePageDismissDirection.multi,
       isFullScreen: false,
-      child: Hero(
-        tag: 'Unique tag',
-        child: Image.network(
-          imageUrl,
-          alignment: Alignment.bottomCenter,
-          fit: BoxFit.cover,
+      minScale: .5,
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Hero(
+                tag: imagePath,
+                child: Image.asset(imagePath, fit: BoxFit.cover),
+              ),
+              ...List.generate(20, (index) => index + 1).map((index) {
+                return ListTile(
+                  title: Text(
+                    'Item $index',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
         ),
       ),
     );
