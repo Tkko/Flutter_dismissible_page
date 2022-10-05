@@ -58,7 +58,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
 }
 
 class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
-    with Drag, SingleTickerProviderStateMixin, DismissibleDragMixin {
+    with Drag, SingleTickerProviderStateMixin, _DismissiblePageMixin {
   late final GestureRecognizer _recognizer;
   late final ValueNotifier<DismissiblePageDragUpdateDetails> _dragNotifier;
   Offset _startOffset = Offset.zero;
@@ -172,7 +172,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
 
   @override
   Widget build(BuildContext context) {
-    return DismissibleScrollNotification(
+    return _DismissiblePageListener(
       parentState: this,
       onStart: _startDrag,
       onUpdate: update,
@@ -185,6 +185,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
           final backgroundColor = widget.backgroundColor == Colors.transparent
               ? Colors.transparent
               : widget.backgroundColor.withOpacity(details.opacity);
+
           return Container(
             padding: widget.contentPadding,
             color: backgroundColor,

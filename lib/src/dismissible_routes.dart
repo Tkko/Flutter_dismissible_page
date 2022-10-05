@@ -31,15 +31,6 @@ class TransparentRoute<T> extends PageRoute<T>
   final Color backgroundColor;
 
   @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) =>
-      FadeTransition(opacity: animation, child: child);
-
-  @override
   Color get barrierColor => backgroundColor;
 
   @override
@@ -53,4 +44,9 @@ class TransparentRoute<T> extends PageRoute<T>
 
   @override
   bool get opaque => false;
+
+  @override
+  Widget buildTransitions(_, Animation<double> animation, __, Widget child) {
+    return FadeTransition(opacity: animation, child: child);
+  }
 }

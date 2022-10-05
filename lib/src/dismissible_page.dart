@@ -16,7 +16,9 @@ part 'single_axis_dismissible_page.dart';
 
 part 'dismissible_page_drag_update_details.dart';
 
-const double _kDismissThreshold = 0.15;
+part 'dismissible_page_helpers.dart';
+
+const double _kDismissThreshold = 0.25;
 
 /// Creates page that is dismissed by swipe gestures, with Hero style animations
 class DismissiblePage extends StatelessWidget {
@@ -128,7 +130,7 @@ class DismissiblePage extends StatelessWidget {
 
     if (direction == DismissiblePageDismissDirection.multi) {
       return ScrollConfiguration(
-        behavior: const DismissiblePageScrollBehavior(),
+        behavior: const _DismissiblePageScrollBehavior(),
         child: MultiAxisDismissiblePage(
           onDismissed: onDismissed,
           isFullScreen: isFullScreen,
@@ -153,7 +155,7 @@ class DismissiblePage extends StatelessWidget {
       );
     }
     return ScrollConfiguration(
-      behavior: const DismissiblePageScrollBehavior(),
+      behavior: const _DismissiblePageScrollBehavior(),
       child: SingleAxisDismissiblePage(
         onDismissed: onDismissed,
         isFullScreen: isFullScreen,
@@ -177,18 +179,4 @@ class DismissiblePage extends StatelessWidget {
       ),
     );
   }
-}
-
-class DismissiblePageScrollBehavior extends ScrollBehavior {
-  const DismissiblePageScrollBehavior();
-
-  @override
-  Widget buildOverscrollIndicator(_, Widget child, __) => child;
-
-  @override
-  TargetPlatform getPlatform(BuildContext context) => TargetPlatform.android;
-
-  @override
-  ScrollPhysics getScrollPhysics(_) =>
-      const BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
 }

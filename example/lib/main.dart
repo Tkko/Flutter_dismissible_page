@@ -1,90 +1,100 @@
-import 'dart:math';
-import 'dart:ui';
-import 'package:example/pages/dismissible_page_demo.dart';
+import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-class MyCustomScrollBehavior extends MaterialScrollBehavior {
-  // Override behavior methods and getters like dragDevices
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-      };
+void main() {
+  runApp(MaterialApp(home: SimpleExample()));
 }
 
-const accentColor = Color(0xff00d573);
+/// This is a basic usage of DismissiblePage
+/// For more examples check the demo/folder
+class SimpleExample extends StatelessWidget {
+  static const imagePath = 'assets/images/home_1.png';
 
-void main() => runApp(AppView());
+  const SimpleExample({Key? key}) : super(key: key);
 
-class AppView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final app = MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            primaryColor: accentColor,
-            scaffoldBackgroundColor: Colors.white,
-            appBarTheme: AppBarTheme(color: Colors.white),
-            chipTheme: ChipThemeData(selectedColor: accentColor),
-            sliderTheme: SliderThemeData(
-              activeTrackColor: accentColor,
-              activeTickMarkColor: accentColor,
-              thumbColor: accentColor,
-              inactiveTrackColor: accentColor.withOpacity(.2),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text('Simple Example'),
+        titleTextStyle: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Colors.black.withOpacity(.85),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          child: GestureDetector(
+            onTap: () {
+              // Use extension method to use [TransparentRoute]
+              // This will push page without route background
+              context.pushTransparentRoute(
+                SecondPage(imagePath: imagePath),
+              );
+            },
+            child: Hero(
+              tag: imagePath,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(imagePath, fit: BoxFit.cover),
+              ),
             ),
           ),
-          home: ScrollConfiguration(
-            behavior: MyCustomScrollBehavior(),
-            child: DismissiblePageDemo(),
-          ),
-        );
+        ),
+      ),
+    );
+  }
+}
 
-        final shortestSide =
-            min(constraints.maxWidth.abs(), constraints.maxHeight.abs());
+class SecondPage extends StatelessWidget {
+  final String imagePath;
 
-        if (shortestSide > 600) {
-          return Container(
-            color: Colors.white,
-            alignment: Alignment.center,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: Text(
-                    'Dismissible Examples',
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                Flexible(
-                  child: Container(
-                    width: 500,
-                    height: min(1100, constraints.maxHeight.abs()),
-                    margin: EdgeInsets.all(20),
-                    clipBehavior: Clip.antiAlias,
-                    foregroundDecoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.black, width: 15),
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 15),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: app,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-        return app;
+  const SecondPage({required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return DismissiblePage(
+      onDismissed: () => Navigator.of(context).pop(),
+      // Start of the optional properties
+      isFullScreen: false,
+      disabled: false,
+      minRadius: 10,
+      maxRadius: 10,
+      dragSensitivity: .1,
+      maxTransformValue: .8,
+      direction: DismissiblePageDismissDirection.vertical,
+      backgroundColor: Colors.black,
+      dismissThresholds: {
+        DismissiblePageDismissDirection.vertical: .2,
       },
+      minScale: .8,
+      startingOpacity: 1,
+      reverseDuration: const Duration(milliseconds: 250),
+      // End of the optional properties
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Hero(
+                tag: imagePath,
+                child: Image.asset(imagePath, fit: BoxFit.cover),
+              ),
+              ...List.generate(20, (index) => index + 1).map((index) {
+                return ListTile(
+                  title: Text(
+                    'Item $index',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

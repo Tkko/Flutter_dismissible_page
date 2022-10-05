@@ -1,5 +1,5 @@
-import 'package:example/models/models.dart';
-import 'package:example/widgets/widgets.dart';
+import 'package:example/demo/models/models.dart';
+import 'package:example/demo/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
 
 class StoryPage extends StatelessWidget {

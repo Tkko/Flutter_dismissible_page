@@ -1,5 +1,5 @@
 import 'package:dismissible_page/dismissible_page.dart';
-import 'package:example/models/models.dart';
+import 'package:example/demo/models/models.dart';
 import 'package:flutter/material.dart';
 
 class ScrollablePage extends StatefulWidget {
