@@ -52,6 +52,7 @@ class _StoryImageState extends State<StoryImage> {
   Widget build(BuildContext context) {
     return Hero(
       tag: widget.story.storyId,
+      placeholderBuilder: (_, Size size, Widget child) => child,
       child: Material(
         color: Colors.transparent,
         child: Container(

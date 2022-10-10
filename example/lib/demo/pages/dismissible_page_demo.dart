@@ -222,10 +222,11 @@ class LargeImages extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: images
-            .map((imagePath) =>
-                LargeImageItem(imagePath: imagePath, pageModel: pageModel))
-            .toList(),
+        children: [
+          Title('Scrollable'),
+          ...images.map((imagePath) =>
+              LargeImageItem(imagePath: imagePath, pageModel: pageModel)),
+        ],
       ),
     );
   }
@@ -304,7 +305,7 @@ class DismissibleDemo extends StatelessWidget {
       startingOpacity: startingOpacity,
       behavior: pageModel.behavior,
       reverseDuration: pageModel.reverseDuration,
-      onDragUpdate: (d) => print(d.offset.dy),
+      // onDragUpdate: (d) => print(d.offset.dy),
       child: child,
     );
   }
@@ -431,7 +432,6 @@ class LargeImageDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return DismissibleDemo(
       pageModel: pageModel,
-      // onDragUpdate: print,
       // direction: DismissiblePageDismissDirection.multi,
       child: Scaffold(
         body: SingleChildScrollView(
@@ -441,7 +441,7 @@ class LargeImageDetailsPage extends StatelessWidget {
                 tag: imagePath,
                 child: Image.asset(imagePath, fit: BoxFit.cover),
               ),
-              ...List.generate(20, (index) => index + 1).map((index) {
+              ...List.generate(13, (index) => index + 1).map((index) {
                 return ListTile(
                   title: Text(
                     'Item $index',
