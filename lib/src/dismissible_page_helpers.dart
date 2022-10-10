@@ -7,12 +7,9 @@ class _DismissiblePageScrollBehavior extends ScrollBehavior {
   Widget buildOverscrollIndicator(_, Widget child, __) => child;
 
 // @override
-// TargetPlatform getPlatform(BuildContext context) => TargetPlatform.android;
-//
-// @override
 // ScrollPhysics getScrollPhysics(_) =>
-//     const ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
-// const BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+//     // const ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+//     const BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
 }
 
 mixin _DismissiblePageMixin {

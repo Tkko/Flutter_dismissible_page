@@ -224,8 +224,16 @@ class LargeImages extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Title('Scrollable'),
-          ...images.map((imagePath) =>
-              LargeImageItem(imagePath: imagePath, pageModel: pageModel)),
+          ...images.asMap().entries.map((entry) {
+            return LargeImageItem(
+              imagePath: entry.value,
+              pageModel: pageModel,
+              scrollPhysics: entry.key.isOdd
+                  ? ClampingScrollPhysics()
+                  : BouncingScrollPhysics(),
+            );
+          }),
+          SizedBox(height: 100),
         ],
       ),
     );
@@ -371,13 +379,15 @@ const home2ImagePath = 'assets/images/home_2.png';
 const images = [home1ImagePath, home2ImagePath];
 
 class LargeImageItem extends StatelessWidget {
-  final DismissiblePageModel pageModel;
-  final String imagePath;
-
   LargeImageItem({
     required this.imagePath,
     required this.pageModel,
+    required this.scrollPhysics,
   });
+
+  final DismissiblePageModel pageModel;
+  final String imagePath;
+  final ScrollPhysics scrollPhysics;
 
   @override
   Widget build(BuildContext context) {
@@ -386,29 +396,50 @@ class LargeImageItem extends StatelessWidget {
         // Use extension method to use [TransparentRoute]
         // This will push page without route background
         context.pushTransparentRoute(
-            LargeImageDetailsPage(imagePath: imagePath, pageModel: pageModel));
+          LargeImageDetailsPage(
+            imagePath: imagePath,
+            pageModel: pageModel,
+            scrollPhysics: scrollPhysics,
+          ),
+        );
       },
       behavior: HitTestBehavior.translucent,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Hero(
-              tag: imagePath,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
+            Stack(
+              children: [
+                Hero(
+                  tag: imagePath,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      imagePath,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
-              ),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Icon(
+                    Icons.favorite_border,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
-            Positioned(
-              top: 10,
-              right: 10,
-              child: Icon(
-                Icons.favorite_border,
-                color: Colors.white,
+            SizedBox(height: 5),
+            Text(
+              scrollPhysics is BouncingScrollPhysics
+                  ? 'iOS (BouncingScrollPhysics)'
+                  : 'Android (ClampingScrollPhysics)',
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.black,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -419,13 +450,14 @@ class LargeImageItem extends StatelessWidget {
 }
 
 class LargeImageDetailsPage extends StatelessWidget {
-  final DismissiblePageModel pageModel;
-
   const LargeImageDetailsPage({
     required this.imagePath,
     required this.pageModel,
+    required this.scrollPhysics,
   });
 
+  final DismissiblePageModel pageModel;
+  final ScrollPhysics scrollPhysics;
   final String imagePath;
 
   @override
@@ -435,13 +467,14 @@ class LargeImageDetailsPage extends StatelessWidget {
       // direction: DismissiblePageDismissDirection.multi,
       child: Scaffold(
         body: SingleChildScrollView(
+          physics: scrollPhysics,
           child: Column(
             children: [
               Hero(
                 tag: imagePath,
                 child: Image.asset(imagePath, fit: BoxFit.cover),
               ),
-              ...List.generate(13, (index) => index + 1).map((index) {
+              ...List.generate(25, (index) => index + 1).map((index) {
                 return ListTile(
                   title: Text(
                     'Item $index',
