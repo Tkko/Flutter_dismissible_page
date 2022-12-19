@@ -18,7 +18,7 @@ part 'dismissible_page_drag_update_details.dart';
 
 part 'dismissible_page_helpers.dart';
 
-const double _kDismissThreshold = 0.25;
+const double _kDismissThreshold = 0.15;
 
 /// Creates page that is dismissed by swipe gestures, with Hero style animations
 class DismissiblePage extends StatelessWidget {
@@ -41,7 +41,7 @@ class DismissiblePage extends StatelessWidget {
     this.maxRadius = 30,
     this.maxTransformValue = .4,
     this.startingOpacity = 1,
-    this.behavior = HitTestBehavior.opaque,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
     Key? key,
   }) : super(key: key);
@@ -108,7 +108,7 @@ class DismissiblePage extends StatelessWidget {
   /// How to behave during hit tests.
   ///
   /// This defaults to [HitTestBehavior.opaque].
-  final HitTestBehavior behavior;
+  final HitTestBehavior hitTestBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +148,7 @@ class DismissiblePage extends StatelessWidget {
           onDragEnd: onDragEnd,
           onDragUpdate: onDragUpdate,
           reverseDuration: reverseDuration,
-          behavior: behavior,
+          hitTestBehavior: hitTestBehavior,
           contentPadding: contentPadding,
           child: child,
         ),
@@ -173,7 +173,7 @@ class DismissiblePage extends StatelessWidget {
         onDragEnd: onDragEnd,
         onDragUpdate: onDragUpdate,
         reverseDuration: reverseDuration,
-        behavior: behavior,
+        hitTestBehavior: hitTestBehavior,
         contentPadding: contentPadding,
         child: child,
       ),

@@ -20,7 +20,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
     required this.onDragEnd,
     required this.onDragUpdate,
     required this.reverseDuration,
-    required this.behavior,
+    required this.hitTestBehavior,
     required this.contentPadding,
     Key? key,
   }) : super(key: key);
@@ -42,7 +42,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   final double dragSensitivity;
   final DragStartBehavior dragStartBehavior;
   final Duration reverseDuration;
-  final HitTestBehavior behavior;
+  final HitTestBehavior hitTestBehavior;
   final EdgeInsetsGeometry contentPadding;
 
   @protected
@@ -178,6 +178,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
       onUpdate: update,
       onEnd: end,
       onPointerDown: _routePointer,
+      direction: widget.direction,
       child: ValueListenableBuilder<DismissiblePageDragUpdateDetails>(
         valueListenable: _dragNotifier,
         child: widget.child,

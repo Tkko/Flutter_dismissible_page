@@ -5,11 +5,6 @@ class _DismissiblePageScrollBehavior extends ScrollBehavior {
 
   @override
   Widget buildOverscrollIndicator(_, Widget child, __) => child;
-
-// @override
-// ScrollPhysics getScrollPhysics(_) =>
-//     // const ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
-//     const BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
 }
 
 mixin _DismissiblePageMixin {
@@ -28,15 +23,18 @@ class _DismissiblePageListener extends StatelessWidget {
     required this.onStart,
     required this.onUpdate,
     required this.onEnd,
+    required this.direction,
     required this.child,
     this.onPointerDown,
     Key? key,
   }) : super(key: key);
+
   final _DismissiblePageMixin parentState;
   final ValueChanged<Offset> onStart;
   final ValueChanged<DragEndDetails> onEnd;
   final ValueChanged<DragUpdateDetails> onUpdate;
   final ValueChanged<PointerDownEvent>? onPointerDown;
+  final DismissiblePageDismissDirection direction;
   final Widget child;
 
   bool get _dragUnderway => parentState._dragUnderway;
@@ -58,27 +56,40 @@ class _DismissiblePageListener extends StatelessWidget {
     }
   }
 
+  bool _isSameDirections(Axis axis) {
+    switch (direction) {
+      case DismissiblePageDismissDirection.vertical:
+      case DismissiblePageDismissDirection.up:
+      case DismissiblePageDismissDirection.down:
+        return axis == Axis.vertical;
+      case DismissiblePageDismissDirection.horizontal:
+      case DismissiblePageDismissDirection.endToStart:
+      case DismissiblePageDismissDirection.startToEnd:
+        return axis == Axis.horizontal;
+      case DismissiblePageDismissDirection.multi:
+        return true;
+      case DismissiblePageDismissDirection.none:
+        return false;
+    }
+  }
+
   bool _onScrollNotification(ScrollNotification scrollInfo) {
-    // final shouldEndDrag = _dragUnderway &&
-    //     (scrollInfo.metrics.atEdge || !scrollInfo.metrics.outOfRange);
-    // if (shouldEndDrag) {
-    //   onEnd(DragEndDetails());
-    //   return false;
-    // }
-
-    if (scrollInfo is OverscrollNotification) {
-      _startOrUpdateDrag(scrollInfo.dragDetails);
-      return false;
-    }
-
-    if (scrollInfo is ScrollUpdateNotification) {
-      if (scrollInfo.metrics.outOfRange) {
+    if (_isSameDirections(scrollInfo.metrics.axis)) {
+      if (scrollInfo is OverscrollNotification) {
         _startOrUpdateDrag(scrollInfo.dragDetails);
-      } else {
-        _updateDrag(scrollInfo.dragDetails);
+        return false;
       }
-      return false;
+
+      if (scrollInfo is ScrollUpdateNotification) {
+        if (scrollInfo.metrics.outOfRange) {
+          _startOrUpdateDrag(scrollInfo.dragDetails);
+        } else {
+          _updateDrag(scrollInfo.dragDetails);
+        }
+        return false;
+      }
     }
+
     return false;
   }
 

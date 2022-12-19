@@ -311,7 +311,7 @@ class DismissibleDemo extends StatelessWidget {
       dragStartBehavior: pageModel.dragStartBehavior,
       minScale: pageModel.minScale,
       startingOpacity: startingOpacity,
-      behavior: pageModel.behavior,
+      hitTestBehavior: pageModel.behavior,
       reverseDuration: pageModel.reverseDuration,
       // onDragUpdate: (d) => print(d.offset.dy),
       child: child,
@@ -413,11 +413,15 @@ class LargeImageItem extends StatelessWidget {
               children: [
                 Hero(
                   tag: imagePath,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      imagePath,
-                      fit: BoxFit.cover,
+                  child: FractionallySizedBox(
+                    widthFactor: 1,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        imagePath,
+                        fit: BoxFit.cover,
+                        height: 300,
+                      ),
                     ),
                   ),
                 ),
@@ -464,7 +468,6 @@ class LargeImageDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return DismissibleDemo(
       pageModel: pageModel,
-      // direction: DismissiblePageDismissDirection.multi,
       child: Scaffold(
         body: SingleChildScrollView(
           physics: scrollPhysics,
@@ -475,12 +478,16 @@ class LargeImageDetailsPage extends StatelessWidget {
                 child: Image.asset(imagePath, fit: BoxFit.cover),
               ),
               ...List.generate(25, (index) => index + 1).map((index) {
-                return ListTile(
-                  title: Text(
-                    'Item $index',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                return SizedBox(
+                  height: 50,
+                  width: 300,
+                  child: ListTile(
+                    title: Text(
+                      'Item $index',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 );

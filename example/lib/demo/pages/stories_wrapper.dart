@@ -84,7 +84,7 @@ class _StoriesWrapperState extends State<StoriesWrapper>
       dragStartBehavior: widget.pageModel.dragStartBehavior,
       minScale: widget.pageModel.minScale,
       startingOpacity: widget.pageModel.startingOpacity,
-      behavior: widget.pageModel.behavior,
+      hitTestBehavior: widget.pageModel.behavior,
       reverseDuration: widget.pageModel.reverseDuration,
       onDragUpdate: (d) => print(d.offset.dy),
       child: CubicPageView(

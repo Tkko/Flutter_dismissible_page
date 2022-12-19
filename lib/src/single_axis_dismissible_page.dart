@@ -20,7 +20,7 @@ class SingleAxisDismissiblePage extends StatefulWidget {
     required this.onDragEnd,
     required this.onDragUpdate,
     required this.reverseDuration,
-    required this.behavior,
+    required this.hitTestBehavior,
     required this.contentPadding,
     Key? key,
   }) : super(key: key);
@@ -42,7 +42,7 @@ class SingleAxisDismissiblePage extends StatefulWidget {
   final double dragSensitivity;
   final DragStartBehavior dragStartBehavior;
   final Duration reverseDuration;
-  final HitTestBehavior behavior;
+  final HitTestBehavior hitTestBehavior;
   final EdgeInsetsGeometry contentPadding;
 
   @override
@@ -259,13 +259,14 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
       onVerticalDragStart: _directionIsXAxis ? null : _handleDragStart,
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
-      behavior: widget.behavior,
+      behavior: widget.hitTestBehavior,
       dragStartBehavior: widget.dragStartBehavior,
       child: _DismissiblePageListener(
         onStart: (_) => _handleDragStart(),
         onUpdate: _handleDragUpdate,
         onEnd: _handleDragEnd,
         parentState: this,
+        direction: widget.direction,
         child: AnimatedBuilder(
           animation: _moveAnimation,
           builder: (BuildContext context, Widget? child) {
