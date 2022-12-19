@@ -55,7 +55,7 @@ class DismissiblePage extends StatelessWidget {
   /// Called when the user ends dragging the widget.
   final VoidCallback? onDragEnd;
 
-  /// Called when the widget has been dragged. [0.0 - 1.0]
+  /// Called when the widget has been dragged. (0.0 - 1.0)
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
 
   /// If true widget will ignore device padding
@@ -73,7 +73,7 @@ class DismissiblePage extends StatelessWidget {
   /// Note that radius increases as user drags
   final double maxRadius;
 
-  /// The amount of distance widget is able to drag. value [0.0 - 1.0]
+  /// The amount of distance widget is able to drag. value (0.0 - 1.0)
   final double maxTransformValue;
 
   /// If true the widget will ignore gestures
@@ -92,7 +92,7 @@ class DismissiblePage extends StatelessWidget {
   final DismissiblePageDismissDirection direction;
 
   /// The offset threshold the item has to be dragged in order to be considered
-  /// dismissed. default is [_kDismissThreshold], value [0.0 - 1.0]
+  /// dismissed. default is [_kDismissThreshold], value (0.0 - 1.0)
   final Map<DismissiblePageDismissDirection, double> dismissThresholds;
 
   /// Represents how much responsive dragging the widget will be
