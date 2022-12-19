@@ -3,6 +3,12 @@ description: Creates page that is dismissed by swipe gestures, with Hero style a
 version: 1.0.0
 homepage: https://github.com/Tkko/Flutter_dismissible_page
 repository: https://github.com/Tkko/Flutter_dismissible_page
+issue_tracker: https://github.com/Tkko/Flutter_dismissible_page/issues
+screenshots:
+  - description: 'Dismissible page demo'
+    path: dismissible_page_demo.webp
+funding:
+  - https://ko-fi.com/flutterman
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
