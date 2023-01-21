@@ -1,7 +1,7 @@
 name: dismissible_page
 description: Flutter widget that allows you to dismiss page to any direction, forget the boring back button and
   plain transitions..
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/Tkko/Flutter_dismissible_page
 repository: https://github.com/Tkko/Flutter_dismissible_page
 issue_tracker: https://github.com/Tkko/Flutter_dismissible_page/issues

@@ -1,3 +1,6 @@
+## 1.0.1
+- Nothing special, the formatter, messed up the readme, so I had to update it
+
 ## 1.0.0
 - From now on you can use Dismissible page with scrollable content
 - Added pub screenshots

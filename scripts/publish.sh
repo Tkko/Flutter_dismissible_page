@@ -21,7 +21,6 @@ function run_pana {
 }
 
 function publish {
-  flutter packages pub publish --dry-run || fail "pub publish failed"
   flutter packages pub publish || fail "pub publish failed"
 }
 

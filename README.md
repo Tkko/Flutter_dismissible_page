@@ -38,11 +38,9 @@ plain transitions.
 PRs Welcome Discord [Channel](https://rebrand.ly/qwc3s0d)
 Don't forget to give it a star ⭐
 
-| [Live Demo](https://rebrand.ly/gw8nktq) | Multi Direction | Vertical | |--|--|--|
-| <a href="https://rebrand.ly/gw8nktq"><img width="300" src="https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png"/></a>
-| <img src="https://user-images.githubusercontent.com/26390946/161377483-78e5dbaf-678f-4381-a393-52af8180bbcb.gif" />
-| <img src="https://user-images.githubusercontent.com/26390946/156391449-a9235d05-bc87-4f51-8a5d-50c44fd0c582.gif"/>
-|
+| [Live Demo](https://rebrand.ly/gw8nktq) | Multi Direction | Vertical |
+|--|--|--|
+| <a href="https://rebrand.ly/gw8nktq"><img width="300" src="https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png"/></a> | <img src="https://user-images.githubusercontent.com/26390946/161377483-78e5dbaf-678f-4381-a393-52af8180bbcb.gif" /> | <img src="https://user-images.githubusercontent.com/26390946/156391449-a9235d05-bc87-4f51-8a5d-50c44fd0c582.gif"/> |
 
 ## Getting Started
 

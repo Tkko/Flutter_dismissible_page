@@ -1,4 +1,11 @@
-/// Flutter package to navigate to the page that is dismissed by swipe gestures, with Hero style animations, Inspired by FB, IG stories.
+/// Flutter widget that allows you to dismiss page to any direction, forget the boring back button and
+/// plain transitions.
+///
+/// - Dismiss to any direction
+/// - Works with nested list view
+/// - Animating border
+/// - Animating background
+/// - Animating scale
 library dismissible_page;
 
 export 'src/dismissible_page.dart';
