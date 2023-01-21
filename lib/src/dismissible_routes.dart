@@ -2,6 +2,17 @@ part of 'dismissible_page.dart';
 
 class TransparentRoute<T> extends PageRoute<T>
     with CupertinoRouteTransitionMixin<T> {
+  TransparentRoute({
+    required this.builder,
+    required this.backgroundColor,
+    required this.transitionDuration,
+    required this.reverseTransitionDuration,
+    this.title,
+    RouteSettings? settings,
+    this.maintainState = true,
+    bool fullscreenDialog = true,
+  }) : super(settings: settings, fullscreenDialog: fullscreenDialog);
+
   final WidgetBuilder builder;
 
   @override
@@ -19,26 +30,6 @@ class TransparentRoute<T> extends PageRoute<T>
 
   final Color backgroundColor;
 
-  TransparentRoute({
-    required this.builder,
-    required this.backgroundColor,
-    required this.transitionDuration,
-    required this.reverseTransitionDuration,
-    this.title,
-    RouteSettings? settings,
-    this.maintainState = true,
-    bool fullscreenDialog = true,
-  }) : super(settings: settings, fullscreenDialog: fullscreenDialog);
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) =>
-      FadeTransition(opacity: animation, child: child);
-
   @override
   Color get barrierColor => backgroundColor;
 
@@ -53,4 +44,9 @@ class TransparentRoute<T> extends PageRoute<T>
 
   @override
   bool get opaque => false;
+
+  @override
+  Widget buildTransitions(_, Animation<double> animation, __, Widget child) {
+    return FadeTransition(opacity: animation, child: child);
+  }
 }

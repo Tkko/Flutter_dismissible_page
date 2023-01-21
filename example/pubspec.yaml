@@ -27,8 +27,8 @@ dependencies:
     path: ../
   #    git:
   #      url: https://github.com/Tkko/Flutter_dismissible_page
-  url_launcher: ^6.1.4
-  google_fonts: ^3.0.1
+  url_launcher: ^6.0.0
+  google_fonts:
 
 
 dev_dependencies:
@@ -46,7 +46,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-    # To add assets to your application, add an assets section, like this:
+  # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
 

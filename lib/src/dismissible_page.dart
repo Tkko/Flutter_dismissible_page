@@ -16,11 +16,19 @@ part 'single_axis_dismissible_page.dart';
 
 part 'dismissible_page_drag_update_details.dart';
 
+part 'dismissible_page_helpers.dart';
+
 const double _kDismissThreshold = 0.15;
 
-/// Creates page that is dismissed by swipe gestures, with Hero style animations
+/// Flutter widget that allows you to dismiss page to any direction, forget the boring back button and
+/// plain transitions.
+///
+/// - Dismiss to any direction
+/// - Works with nested list view
+/// - Animating border
+/// - Animating background
+/// - Animating scale
 class DismissiblePage extends StatelessWidget {
-  ///
   const DismissiblePage({
     required this.child,
     required this.onDismissed,
@@ -39,7 +47,7 @@ class DismissiblePage extends StatelessWidget {
     this.maxRadius = 30,
     this.maxTransformValue = .4,
     this.startingOpacity = 1,
-    this.behavior = HitTestBehavior.opaque,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
     Key? key,
   }) : super(key: key);
@@ -53,7 +61,7 @@ class DismissiblePage extends StatelessWidget {
   /// Called when the user ends dragging the widget.
   final VoidCallback? onDragEnd;
 
-  /// Called when the widget has been dragged. [0.0 - 1.0]
+  /// Called when the widget has been dragged. (0.0 - 1.0)
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
 
   /// If true widget will ignore device padding
@@ -71,7 +79,7 @@ class DismissiblePage extends StatelessWidget {
   /// Note that radius increases as user drags
   final double maxRadius;
 
-  /// The amount of distance widget is able to drag. value [0.0 - 1.0]
+  /// The amount of distance widget is able to drag. value (0.0 - 1.0)
   final double maxTransformValue;
 
   /// If true the widget will ignore gestures
@@ -90,7 +98,7 @@ class DismissiblePage extends StatelessWidget {
   final DismissiblePageDismissDirection direction;
 
   /// The offset threshold the item has to be dragged in order to be considered
-  /// dismissed. default is [_kDismissThreshold], value [0.0 - 1.0]
+  /// dismissed. default is [_kDismissThreshold], value (0.0 - 1.0)
   final Map<DismissiblePageDismissDirection, double> dismissThresholds;
 
   /// Represents how much responsive dragging the widget will be
@@ -106,7 +114,7 @@ class DismissiblePage extends StatelessWidget {
   /// How to behave during hit tests.
   ///
   /// This defaults to [HitTestBehavior.opaque].
-  final HitTestBehavior behavior;
+  final HitTestBehavior hitTestBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +135,34 @@ class DismissiblePage extends StatelessWidget {
     }
 
     if (direction == DismissiblePageDismissDirection.multi) {
-      return MultiAxisDismissiblePage(
+      return ScrollConfiguration(
+        behavior: const _DismissiblePageScrollBehavior(),
+        child: MultiAxisDismissiblePage(
+          onDismissed: onDismissed,
+          isFullScreen: isFullScreen,
+          backgroundColor: backgroundColor,
+          direction: direction,
+          dismissThresholds: dismissThresholds,
+          dragStartBehavior: dragStartBehavior,
+          dragSensitivity: dragSensitivity,
+          minRadius: minRadius,
+          minScale: minScale,
+          maxRadius: maxRadius,
+          maxTransformValue: maxTransformValue,
+          startingOpacity: startingOpacity,
+          onDragStart: onDragStart,
+          onDragEnd: onDragEnd,
+          onDragUpdate: onDragUpdate,
+          reverseDuration: reverseDuration,
+          hitTestBehavior: hitTestBehavior,
+          contentPadding: contentPadding,
+          child: child,
+        ),
+      );
+    }
+    return ScrollConfiguration(
+      behavior: const _DismissiblePageScrollBehavior(),
+      child: SingleAxisDismissiblePage(
         onDismissed: onDismissed,
         isFullScreen: isFullScreen,
         backgroundColor: backgroundColor,
@@ -144,31 +179,10 @@ class DismissiblePage extends StatelessWidget {
         onDragEnd: onDragEnd,
         onDragUpdate: onDragUpdate,
         reverseDuration: reverseDuration,
-        behavior: behavior,
+        hitTestBehavior: hitTestBehavior,
         contentPadding: contentPadding,
         child: child,
-      );
-    }
-    return SingleAxisDismissiblePage(
-      onDismissed: onDismissed,
-      isFullScreen: isFullScreen,
-      backgroundColor: backgroundColor,
-      direction: direction,
-      dismissThresholds: dismissThresholds,
-      dragStartBehavior: dragStartBehavior,
-      dragSensitivity: dragSensitivity,
-      minRadius: minRadius,
-      minScale: minScale,
-      maxRadius: maxRadius,
-      maxTransformValue: maxTransformValue,
-      startingOpacity: startingOpacity,
-      onDragStart: onDragStart,
-      onDragEnd: onDragEnd,
-      onDragUpdate: onDragUpdate,
-      reverseDuration: reverseDuration,
-      behavior: behavior,
-      contentPadding: contentPadding,
-      child: child,
+      ),
     );
   }
 }

@@ -20,7 +20,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
     required this.onDragEnd,
     required this.onDragUpdate,
     required this.reverseDuration,
-    required this.behavior,
+    required this.hitTestBehavior,
     required this.contentPadding,
     Key? key,
   }) : super(key: key);
@@ -42,7 +42,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   final double dragSensitivity;
   final DragStartBehavior dragStartBehavior;
   final Duration reverseDuration;
-  final HitTestBehavior behavior;
+  final HitTestBehavior hitTestBehavior;
   final EdgeInsetsGeometry contentPadding;
 
   @protected
@@ -58,14 +58,10 @@ class MultiAxisDismissiblePage extends StatefulWidget {
 }
 
 class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
-    with Drag, SingleTickerProviderStateMixin {
+    with Drag, SingleTickerProviderStateMixin, _DismissiblePageMixin {
   late final GestureRecognizer _recognizer;
-  late final AnimationController _moveController;
   late final ValueNotifier<DismissiblePageDragUpdateDetails> _dragNotifier;
-
   Offset _startOffset = Offset.zero;
-  int _activeCount = 0;
-  bool _dragUnderway = false;
 
   @override
   void initState() {
@@ -114,17 +110,17 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
     }
   }
 
-  double overallDrag([Offset? offset]) {
-    final _offset = offset ?? _dragNotifier.value.offset;
+  double overallDrag([Offset? nullableOffset]) {
+    final offset = nullableOffset ?? _dragNotifier.value.offset;
     final size = MediaQuery.of(context).size;
-    final distanceOffset = _offset - Offset.zero;
+    final distanceOffset = offset - Offset.zero;
     final w = distanceOffset.dx.abs() / size.width;
     final h = distanceOffset.dy.abs() / size.height;
     return max(w, h);
   }
 
   Drag? _startDrag(Offset position) {
-    if (_activeCount > 1) return null;
+    if (_activePointerCount > 1) return null;
     _dragUnderway = true;
     final renderObject = context.findRenderObject()! as RenderBox;
     _startOffset = renderObject.globalToLocal(position);
@@ -132,14 +128,13 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   }
 
   void _routePointer(PointerDownEvent event) {
-    ++_activeCount;
-    if (_activeCount > 1) return;
+    if (_activePointerCount > 1) return;
     _recognizer.addPointer(event);
   }
 
   @override
   void update(DragUpdateDetails details) {
-    if (_activeCount > 1) return;
+    if (_activePointerCount > 1) return;
     _updateOffset(
       (details.globalPosition - _startOffset) * widget.dragSensitivity,
     );
@@ -149,7 +144,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   void cancel() => _dragUnderway = false;
 
   @override
-  void end(DragEndDetails details) {
+  void end(DragEndDetails _) {
     if (!_dragUnderway) return;
     _dragUnderway = false;
     final shouldDismiss = overallDrag() >
@@ -163,7 +158,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   }
 
   void _disposeRecognizerIfInactive() {
-    if (_activeCount > 0) return;
+    if (_activePointerCount > 0) return;
     _recognizer.dispose();
   }
 
@@ -177,34 +172,36 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
 
   @override
   Widget build(BuildContext context) {
-    final content = ValueListenableBuilder<DismissiblePageDragUpdateDetails>(
-      valueListenable: _dragNotifier,
-      child: widget.child,
-      builder: (_, DismissiblePageDragUpdateDetails details, Widget? child) {
-        final backgroundColor = widget.backgroundColor == Colors.transparent
-            ? Colors.transparent
-            : widget.backgroundColor.withOpacity(details.opacity);
-        return Container(
-          padding: widget.contentPadding,
-          color: backgroundColor,
-          child: Transform(
-            transform: Matrix4.identity()
-              ..translate(details.offset.dx, details.offset.dy)
-              ..scale(details.scale, details.scale),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(details.radius),
-              child: child,
-            ),
-          ),
-        );
-      },
-    );
-
-    return Listener(
+    return _DismissiblePageListener(
+      parentState: this,
+      onStart: _startDrag,
+      onUpdate: update,
+      onEnd: end,
       onPointerDown: _routePointer,
-      onPointerUp: (_) => --_activeCount,
-      behavior: widget.behavior,
-      child: content,
+      direction: widget.direction,
+      child: ValueListenableBuilder<DismissiblePageDragUpdateDetails>(
+        valueListenable: _dragNotifier,
+        child: widget.child,
+        builder: (_, details, Widget? child) {
+          final backgroundColor = widget.backgroundColor == Colors.transparent
+              ? Colors.transparent
+              : widget.backgroundColor.withOpacity(details.opacity);
+
+          return Container(
+            padding: widget.contentPadding,
+            color: backgroundColor,
+            child: Transform(
+              transform: Matrix4.identity()
+                ..translate(details.offset.dx, details.offset.dy)
+                ..scale(details.scale, details.scale),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(details.radius),
+                child: child,
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

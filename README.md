@@ -22,29 +22,32 @@
 
 </div>
 
-Flutter package to navigate to page that is dismissed by swipe gestures, with Hero style animations, Inspired by FB, IG stories.
-
+Flutter widget that allows you to dismiss page to any direction, forget the boring back button and
+plain transitions.
 
 ## Features:
--    Dismiss to any direction
--    Animating border
--    Animating background
--    Animating scale
 
+- Dismiss to any direction
+- Works with nested list view
+- Animating border
+- Animating background
+- Animating scale
 
 ## Support
-PRs Welcome
-Discord [Channel](https://rebrand.ly/qwc3s0d)
+
+PRs Welcome Discord [Channel](https://rebrand.ly/qwc3s0d)
 Don't forget to give it a star ⭐
 
-| [Live Demo](https://rebrand.ly/gw8nktq) | Multi Direction | Vertical |
-|--|--|--|
-| <a href="https://rebrand.ly/gw8nktq"><img width="400" src="https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png" /><a/> | <img src="https://user-images.githubusercontent.com/26390946/161377483-78e5dbaf-678f-4381-a393-52af8180bbcb.gif" /> | <img src="https://user-images.githubusercontent.com/26390946/156391449-a9235d05-bc87-4f51-8a5d-50c44fd0c582.gif"/> |
-
-
+| [Live Demo](https://rebrand.ly/gw8nktq) | Multi Direction | Vertical | |--|--|--|
+| <a href="https://rebrand.ly/gw8nktq"><img width="300" src="https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png"/></a>
+| <img src="https://user-images.githubusercontent.com/26390946/161377483-78e5dbaf-678f-4381-a393-52af8180bbcb.gif" />
+| <img src="https://user-images.githubusercontent.com/26390946/156391449-a9235d05-bc87-4f51-8a5d-50c44fd0c582.gif"/>
+|
 
 ## Getting Started
+
 ```dart
+
 const imageUrl =
     'https://user-images.githubusercontent.com/26390946/155666045-aa93bf48-f8e7-407c-bb19-bc247d9e12bd.png';
 
@@ -99,8 +102,8 @@ class SecondPage extends StatelessWidget {
   }
 }
 ```
-  
-## Properties  
+
+## Properties
 
 ``` dart
   const DismissiblePage({
@@ -121,7 +124,7 @@ class SecondPage extends StatelessWidget {
     this.maxRadius = 30,
     this.maxTransformValue = .4,
     this.startingOpacity = 1,
-    this.behavior = HitTestBehavior.opaque,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
     Key? key,
   }) : super(key: key);
@@ -135,8 +138,8 @@ class SecondPage extends StatelessWidget {
   /// Called when the user ends dragging the widget.
   final VoidCallback? onDragEnd;
 
-  /// Called when the user drags the widget. [0.0 - 1.0]
-  final ValueChanged<double>? onDragUpdate;
+  /// Called when the widget has been dragged. (0.0 - 1.0)
+  final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
 
   /// If true widget will ignore device padding
   /// [MediaQuery.of(context).padding]
@@ -153,7 +156,7 @@ class SecondPage extends StatelessWidget {
   /// Note that radius increases as user drags
   final double maxRadius;
 
-  /// The amount of distance widget is able to drag. value [0.0 - 1.0]
+  /// The amount of distance widget is able to drag. value (0.0 - 1.0)
   final double maxTransformValue;
 
   /// If true the widget will ignore gestures
@@ -172,7 +175,7 @@ class SecondPage extends StatelessWidget {
   final DismissiblePageDismissDirection direction;
 
   /// The offset threshold the item has to be dragged in order to be considered
-  /// dismissed. default is [_kDismissThreshold], value [0.0 - 1.0]
+  /// dismissed. default is [_kDismissThreshold], value (0.0 - 1.0)
   final Map<DismissiblePageDismissDirection, double> dismissThresholds;
 
   /// Represents how much responsive dragging the widget will be
@@ -188,6 +191,6 @@ class SecondPage extends StatelessWidget {
   /// How to behave during hit tests.
   ///
   /// This defaults to [HitTestBehavior.opaque].
-  final HitTestBehavior behavior;
+  final HitTestBehavior hitTestBehavior;
 ```
 

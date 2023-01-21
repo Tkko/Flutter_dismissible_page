@@ -1,3 +1,8 @@
+## 1.0.0
+- From now on you can use Dismissible page with scrollable content
+- Added pub screenshots
+
+
 ## 0.7.3
 - Implemented [onDragUpdate](https://github.com/Tkko/Flutter_dismissible_page/issues/15) 
 

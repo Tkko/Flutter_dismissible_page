@@ -20,7 +20,7 @@ class SingleAxisDismissiblePage extends StatefulWidget {
     required this.onDragEnd,
     required this.onDragUpdate,
     required this.reverseDuration,
-    required this.behavior,
+    required this.hitTestBehavior,
     required this.contentPadding,
     Key? key,
   }) : super(key: key);
@@ -42,7 +42,7 @@ class SingleAxisDismissiblePage extends StatefulWidget {
   final double dragSensitivity;
   final DragStartBehavior dragStartBehavior;
   final Duration reverseDuration;
-  final HitTestBehavior behavior;
+  final HitTestBehavior hitTestBehavior;
   final EdgeInsetsGeometry contentPadding;
 
   @override
@@ -51,11 +51,9 @@ class SingleAxisDismissiblePage extends StatefulWidget {
 }
 
 class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
-    with TickerProviderStateMixin {
-  late final AnimationController _moveController;
+    with TickerProviderStateMixin, _DismissiblePageMixin {
   late Animation<Offset> _moveAnimation;
   double _dragExtent = 0;
-  bool _dragUnderway = false;
 
   @override
   void initState() {
@@ -122,16 +120,12 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
   DismissiblePageDismissDirection? get _dismissDirection =>
       _extentToDirection(_dragExtent);
 
-  bool get _isActive {
-    return _dragUnderway || _moveController.isAnimating;
-  }
-
   double get _overallDragAxisExtent {
     final size = context.size;
     return _directionIsXAxis ? size!.width : size!.height;
   }
 
-  void _handleDragStart(DragStartDetails details) {
+  void _handleDragStart([DragStartDetails? _]) {
     widget.onDragStart?.call();
     _dragUnderway = true;
     if (_moveController.isAnimating) {
@@ -196,17 +190,19 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
     );
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  double get _dismissThreshold =>
+      widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold;
+
+  void _handleDragEnd([DragEndDetails? _]) {
     if (!_isActive || _moveController.isAnimating) return;
     _dragUnderway = false;
     if (!_moveController.isDismissed) {
-      if (_moveController.value >
-          (widget.dismissThresholds[_dismissDirection!] ??
-              _kDismissThreshold)) {
+      if (_moveController.value > _dismissThreshold) {
         widget.onDismissed.call();
       } else {
         _moveController
-          ..reverseDuration = widget.reverseDuration
+          ..reverseDuration =
+              widget.reverseDuration * (1 / _moveController.value)
           ..reverse();
         widget.onDragEnd?.call();
       }
@@ -263,31 +259,38 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
       onVerticalDragStart: _directionIsXAxis ? null : _handleDragStart,
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
-      behavior: widget.behavior,
+      behavior: widget.hitTestBehavior,
       dragStartBehavior: widget.dragStartBehavior,
-      child: AnimatedBuilder(
-        animation: _moveAnimation,
-        builder: (BuildContext context, Widget? child) {
-          final backgroundColor = widget.backgroundColor == Colors.transparent
-              ? Colors.transparent
-              : widget.backgroundColor.withOpacity(_opacity);
+      child: _DismissiblePageListener(
+        onStart: (_) => _handleDragStart(),
+        onUpdate: _handleDragUpdate,
+        onEnd: _handleDragEnd,
+        parentState: this,
+        direction: widget.direction,
+        child: AnimatedBuilder(
+          animation: _moveAnimation,
+          builder: (BuildContext context, Widget? child) {
+            final backgroundColor = widget.backgroundColor == Colors.transparent
+                ? Colors.transparent
+                : widget.backgroundColor.withOpacity(_opacity);
 
-          return Container(
-            padding: widget.contentPadding,
-            color: backgroundColor,
-            child: FractionalTranslation(
-              translation: _offset,
-              child: Transform.scale(
-                scale: _scale ?? 0.0,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(_radius),
-                  child: child,
+            return Container(
+              padding: widget.contentPadding,
+              color: backgroundColor,
+              child: FractionalTranslation(
+                translation: _offset,
+                child: Transform.scale(
+                  scale: _scale ?? 0.0,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(_radius),
+                    child: child,
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-        child: widget.child,
+            );
+          },
+          child: widget.child,
+        ),
       ),
     );
   }
