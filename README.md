@@ -22,12 +22,13 @@
 
 </div>
 
-Flutter package to navigate to the page that is dismissed by swipe gestures, with Hero style animations,
-Inspired by FB, IG stories.
+Flutter widget that allows you to dismiss page to any direction, forget the boring back button and
+plain transitions.
 
 ## Features:
 
 - Dismiss to any direction
+- Works with nested list view
 - Animating border
 - Animating background
 - Animating scale
@@ -37,9 +38,11 @@ Inspired by FB, IG stories.
 PRs Welcome Discord [Channel](https://rebrand.ly/qwc3s0d)
 Don't forget to give it a star ⭐
 
-| [Live Demo](https://rebrand.ly/gw8nktq) | Multi Direction | Vertical |
-|--|--|--|
-| <a href="https://rebrand.ly/gw8nktq"><img width="400" src="https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png" /><a/> | <img src="https://user-images.githubusercontent.com/26390946/161377483-78e5dbaf-678f-4381-a393-52af8180bbcb.gif" /> | <img src="https://user-images.githubusercontent.com/26390946/156391449-a9235d05-bc87-4f51-8a5d-50c44fd0c582.gif"/> |
+| [Live Demo](https://rebrand.ly/gw8nktq) | Multi Direction | Vertical | |--|--|--|
+| <a href="https://rebrand.ly/gw8nktq"><img width="300" src="https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png"/></a>
+| <img src="https://user-images.githubusercontent.com/26390946/161377483-78e5dbaf-678f-4381-a393-52af8180bbcb.gif" />
+| <img src="https://user-images.githubusercontent.com/26390946/156391449-a9235d05-bc87-4f51-8a5d-50c44fd0c582.gif"/>
+|
 
 ## Getting Started
 
@@ -103,7 +106,7 @@ class SecondPage extends StatelessWidget {
 ## Properties
 
 ``` dart
-const DismissiblePage({
+  const DismissiblePage({
     required this.child,
     required this.onDismissed,
     this.onDragStart,
@@ -124,70 +127,70 @@ const DismissiblePage({
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
     Key? key,
-}) : super(key: key);
+  }) : super(key: key);
 
-/// Called when the widget has been dismissed.
-final VoidCallback onDismissed;
+  /// Called when the widget has been dismissed.
+  final VoidCallback onDismissed;
 
-/// Called when the user starts dragging the widget.
-final VoidCallback? onDragStart;
+  /// Called when the user starts dragging the widget.
+  final VoidCallback? onDragStart;
 
-/// Called when the user ends dragging the widget.
-final VoidCallback? onDragEnd;
+  /// Called when the user ends dragging the widget.
+  final VoidCallback? onDragEnd;
 
-/// Called when the widget has been dragged. [0.0 - 1.0]
-final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
+  /// Called when the widget has been dragged. (0.0 - 1.0)
+  final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
 
-/// If true widget will ignore device padding
-/// [MediaQuery.of(context).padding]
-final bool isFullScreen;
+  /// If true widget will ignore device padding
+  /// [MediaQuery.of(context).padding]
+  final bool isFullScreen;
 
-/// The minimum amount of scale widget can have while dragging
-/// Note that scale decreases as user drags
-final double minScale;
+  /// The minimum amount of scale widget can have while dragging
+  /// Note that scale decreases as user drags
+  final double minScale;
 
-/// The minimum amount fo border radius widget can have
-final double minRadius;
+  /// The minimum amount fo border radius widget can have
+  final double minRadius;
 
-/// The maximum amount of border radius widget can have while dragging
-/// Note that radius increases as user drags
-final double maxRadius;
+  /// The maximum amount of border radius widget can have while dragging
+  /// Note that radius increases as user drags
+  final double maxRadius;
 
-/// The amount of distance widget is able to drag. value [0.0 - 1.0]
-final double maxTransformValue;
+  /// The amount of distance widget is able to drag. value (0.0 - 1.0)
+  final double maxTransformValue;
 
-/// If true the widget will ignore gestures
-final bool disabled;
+  /// If true the widget will ignore gestures
+  final bool disabled;
 
-/// Widget that should be dismissed
-final Widget child;
+  /// Widget that should be dismissed
+  final Widget child;
 
-/// Background color of [DismissiblePage]
-final Color backgroundColor;
+  /// Background color of [DismissiblePage]
+  final Color backgroundColor;
 
-/// The amount of opacity [backgroundColor] will have when start dragging the widget.
-final double startingOpacity;
+  /// The amount of opacity [backgroundColor] will have when start dragging the widget.
+  final double startingOpacity;
 
-/// The direction in which the widget can be dismissed.
-final DismissiblePageDismissDirection direction;
+  /// The direction in which the widget can be dismissed.
+  final DismissiblePageDismissDirection direction;
 
-/// The offset threshold the item has to be dragged in order to be considered
-/// dismissed. default is [_kDismissThreshold], value [0.0 - 1.0]
-final Map<DismissiblePageDismissDirection, double> dismissThresholds;
+  /// The offset threshold the item has to be dragged in order to be considered
+  /// dismissed. default is [_kDismissThreshold], value (0.0 - 1.0)
+  final Map<DismissiblePageDismissDirection, double> dismissThresholds;
 
-/// Represents how much responsive dragging the widget will be
-/// Doesn't work on [DismissiblePageDismissDirection.multi]
-final double dragSensitivity;
+  /// Represents how much responsive dragging the widget will be
+  /// Doesn't work on [DismissiblePageDismissDirection.multi]
+  final double dragSensitivity;
 
-/// Determines the way that drag start behavior is handled.
-final DragStartBehavior dragStartBehavior;
+  /// Determines the way that drag start behavior is handled.
+  final DragStartBehavior dragStartBehavior;
 
-/// The amount of time the widget will spend returning to initial position if widget is not dismissed after drag
-final Duration reverseDuration;
+  /// The amount of time the widget will spend returning to initial position if widget is not dismissed after drag
+  final Duration reverseDuration;
 
-/// How to behave during hit tests.
-///
-/// This defaults to [HitTestBehavior.opaque].
-final HitTestBehavior hitTestBehavior;
+  /// How to behave during hit tests.
+  ///
+  /// This defaults to [HitTestBehavior.opaque].
+  final HitTestBehavior hitTestBehavior;
 ```
 

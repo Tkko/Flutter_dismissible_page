@@ -66,10 +66,10 @@ class _DismissiblePageListener extends StatelessWidget {
       case DismissiblePageDismissDirection.endToStart:
       case DismissiblePageDismissDirection.startToEnd:
         return axis == Axis.horizontal;
-      case DismissiblePageDismissDirection.multi:
-        return true;
       case DismissiblePageDismissDirection.none:
         return false;
+      case DismissiblePageDismissDirection.multi:
+        return true;
     }
   }
 
