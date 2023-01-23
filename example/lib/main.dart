@@ -66,7 +66,7 @@ class SecondPage extends StatelessWidget {
       maxRadius: 10,
       dragSensitivity: .1,
       maxTransformValue: .8,
-      direction: DismissiblePageDismissDirection.vertical,
+      direction: DismissiblePageDismissDirection.multi,
       backgroundColor: Colors.black,
       dismissThresholds: {
         DismissiblePageDismissDirection.vertical: .2,
@@ -87,7 +87,7 @@ class SecondPage extends StatelessWidget {
                 tag: imagePath,
                 child: Image.asset(imagePath, fit: BoxFit.cover),
               ),
-              ...List.generate(20, (index) => index + 1).map((index) {
+              ...List.generate(40, (index) => index + 1).map((index) {
                 return ListTile(
                   title: Text(
                     'Item $index',

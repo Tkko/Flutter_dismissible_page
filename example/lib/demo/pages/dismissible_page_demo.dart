@@ -477,7 +477,7 @@ class LargeImageDetailsPage extends StatelessWidget {
                 tag: imagePath,
                 child: Image.asset(imagePath, fit: BoxFit.cover),
               ),
-              ...List.generate(25, (index) => index + 1).map((index) {
+              ...List.generate(40, (index) => index + 1).map((index) {
                 return SizedBox(
                   height: 50,
                   width: 300,
