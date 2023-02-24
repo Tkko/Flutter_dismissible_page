@@ -42,7 +42,8 @@ class AppView extends StatelessWidget {
           ),
         );
 
-        final shortestSide = min(constraints.maxWidth.abs(), constraints.maxHeight.abs());
+        final shortestSide =
+            min(constraints.maxWidth.abs(), constraints.maxHeight.abs());
 
         if (shortestSide > 600) {
           return Container(

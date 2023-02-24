@@ -21,7 +21,9 @@ class DismissiblePageDragUpdateDetails {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DismissiblePageDragUpdateDetails && runtimeType == other.runtimeType && offset == other.offset;
+      other is DismissiblePageDragUpdateDetails &&
+          runtimeType == other.runtimeType &&
+          offset == other.offset;
 
   @override
   int get hashCode => offset.hashCode;

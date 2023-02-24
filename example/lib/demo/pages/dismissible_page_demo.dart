@@ -88,12 +88,14 @@ class _PropertiesState extends State<Properties> {
                     Title('Bool Parameters'),
                     Wrap(spacing: 10, runSpacing: 10, children: [
                       AppChip(
-                        onSelected: () => setState(() => pageModel.isFullScreen = !pageModel.isFullScreen),
+                        onSelected: () => setState(() =>
+                            pageModel.isFullScreen = !pageModel.isFullScreen),
                         isSelected: pageModel.isFullScreen,
                         title: 'isFullscreen',
                       ),
                       AppChip(
-                        onSelected: () => setState(() => pageModel.disabled = !pageModel.disabled),
+                        onSelected: () => setState(
+                            () => pageModel.disabled = !pageModel.disabled),
                         isSelected: pageModel.disabled,
                         title: 'disabled',
                       ),
@@ -104,13 +106,15 @@ class _PropertiesState extends State<Properties> {
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
-                      children: DismissiblePageDismissDirection.values.map((item) {
+                      children:
+                          DismissiblePageDismissDirection.values.map((item) {
                         return AppChip(
                           onSelected: () {
                             setState(() => pageModel.direction = item);
                           },
                           isSelected: item == pageModel.direction,
-                          title: '$item'.replaceAll('DismissiblePageDismissDirection.', ''),
+                          title: '$item'.replaceAll(
+                              'DismissiblePageDismissDirection.', ''),
                         );
                       }).toList(),
                     ),
@@ -127,7 +131,8 @@ class _PropertiesState extends State<Properties> {
                       title: 'Reverse Transition Duration',
                       duration: pageModel.reverseTransitionDuration,
                       onChanged: (value) {
-                        setState(() => pageModel.reverseTransitionDuration = value);
+                        setState(
+                            () => pageModel.reverseTransitionDuration = value);
                       },
                     ),
                     SizedBox(height: 30),
@@ -223,7 +228,9 @@ class LargeImages extends StatelessWidget {
             return LargeImageItem(
               imagePath: entry.value,
               pageModel: pageModel,
-              scrollPhysics: entry.key.isOdd ? ClampingScrollPhysics() : BouncingScrollPhysics(),
+              scrollPhysics: entry.key.isOdd
+                  ? ClampingScrollPhysics()
+                  : BouncingScrollPhysics(),
             );
           }),
           SizedBox(height: 100),

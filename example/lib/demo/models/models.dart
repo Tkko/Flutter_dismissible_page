@@ -39,8 +39,10 @@ class DismissiblePageModel {
   double maxTransformValue = .5;
   double dragSensitivity = .7;
   Color backgroundColor = Colors.black;
-  DismissiblePageDismissDirection direction = DismissiblePageDismissDirection.vertical;
-  Map<DismissiblePageDismissDirection, double> dismissThresholds = const <DismissiblePageDismissDirection, double>{};
+  DismissiblePageDismissDirection direction =
+      DismissiblePageDismissDirection.vertical;
+  Map<DismissiblePageDismissDirection, double> dismissThresholds =
+      const <DismissiblePageDismissDirection, double>{};
   DragStartBehavior dragStartBehavior = DragStartBehavior.down;
   Duration reverseDuration = const Duration(milliseconds: 200);
   HitTestBehavior behavior = HitTestBehavior.opaque;

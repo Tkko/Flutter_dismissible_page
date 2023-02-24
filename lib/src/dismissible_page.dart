@@ -118,7 +118,8 @@ class DismissiblePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contentPadding = isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
+    final contentPadding =
+        isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
 
     if (disabled) {
       return DecoratedBox(
