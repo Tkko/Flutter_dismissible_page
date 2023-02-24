@@ -17,8 +17,7 @@ class StoriesWrapper extends StatefulWidget {
   _StoriesWrapperState createState() => _StoriesWrapperState();
 }
 
-class _StoriesWrapperState extends State<StoriesWrapper>
-    with TickerProviderStateMixin {
+class _StoriesWrapperState extends State<StoriesWrapper> with TickerProviderStateMixin {
   late int dWidth;
   late PageController pageCtrl;
 

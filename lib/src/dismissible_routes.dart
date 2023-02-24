@@ -1,7 +1,6 @@
 part of 'dismissible_page.dart';
 
-class TransparentRoute<T> extends PageRoute<T>
-    with CupertinoRouteTransitionMixin<T> {
+class TransparentRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
   TransparentRoute({
     required this.builder,
     required this.backgroundColor,

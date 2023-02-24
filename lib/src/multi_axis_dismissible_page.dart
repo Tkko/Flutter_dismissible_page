@@ -53,8 +53,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   }
 
   @override
-  _MultiAxisDismissiblePageState createState() =>
-      _MultiAxisDismissiblePageState();
+  _MultiAxisDismissiblePageState createState() => _MultiAxisDismissiblePageState();
 }
 
 class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
@@ -71,8 +70,7 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
       opacity: widget.startingOpacity,
     );
     _dragNotifier = ValueNotifier(initialDetails);
-    _moveController =
-        AnimationController(duration: widget.reverseDuration, vsync: this);
+    _moveController = AnimationController(duration: widget.reverseDuration, vsync: this);
     _moveController
       ..addStatusListener(statusListener)
       ..addListener(animationListener);
@@ -147,9 +145,8 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   void end(DragEndDetails _) {
     if (!_dragUnderway) return;
     _dragUnderway = false;
-    final shouldDismiss = overallDrag() >
-        (widget.dismissThresholds[DismissiblePageDismissDirection.multi] ??
-            _kDismissThreshold);
+    final shouldDismiss =
+        overallDrag() > (widget.dismissThresholds[DismissiblePageDismissDirection.multi] ?? _kDismissThreshold);
     if (shouldDismiss) {
       widget.onDismissed();
     } else {
