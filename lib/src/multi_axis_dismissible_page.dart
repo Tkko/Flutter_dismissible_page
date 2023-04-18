@@ -58,7 +58,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
 }
 
 class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
-    with Drag, SingleTickerProviderStateMixin, _DismissiblePageMixin {
+    with SingleTickerProviderStateMixin, _DismissiblePageMixin implements Drag {
   late final GestureRecognizer _recognizer;
   late final ValueNotifier<DismissiblePageDragUpdateDetails> _dragNotifier;
   Offset _startOffset = Offset.zero;
