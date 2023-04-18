@@ -5,11 +5,11 @@ part of 'dismissible_page.dart';
 class DismissiblePageDragUpdateDetails {
   ///
   const DismissiblePageDragUpdateDetails({
+    required this.radius,
+    required this.opacity,
     this.offset = Offset.zero,
     this.overallDragValue = 0.0,
     this.scale = 1.0,
-    required this.radius,
-    required this.opacity,
   });
 
   final double overallDragValue;

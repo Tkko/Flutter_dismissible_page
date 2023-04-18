@@ -1,3 +1,9 @@
+## 1.0.2
+- Merged Fix mixins of _MultiAxisDismissiblePageState (PR)[https://github.com/Tkko/Flutter_dismissible_page/pull/25]
+- Fixed main example
+- Fixed package title in README.md
+- Bumped version
+
 ## 1.0.1
 - Nothing special, the formatter, messed up the readme, so I had to update it
 

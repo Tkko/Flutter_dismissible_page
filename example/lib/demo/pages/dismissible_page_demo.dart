@@ -198,7 +198,7 @@ class Contacts extends StatelessWidget {
               runSpacing: 10,
               children: pageModel.contacts.entries.map((item) {
                 return ActionChip(
-                  onPressed: () => launch(item.value),
+                  onPressed: () => launchUrl(Uri.parse(item.value)),
                   label: Text(item.key, style: GoogleFonts.poppins()),
                 );
               }).toList(),
