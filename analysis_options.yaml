@@ -1,7 +1,5 @@
 include: package:very_good_analysis/analysis_options.yaml
 analyzer:
-  strong-mode:
-    implicit-dynamic: true
   errors:
     missing_required_param: warning
     missing_return: warning

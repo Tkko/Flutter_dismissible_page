@@ -1,3 +1,6 @@
+## 1.0.3
+- Fixed unexpected behavior of dismissing the page when user is scrolling the opposite direction [Issue](https://github.com/Tkko/Flutter_dismissible_page/issues/14#issuecomment-1599097053)
+
 ## 1.0.2
 - Merged Fix mixins of _MultiAxisDismissiblePageState (PR)[https://github.com/Tkko/Flutter_dismissible_page/pull/25]
 - Fixed main example

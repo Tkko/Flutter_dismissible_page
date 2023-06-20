@@ -56,16 +56,21 @@ class _DismissiblePageListener extends StatelessWidget {
     }
   }
 
-  bool _isSameDirections(Axis axis) {
+  bool _isSameDirections(ScrollMetrics metrics) {
+    final Axis axis = metrics.axis;
     switch (direction) {
       case DismissiblePageDismissDirection.vertical:
-      case DismissiblePageDismissDirection.up:
-      case DismissiblePageDismissDirection.down:
         return axis == Axis.vertical;
+      case DismissiblePageDismissDirection.up:
+        return axis == Axis.vertical && metrics.extentAfter == 0;
+      case DismissiblePageDismissDirection.down:
+        return axis == Axis.vertical && metrics.extentBefore == 0;
       case DismissiblePageDismissDirection.horizontal:
-      case DismissiblePageDismissDirection.endToStart:
-      case DismissiblePageDismissDirection.startToEnd:
         return axis == Axis.horizontal;
+      case DismissiblePageDismissDirection.endToStart:
+        return axis == Axis.horizontal && metrics.extentAfter == 0;
+      case DismissiblePageDismissDirection.startToEnd:
+        return axis == Axis.horizontal && metrics.extentBefore == 0;
       case DismissiblePageDismissDirection.none:
         return false;
       case DismissiblePageDismissDirection.multi:
@@ -74,7 +79,7 @@ class _DismissiblePageListener extends StatelessWidget {
   }
 
   bool _onScrollNotification(ScrollNotification scrollInfo) {
-    if (_isSameDirections(scrollInfo.metrics.axis)) {
+    if (_isSameDirections(scrollInfo.metrics)) {
       if (scrollInfo is OverscrollNotification) {
         _startOrUpdateDrag(scrollInfo.dragDetails);
         return false;
