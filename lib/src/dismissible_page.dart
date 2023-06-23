@@ -72,7 +72,7 @@ class DismissiblePage extends StatelessWidget {
   /// Note that scale decreases as user drags
   final double minScale;
 
-  /// The minimum amount fo border radius widget can have
+  /// The minimum amount of border radius widget can have
   final double minRadius;
 
   /// The maximum amount of border radius widget can have while dragging
