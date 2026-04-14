@@ -26,5 +26,17 @@ enum DismissiblePageDismissDirection {
   multi,
 
   /// Cannot be dismissed by dragging.
-  none
+  none;
+
+  /// The axis of the dismiss direction.
+  List<Axis> get axes => switch (this) {
+    vertical => [Axis.vertical],
+    horizontal => [Axis.horizontal],
+    endToStart => [Axis.horizontal],
+    startToEnd => [Axis.horizontal],
+    up => [Axis.vertical],
+    down => [Axis.vertical],
+    multi => [Axis.vertical, Axis.horizontal],
+    none => [],
+  };
 }

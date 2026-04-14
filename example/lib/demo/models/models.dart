@@ -15,10 +15,10 @@ class DismissiblePageModel {
   }
 
   String get randomFood =>
-      'https://source.unsplash.com/collection/1424340/${Random().nextInt(20) + 400}x${Random().nextInt(20) + 600}';
+      'https://picsum.photos/${Random().nextInt(200) + 400}/${Random().nextInt(200) + 600}?random=${Random().nextInt(1000)}';
 
   String get randomNature =>
-      'https://source.unsplash.com/collection/1319040/${Random().nextInt(20) + 400}x${Random().nextInt(20) + 600}';
+      'https://picsum.photos/${Random().nextInt(200) + 400}/${Random().nextInt(200) + 600}?random=${Random().nextInt(1000)}';
 
   List<StoryModel> stories = [];
   final contacts = {
@@ -49,13 +49,13 @@ class DismissiblePageModel {
 }
 
 class StoryModel {
-  final String altUrl = 'assets/images/photo_not_found.png';
-  final storyId = UniqueKey();
-  final String title;
-  final String imageUrl;
-
   StoryModel({
     required this.title,
     required this.imageUrl,
   });
+
+  final String altUrl = 'assets/images/photo_not_found.png';
+  final storyId = UniqueKey();
+  final String title;
+  final String imageUrl;
 }

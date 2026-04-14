@@ -5,16 +5,17 @@ import 'package:example/demo/widgets/cubic_page_view.dart';
 import 'package:flutter/material.dart';
 
 class StoriesWrapper extends StatefulWidget {
+  const StoriesWrapper({
+    required this.parentIndex,
+    required this.pageModel,
+    super.key,
+  });
+
   final int parentIndex;
   final DismissiblePageModel pageModel;
 
-  StoriesWrapper({
-    required this.parentIndex,
-    required this.pageModel,
-  });
-
   @override
-  _StoriesWrapperState createState() => _StoriesWrapperState();
+  State<StoriesWrapper> createState() => _StoriesWrapperState();
 }
 
 class _StoriesWrapperState extends State<StoriesWrapper>
@@ -34,30 +35,36 @@ class _StoriesWrapperState extends State<StoriesWrapper>
 
   @override
   void didChangeDependencies() {
-    dWidth = MediaQuery.of(context).size.width.floor();
+    dWidth = MediaQuery.widthOf(context).floor();
     super.didChangeDependencies();
   }
 
   void nextPage() {
-    if (isLastPage) return Navigator.pop(context);
+    if (isLastPage) {
+      Navigator.maybePop(context);
+      return;
+    }
     next();
   }
 
   void previousPage() {
-    if (pageCtrl.page!.round() == 0) return Navigator.pop(context);
+    if (pageCtrl.page!.round() == 0) {
+      Navigator.maybePop(context);
+      return;
+    }
     previous();
   }
 
   void next() {
     pageCtrl.nextPage(
-      duration: Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 200),
       curve: Curves.easeIn,
     );
   }
 
   void previous() {
     pageCtrl.previousPage(
-      duration: Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 200),
       curve: Curves.easeIn,
     );
   }
@@ -71,7 +78,8 @@ class _StoriesWrapperState extends State<StoriesWrapper>
   @override
   Widget build(BuildContext context) {
     return DismissiblePage(
-      onDismissed: () => Navigator.of(context).pop(),
+      onDismissed: () => Navigator.of(context).maybePop(),
+      interactionMode: DismissiblePageInteractionMode.gesture,
       isFullScreen: widget.pageModel.isFullScreen,
       minRadius: widget.pageModel.minRadius,
       maxRadius: widget.pageModel.maxRadius,
@@ -86,8 +94,7 @@ class _StoriesWrapperState extends State<StoriesWrapper>
       startingOpacity: widget.pageModel.startingOpacity,
       hitTestBehavior: widget.pageModel.behavior,
       reverseDuration: widget.pageModel.reverseDuration,
-      onDragUpdate: (d) => print(d.offset.dy),
-      child: CubicPageView(
+      builder: (context, _) => CubicPageView(
         controller: pageCtrl,
         children: stories.map((story) {
           return StoryPage(

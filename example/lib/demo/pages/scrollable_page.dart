@@ -3,9 +3,9 @@ import 'package:example/demo/models/models.dart';
 import 'package:flutter/material.dart';
 
 class ScrollablePage extends StatefulWidget {
-  final StoryModel story;
+  const ScrollablePage(this.story, {super.key});
 
-  ScrollablePage(this.story);
+  final StoryModel story;
 
   @override
   State<ScrollablePage> createState() => _ScrollablePageState();
@@ -14,7 +14,7 @@ class ScrollablePage extends StatefulWidget {
 class _ScrollablePageState extends State<ScrollablePage> {
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
 
     final child = SizedBox(
       width: size.width,
@@ -35,12 +35,13 @@ class _ScrollablePageState extends State<ScrollablePage> {
     );
 
     return DismissiblePage(
-      child: child,
       isFullScreen: false,
       direction: DismissiblePageDismissDirection.multi,
+      interactionMode: DismissiblePageInteractionMode.gesture,
       onDismissed: () {
         Navigator.of(context).pop();
       },
+      builder: (context, scrollController) => child,
     );
   }
 }

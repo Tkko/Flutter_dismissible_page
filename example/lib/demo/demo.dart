@@ -1,49 +1,41 @@
 import 'dart:math';
-import 'dart:ui';
+
 import 'package:example/demo/pages/dismissible_page_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class MyCustomScrollBehavior extends MaterialScrollBehavior {
-  // Override behavior methods and getters like dragDevices
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-      };
-}
-
 const accentColor = Color(0xff00d573);
 
-void main() => runApp(AppView());
+void main() => runApp(const AppView());
 
 class AppView extends StatelessWidget {
+  const AppView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (context, constraints) {
         final app = MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             primaryColor: accentColor,
             scaffoldBackgroundColor: Colors.white,
-            appBarTheme: AppBarTheme(color: Colors.white),
-            chipTheme: ChipThemeData(selectedColor: accentColor),
+            appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
+            chipTheme: const ChipThemeData(selectedColor: accentColor),
             sliderTheme: SliderThemeData(
               activeTrackColor: accentColor,
               activeTickMarkColor: accentColor,
               thumbColor: accentColor,
-              inactiveTrackColor: accentColor.withOpacity(.2),
+              inactiveTrackColor: accentColor.withValues(alpha: .2),
             ),
           ),
-          home: ScrollConfiguration(
-            behavior: MyCustomScrollBehavior(),
-            child: DismissiblePageDemo(),
-          ),
+          home: const DismissiblePageDemo(),
         );
 
-        final shortestSide =
-            min(constraints.maxWidth.abs(), constraints.maxHeight.abs());
+        final shortestSide = min(
+          constraints.maxWidth.abs(),
+          constraints.maxHeight.abs(),
+        );
 
         if (shortestSide > 600) {
           return Container(
@@ -66,14 +58,14 @@ class AppView extends StatelessWidget {
                   child: Container(
                     width: 500,
                     height: min(1100, constraints.maxHeight.abs()),
-                    margin: EdgeInsets.all(20),
+                    margin: const EdgeInsets.all(20),
                     clipBehavior: Clip.antiAlias,
                     foregroundDecoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.black, width: 15),
+                      border: Border.all(width: 15),
                     ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 15),
+                      border: Border.all(width: 15),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: app,

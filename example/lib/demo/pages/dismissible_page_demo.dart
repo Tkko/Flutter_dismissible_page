@@ -1,4 +1,6 @@
+import 'dart:developer' as dev;
 import 'dart:math';
+
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:example/demo/models/models.dart';
 import 'package:example/demo/widgets/widgets.dart';
@@ -7,13 +9,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DismissiblePageDemo extends StatefulWidget {
-  const DismissiblePageDemo({Key? key}) : super(key: key);
+  const DismissiblePageDemo({super.key});
 
   @override
-  _DismissiblePageDemoState createState() => _DismissiblePageDemoState();
+  State<DismissiblePageDemo> createState() => DismissiblePageDemoState();
 }
 
-class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
+class DismissiblePageDemoState extends State<DismissiblePageDemo> {
   DismissiblePageModel pageModel = DismissiblePageModel();
 
   @override
@@ -26,7 +28,7 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: max(20, MediaQuery.of(context).padding.top)),
+            SizedBox(height: max(20, MediaQuery.paddingOf(context).top)),
             Contacts(pageModel: pageModel),
             Stories(pageModel: pageModel),
             LargeImages(pageModel: pageModel),
@@ -41,12 +43,12 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
       tag: 'TT',
       child: AppChip(
         onSelected: () {
-          context.pushTransparentRoute(Properties(parent: this));
+          context.pushTransparentRoute<void>(Properties(parent: this));
         },
         isSelected: true,
         fontSize: 18,
         fontWeight: FontWeight.w600,
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         title: 'Properties',
       ),
     );
@@ -54,9 +56,9 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
 }
 
 class Properties extends StatefulWidget {
-  final _DismissiblePageDemoState parent;
+  const Properties({required this.parent, super.key});
 
-  const Properties({required this.parent, Key? key}) : super(key: key);
+  final DismissiblePageDemoState parent;
 
   @override
   State<Properties> createState() => _PropertiesState();
@@ -70,7 +72,8 @@ class _PropertiesState extends State<Properties> {
     return DismissibleDemo(
       pageModel: pageModel,
       startingOpacity: .5,
-      child: GestureDetector(
+      interactionMode: DismissiblePageInteractionMode.gesture,
+      builder: (context, scrollController) => GestureDetector(
         onTap: () => Navigator.of(context).pop(),
         behavior: HitTestBehavior.translucent,
         child: Padding(
@@ -78,47 +81,60 @@ class _PropertiesState extends State<Properties> {
           child: GestureDetector(
             onTap: () {},
             child: Material(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(8),
+              ),
               child: SingleChildScrollView(
+                controller: scrollController,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 10),
-                    Title('Bool Parameters'),
-                    Wrap(spacing: 10, runSpacing: 10, children: [
-                      AppChip(
-                        onSelected: () => setState(() =>
-                            pageModel.isFullScreen = !pageModel.isFullScreen),
-                        isSelected: pageModel.isFullScreen,
-                        title: 'isFullscreen',
-                      ),
-                      AppChip(
-                        onSelected: () => setState(
-                            () => pageModel.disabled = !pageModel.disabled),
-                        isSelected: pageModel.disabled,
-                        title: 'disabled',
-                      ),
-                    ]),
-                    SizedBox(height: 20),
-                    Title('Dismiss Direction'),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
+                    const Title('Bool Parameters'),
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
-                      children:
-                          DismissiblePageDismissDirection.values.map((item) {
+                      children: [
+                        AppChip(
+                          onSelected: () => setState(
+                            () => pageModel.isFullScreen =
+                                !pageModel.isFullScreen,
+                          ),
+                          isSelected: pageModel.isFullScreen,
+                          title: 'isFullscreen',
+                        ),
+                        AppChip(
+                          onSelected: () => setState(
+                            () => pageModel.disabled = !pageModel.disabled,
+                          ),
+                          isSelected: pageModel.disabled,
+                          title: 'disabled',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Title('Dismiss Direction'),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: DismissiblePageDismissDirection.values.map((
+                        item,
+                      ) {
                         return AppChip(
                           onSelected: () {
                             setState(() => pageModel.direction = item);
                           },
                           isSelected: item == pageModel.direction,
                           title: '$item'.replaceAll(
-                              'DismissiblePageDismissDirection.', ''),
+                            'DismissiblePageDismissDirection.',
+                            '',
+                          ),
                         );
                       }).toList(),
                     ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     DurationSlider(
                       title: 'Transition Duration',
                       duration: pageModel.transitionDuration,
@@ -126,16 +142,17 @@ class _PropertiesState extends State<Properties> {
                         setState(() => pageModel.transitionDuration = value);
                       },
                     ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     DurationSlider(
                       title: 'Reverse Transition Duration',
                       duration: pageModel.reverseTransitionDuration,
                       onChanged: (value) {
                         setState(
-                            () => pageModel.reverseTransitionDuration = value);
+                          () => pageModel.reverseTransitionDuration = value,
+                        );
                       },
                     ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     DurationSlider(
                       title: 'Reverse Animation Duration',
                       duration: pageModel.reverseDuration,
@@ -143,7 +160,7 @@ class _PropertiesState extends State<Properties> {
                         setState(() => pageModel.reverseDuration = value);
                       },
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -158,6 +175,7 @@ class _PropertiesState extends State<Properties> {
 class Contacts extends StatelessWidget {
   const Contacts({
     required this.pageModel,
+    super.key,
   });
 
   final DismissiblePageModel pageModel;
@@ -204,7 +222,7 @@ class Contacts extends StatelessWidget {
               }).toList(),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -212,9 +230,8 @@ class Contacts extends StatelessWidget {
 }
 
 class LargeImages extends StatelessWidget {
+  const LargeImages({required this.pageModel, super.key});
   final DismissiblePageModel pageModel;
-
-  const LargeImages({Key? key, required this.pageModel}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -223,17 +240,17 @@ class LargeImages extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Title('Scrollable'),
+          const Title('Scrollable'),
           ...images.asMap().entries.map((entry) {
             return LargeImageItem(
               imagePath: entry.value,
               pageModel: pageModel,
               scrollPhysics: entry.key.isOdd
-                  ? ClampingScrollPhysics()
-                  : BouncingScrollPhysics(),
+                  ? const ClampingScrollPhysics()
+                  : const BouncingScrollPhysics(),
             );
           }),
-          SizedBox(height: 100),
+          const SizedBox(height: 100),
         ],
       ),
     );
@@ -241,28 +258,27 @@ class LargeImages extends StatelessWidget {
 }
 
 class Stories extends StatelessWidget {
+  const Stories({required this.pageModel, super.key});
   final DismissiblePageModel pageModel;
-
-  const Stories({required this.pageModel, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
         top: 5,
-        bottom: max(24, MediaQuery.of(context).padding.bottom),
+        bottom: max(24, MediaQuery.paddingOf(context).bottom),
       ),
       child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+        builder: (context, constraints) {
           final width = constraints.maxWidth;
           final itemHeight = width / 3;
           final itemWidth = width / 4;
           return SizedBox(
             height: itemHeight,
             child: ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               scrollDirection: Axis.horizontal,
-              itemBuilder: (_, int index) {
+              itemBuilder: (_, index) {
                 final item = pageModel.stories.elementAt(index);
 
                 return SizedBox(
@@ -273,7 +289,7 @@ class Stories extends StatelessWidget {
                   ),
                 );
               },
-              separatorBuilder: (_, int i) => SizedBox(width: 10),
+              separatorBuilder: (_, i) => const SizedBox(width: 10),
               itemCount: pageModel.stories.length,
             ),
           );
@@ -284,26 +300,36 @@ class Stories extends StatelessWidget {
 }
 
 class DismissibleDemo extends StatelessWidget {
-  final DismissiblePageModel pageModel;
-  final Widget child;
-  final double startingOpacity;
-
   const DismissibleDemo({
-    Key? key,
     required this.pageModel,
-    required this.child,
+    required this.builder,
+    required this.interactionMode,
+    super.key,
     this.startingOpacity = 1,
-  }) : super(key: key);
+    this.minOpacity = .0,
+    this.maxTransformValue = .5,
+  });
+
+  final DismissiblePageModel pageModel;
+  final DismissiblePageBuilder builder;
+  final DismissiblePageInteractionMode interactionMode;
+  final double startingOpacity;
+  final double minOpacity;
+  final double maxTransformValue;
 
   @override
   Widget build(BuildContext context) {
     return DismissiblePage(
-      onDismissed: () => Navigator.of(context).pop(),
+      onDismissed: () {
+        dev.log('onDismissed');
+        Navigator.of(context).maybePop();
+      },
+      interactionMode: interactionMode,
       isFullScreen: pageModel.isFullScreen,
       minRadius: pageModel.minRadius,
       maxRadius: pageModel.maxRadius,
       dragSensitivity: pageModel.dragSensitivity,
-      maxTransformValue: pageModel.maxTransformValue,
+      maxTransformValue: maxTransformValue,
       direction: pageModel.direction,
       disabled: pageModel.disabled,
       backgroundColor: pageModel.backgroundColor,
@@ -313,16 +339,18 @@ class DismissibleDemo extends StatelessWidget {
       startingOpacity: startingOpacity,
       hitTestBehavior: pageModel.behavior,
       reverseDuration: pageModel.reverseDuration,
-      // onDragUpdate: (d) => print(d.offset.dy),
-      child: child,
+      minOpacity: minOpacity,
+      // onDragStart: () => dev.log('onDragStart'),
+      // onDragUpdate: (d) => dev.log('onDragUpdate: ${d.offset.dy}'),
+      // onDragEnd: () => dev.log('onDragEnd'),
+      builder: builder,
     );
   }
 }
 
 class Title extends StatelessWidget {
+  const Title(this.text, {super.key});
   final String text;
-
-  Title(this.text);
 
   @override
   Widget build(BuildContext context) {
@@ -337,21 +365,21 @@ class Title extends StatelessWidget {
 }
 
 class AppChip extends StatelessWidget {
+  const AppChip({
+    required this.onSelected,
+    required this.isSelected,
+    required this.title,
+    super.key,
+    this.fontSize = 14,
+    this.fontWeight = FontWeight.w400,
+    this.padding,
+  });
   final VoidCallback onSelected;
   final bool isSelected;
   final String title;
   final double fontSize;
   final FontWeight fontWeight;
   final EdgeInsetsGeometry? padding;
-
-  AppChip({
-    required this.onSelected,
-    required this.isSelected,
-    required this.title,
-    this.fontSize = 14,
-    this.fontWeight = FontWeight.w400,
-    this.padding,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -376,13 +404,14 @@ class AppChip extends StatelessWidget {
 
 const home1ImagePath = 'assets/images/home_1.png';
 const home2ImagePath = 'assets/images/home_2.png';
-const images = [home1ImagePath, home2ImagePath];
+const List<String> images = [home1ImagePath, home2ImagePath];
 
 class LargeImageItem extends StatelessWidget {
-  LargeImageItem({
+  const LargeImageItem({
     required this.imagePath,
     required this.pageModel,
     required this.scrollPhysics,
+    super.key,
   });
 
   final DismissiblePageModel pageModel;
@@ -395,7 +424,7 @@ class LargeImageItem extends StatelessWidget {
       onTap: () {
         // Use extension method to use [TransparentRoute]
         // This will push page without route background
-        context.pushTransparentRoute(
+        context.pushTransparentRoute<void>(
           LargeImageDetailsPage(
             imagePath: imagePath,
             pageModel: pageModel,
@@ -425,7 +454,7 @@ class LargeImageItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                Positioned(
+                const Positioned(
                   top: 10,
                   right: 10,
                   child: Icon(
@@ -435,12 +464,12 @@ class LargeImageItem extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Text(
               scrollPhysics is BouncingScrollPhysics
                   ? 'iOS (BouncingScrollPhysics)'
                   : 'Android (ClampingScrollPhysics)',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 15,
                 color: Colors.black,
                 fontWeight: FontWeight.w500,
@@ -458,6 +487,7 @@ class LargeImageDetailsPage extends StatelessWidget {
     required this.imagePath,
     required this.pageModel,
     required this.scrollPhysics,
+    super.key,
   });
 
   final DismissiblePageModel pageModel;
@@ -468,31 +498,38 @@ class LargeImageDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return DismissibleDemo(
       pageModel: pageModel,
-      child: Scaffold(
-        body: SingleChildScrollView(
-          physics: scrollPhysics,
-          child: Column(
-            children: [
-              Hero(
-                tag: imagePath,
-                child: Image.asset(imagePath, fit: BoxFit.cover),
-              ),
-              ...List.generate(40, (index) => index + 1).map((index) {
-                return SizedBox(
-                  height: 50,
-                  width: 300,
-                  child: ListTile(
-                    title: Text(
-                      'Item $index',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+      interactionMode: DismissiblePageInteractionMode.scroll,
+      startingOpacity: .6,
+      maxTransformValue: 1,
+      builder: (context, scrollController) => Scaffold(
+        body: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            physics: scrollPhysics,
+            child: Column(
+              children: [
+                Hero(
+                  tag: imagePath,
+                  child: Image.asset(imagePath, fit: BoxFit.cover),
+                ),
+                ...List.generate(40, (index) => index + 1).map((index) {
+                  return SizedBox(
+                    height: 50,
+                    width: 300,
+                    child: ListTile(
+                      title: Text(
+                        'Item $index',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              }),
-            ],
+                  );
+                }),
+              ],
+            ),
           ),
         ),
       ),

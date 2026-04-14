@@ -5,16 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class StoryWidget extends StatelessWidget {
+  const StoryWidget({required this.story, required this.pageModel, super.key});
+
   final StoryModel story;
   final DismissiblePageModel pageModel;
-
-  const StoryWidget({required this.story, required this.pageModel});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.pushTransparentRoute(
+        context.pushTransparentRoute<void>(
           StoriesWrapper(
             parentIndex: pageModel.stories.indexOf(story),
             pageModel: pageModel,
@@ -29,16 +29,22 @@ class StoryWidget extends StatelessWidget {
 }
 
 class StoryImage extends StatefulWidget {
+  const StoryImage(
+    this.story, {
+    super.key,
+    this.isFullScreen = false,
+    this.withSafeArea = false,
+  });
+
   final StoryModel story;
   final bool isFullScreen;
-
-  StoryImage(this.story, {this.isFullScreen = false});
+  final bool withSafeArea;
 
   @override
-  _StoryImageState createState() => _StoryImageState();
+  State<StoryImage> createState() => StoryImageState();
 }
 
-class _StoryImageState extends State<StoryImage> {
+class StoryImageState extends State<StoryImage> {
   late String imageUrl;
   bool hasError = false;
 
@@ -52,18 +58,17 @@ class _StoryImageState extends State<StoryImage> {
   Widget build(BuildContext context) {
     return Hero(
       tag: widget.story.storyId,
-      placeholderBuilder: (_, Size size, Widget child) => child,
+      placeholderBuilder: (_, size, child) => child,
       child: Material(
-        color: Colors.transparent,
         child: Container(
           clipBehavior: Clip.antiAlias,
           alignment: Alignment.bottomLeft,
           padding: EdgeInsets.all(widget.isFullScreen ? 20 : 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(widget.isFullScreen ? 0 : 8),
-            color: Color.fromRGBO(237, 241, 248, 1),
+            color: const Color.fromRGBO(237, 241, 248, 1),
             image: DecorationImage(
-              onError: (_, __) {
+              onError: (_, _) {
                 setState(() {
                   imageUrl = widget.story.altUrl;
                   hasError = true;
@@ -75,9 +80,16 @@ class _StoryImageState extends State<StoryImage> {
                   : NetworkImage(imageUrl) as ImageProvider,
             ),
           ),
-          child: Text(
-            widget.story.title,
-            style: GoogleFonts.poppins(color: Colors.white),
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: widget.withSafeArea
+                  ? MediaQuery.paddingOf(context).bottom
+                  : 0,
+            ),
+            child: Text(
+              widget.story.title,
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
           ),
         ),
       ),
@@ -86,15 +98,15 @@ class _StoryImageState extends State<StoryImage> {
 }
 
 class DurationSlider extends StatelessWidget {
-  final String title;
-  final Duration duration;
-  final ValueChanged<Duration> onChanged;
-
-  DurationSlider({
+  const DurationSlider({
     required this.title,
     required this.duration,
     required this.onChanged,
+    super.key,
   });
+  final String title;
+  final Duration duration;
+  final ValueChanged<Duration> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +130,6 @@ class DurationSlider extends StatelessWidget {
         ),
         Slider(
           value: duration.inMilliseconds.toDouble(),
-          min: 0,
           max: 1000,
           divisions: 20,
           label: duration.inMilliseconds.toString(),

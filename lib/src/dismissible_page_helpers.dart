@@ -1,17 +1,9 @@
 part of 'dismissible_page.dart';
 
-class _DismissiblePageScrollBehavior extends ScrollBehavior {
-  const _DismissiblePageScrollBehavior();
-
-  @override
-  Widget buildOverscrollIndicator(_, Widget child, __) => child;
-}
-
 mixin _DismissiblePageMixin {
   late final AnimationController _moveController;
   int _activePointerCount = 0;
 
-  // ignore: prefer_final_fields
   bool _dragUnderway = false;
 
   bool get _isActive => _dragUnderway || _moveController.isAnimating;
@@ -25,9 +17,9 @@ class _DismissiblePageListener extends StatelessWidget {
     required this.onEnd,
     required this.direction,
     required this.child,
+    this.enabled = true,
     this.onPointerDown,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final _DismissiblePageMixin parentState;
   final ValueChanged<Offset> onStart;
@@ -36,6 +28,7 @@ class _DismissiblePageListener extends StatelessWidget {
   final ValueChanged<PointerDownEvent>? onPointerDown;
   final DismissiblePageDismissDirection direction;
   final Widget child;
+  final bool enabled;
 
   bool get _dragUnderway => parentState._dragUnderway;
 
@@ -57,7 +50,7 @@ class _DismissiblePageListener extends StatelessWidget {
   }
 
   bool _isSameDirections(ScrollMetrics metrics) {
-    final Axis axis = metrics.axis;
+    final axis = metrics.axis;
     switch (direction) {
       case DismissiblePageDismissDirection.vertical:
         return axis == Axis.vertical;
@@ -79,6 +72,7 @@ class _DismissiblePageListener extends StatelessWidget {
   }
 
   bool _onScrollNotification(ScrollNotification scrollInfo) {
+    if (!enabled) return false;
     if (_isSameDirections(scrollInfo.metrics)) {
       if (scrollInfo is OverscrollNotification) {
         _startOrUpdateDrag(scrollInfo.dragDetails);
@@ -99,11 +93,13 @@ class _DismissiblePageListener extends StatelessWidget {
   }
 
   void _onPointerDown(PointerDownEvent event) {
+    if (!enabled) return;
     parentState._activePointerCount++;
     onPointerDown?.call(event);
   }
 
   void _onPointerUp(_) {
+    if (!enabled) return;
     parentState._activePointerCount--;
     if (_dragUnderway && parentState._activePointerCount == 0) {
       onEnd(DragEndDetails());
@@ -113,9 +109,9 @@ class _DismissiblePageListener extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Listener(
-      onPointerDown: _onPointerDown,
-      onPointerCancel: _onPointerUp,
-      onPointerUp: _onPointerUp,
+      onPointerDown: enabled ? _onPointerDown : null,
+      onPointerCancel: enabled ? _onPointerUp : null,
+      onPointerUp: enabled ? _onPointerUp : null,
       child: NotificationListener<ScrollNotification>(
         onNotification: _onScrollNotification,
         child: child,

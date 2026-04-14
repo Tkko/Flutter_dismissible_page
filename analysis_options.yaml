@@ -1,23 +1,13 @@
 include: package:very_good_analysis/analysis_options.yaml
 analyzer:
   errors:
-    missing_required_param: warning
-    missing_return: warning
+    document_ignores: ignore
     todo: ignore
   exclude:
     - flutter/**
-    - lib/api/*.dart
-
 
 linter:
   rules:
-    lines_longer_than_80_chars: false
-    sort_pub_dependencies: false
-    public_member_api_docs: false
-    library_private_types_in_public_api: false
-    no_default_cases: false
-    avoid_renaming_method_parameters: false
-    omit_local_variable_types: false
     require_trailing_commas: true
     prefer_const_constructors: true
     prefer_const_declarations: true

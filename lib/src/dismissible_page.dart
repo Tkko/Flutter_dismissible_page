@@ -1,43 +1,52 @@
+import 'dart:async';
+import 'dart:developer' as dev;
 import 'dart:math';
 import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 part 'dismissible_extensions.dart';
-
-part 'dismissible_routes.dart';
-
-part 'multi_axis_dismissible_page.dart';
-
 part 'dismissible_page_dismiss_direction.dart';
-
-part 'single_axis_dismissible_page.dart';
-
 part 'dismissible_page_drag_update_details.dart';
-
 part 'dismissible_page_helpers.dart';
+part 'dismissible_page_interaction_mode.dart';
+part 'dismissible_page_scroll_controller.dart';
+part 'multi_axis_dismissible_page.dart';
+part 'single_axis_dismissible_page.dart';
+part 'dismissible_routes.dart';
 
 const double _kDismissThreshold = 0.15;
 
-/// Flutter widget that allows you to dismiss page to any direction, forget the boring back button and
-/// plain transitions.
+/// {@template dismissible_page_builder}
+/// Builder that receives a [ScrollController] for scroll-aware mode.
+/// {@endtemplate}
+typedef DismissiblePageBuilder =
+    Widget Function(BuildContext context, ScrollController scrollController);
+
+/// {@template dismissible_page}
+/// Flutter widget that allows you to dismiss page to any direction, forget the
+/// boring back button and plain transitions.
 ///
 /// - Dismiss to any direction
 /// - Works with nested list view
 /// - Animating border
 /// - Animating background
 /// - Animating scale
+/// {@endtemplate}
 class DismissiblePage extends StatelessWidget {
+  /// {@macro dismissible_page}
   const DismissiblePage({
-    required this.child,
+    required this.builder,
     required this.onDismissed,
+    required this.interactionMode,
     this.onDragStart,
     this.onDragEnd,
     this.onDragUpdate,
     this.isFullScreen = true,
     this.disabled = false,
-    this.backgroundColor = Colors.black,
+    this.backgroundColor,
     this.direction = DismissiblePageDismissDirection.vertical,
     this.dismissThresholds = const <DismissiblePageDismissDirection, double>{},
     this.dragStartBehavior = DragStartBehavior.down,
@@ -47,13 +56,19 @@ class DismissiblePage extends StatelessWidget {
     this.maxRadius = 30,
     this.maxTransformValue = .4,
     this.startingOpacity = 1,
+    this.enableBackgroundOpacity = true,
+    this.minOpacity = 0,
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// Called when the widget has been dismissed.
   final VoidCallback onDismissed;
+
+  /// Controls how drag-to-dismiss interaction is coordinated with nested
+  /// scrollables.
+  final DismissiblePageInteractionMode interactionMode;
 
   /// Called when the user starts dragging the widget.
   final VoidCallback? onDragStart;
@@ -65,7 +80,7 @@ class DismissiblePage extends StatelessWidget {
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
 
   /// If true widget will ignore device padding
-  /// [MediaQuery.of(context).padding]
+  /// [MediaQuery.paddingOf(context)]
   final bool isFullScreen;
 
   /// The minimum amount of scale widget can have while dragging
@@ -85,14 +100,25 @@ class DismissiblePage extends StatelessWidget {
   /// If true the widget will ignore gestures
   final bool disabled;
 
-  /// Widget that should be dismissed
-  final Widget child;
+  /// Builds the widget that should be dismissed.
+  ///
+  /// The provided [ScrollController] must be attached to your primary
+  /// scrollable when [interactionMode] is
+  /// [DismissiblePageInteractionMode.scroll].
+  final DismissiblePageBuilder builder;
 
   /// Background color of [DismissiblePage]
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
-  /// The amount of opacity [backgroundColor] will have when start dragging the widget.
+  /// The amount of opacity [backgroundColor] will have when start dragging the
+  /// widget.
   final double startingOpacity;
+
+  /// Whether to enable background opacity animation.
+  final bool enableBackgroundOpacity;
+
+  /// The minimum opacity of the background when the page is displayed.
+  final double minOpacity;
 
   /// The direction in which the widget can be dismissed.
   final DismissiblePageDismissDirection direction;
@@ -108,7 +134,8 @@ class DismissiblePage extends StatelessWidget {
   /// Determines the way that drag start behavior is handled.
   final DragStartBehavior dragStartBehavior;
 
-  /// The amount of time the widget will spend returning to initial position if widget is not dismissed after drag
+  /// The amount of time the widget will spend returning to initial position
+  /// if widget is not dismissed after drag
   final Duration reverseDuration;
 
   /// How to behave during hit tests.
@@ -118,53 +145,15 @@ class DismissiblePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contentPadding =
-        isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
-
-    if (disabled) {
-      return DecoratedBox(
-        decoration: BoxDecoration(color: backgroundColor),
-        child: Padding(
-          padding: contentPadding,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(minRadius),
-            child: child,
-          ),
-        ),
-      );
-    }
+    final contentPadding = isFullScreen
+        ? EdgeInsets.zero
+        : MediaQuery.paddingOf(context);
 
     if (direction == DismissiblePageDismissDirection.multi) {
-      return ScrollConfiguration(
-        behavior: const _DismissiblePageScrollBehavior(),
-        child: MultiAxisDismissiblePage(
-          onDismissed: onDismissed,
-          isFullScreen: isFullScreen,
-          backgroundColor: backgroundColor,
-          direction: direction,
-          dismissThresholds: dismissThresholds,
-          dragStartBehavior: dragStartBehavior,
-          dragSensitivity: dragSensitivity,
-          minRadius: minRadius,
-          minScale: minScale,
-          maxRadius: maxRadius,
-          maxTransformValue: maxTransformValue,
-          startingOpacity: startingOpacity,
-          onDragStart: onDragStart,
-          onDragEnd: onDragEnd,
-          onDragUpdate: onDragUpdate,
-          reverseDuration: reverseDuration,
-          hitTestBehavior: hitTestBehavior,
-          contentPadding: contentPadding,
-          child: child,
-        ),
-      );
-    }
-    return ScrollConfiguration(
-      behavior: const _DismissiblePageScrollBehavior(),
-      child: SingleAxisDismissiblePage(
+      return MultiAxisDismissiblePage(
         onDismissed: onDismissed,
         isFullScreen: isFullScreen,
+        disabled: disabled,
         backgroundColor: backgroundColor,
         direction: direction,
         dismissThresholds: dismissThresholds,
@@ -181,8 +170,37 @@ class DismissiblePage extends StatelessWidget {
         reverseDuration: reverseDuration,
         hitTestBehavior: hitTestBehavior,
         contentPadding: contentPadding,
-        child: child,
-      ),
+        interactionMode: interactionMode,
+        enableBackgroundOpacity: enableBackgroundOpacity,
+        minOpacity: minOpacity,
+        builder: builder,
+      );
+    }
+
+    return SingleAxisDismissiblePage(
+      onDismissed: onDismissed,
+      isFullScreen: isFullScreen,
+      disabled: disabled,
+      backgroundColor: backgroundColor,
+      direction: direction,
+      dismissThresholds: dismissThresholds,
+      dragStartBehavior: dragStartBehavior,
+      dragSensitivity: dragSensitivity,
+      minRadius: minRadius,
+      minScale: minScale,
+      maxRadius: maxRadius,
+      maxTransformValue: maxTransformValue,
+      startingOpacity: startingOpacity,
+      onDragStart: onDragStart,
+      onDragEnd: onDragEnd,
+      onDragUpdate: onDragUpdate,
+      reverseDuration: reverseDuration,
+      hitTestBehavior: hitTestBehavior,
+      contentPadding: contentPadding,
+      interactionMode: interactionMode,
+      enableBackgroundOpacity: enableBackgroundOpacity,
+      minOpacity: minOpacity,
+      builder: builder,
     );
   }
 }

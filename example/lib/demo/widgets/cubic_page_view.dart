@@ -1,19 +1,19 @@
 import 'dart:ui';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class CubicPageView extends StatefulWidget {
+  const CubicPageView({
+    required this.controller,
+    required this.children,
+    super.key,
+  });
+
   final PageController controller;
   final List<Widget> children;
 
-  CubicPageView({
-    required this.controller,
-    required this.children,
-  });
-
   @override
-  _CubicPageViewState createState() => _CubicPageViewState();
+  State<CubicPageView> createState() => _CubicPageViewState();
 }
 
 class _CubicPageViewState extends State<CubicPageView> {
@@ -37,8 +37,7 @@ class _CubicPageViewState extends State<CubicPageView> {
     return PageView.builder(
       controller: _controller,
       itemCount: children.length,
-      dragStartBehavior: DragStartBehavior.start,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (_, position) {
         Alignment? al;
         if (position == currentPageValue.floor()) al = Alignment.centerRight;

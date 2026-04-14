@@ -25,6 +25,30 @@
 Flutter widget that allows you to dismiss page to any direction, forget the boring back button and
 plain transitions.
 
+## Why This Fork Exists
+
+This fork focuses on fixing long-standing scroll + dismiss gesture conflicts in
+`DismissiblePage`, especially for pages that contain scrollable content.
+
+### What It Fixes
+
+- Introduces a custom `ScrollController` + `ScrollPosition` arbitration path
+  for `interactionMode: DismissiblePageInteractionMode.scroll`.
+- Ensures drag delta is routed correctly between page dismissal and inner
+  scrollable content.
+- Fixes the issue where reversing direction could leave the page in a dismiss
+  state or leak part of the delta into dismiss drag unexpectedly.
+
+### Behavior Comparison
+
+Old behavior (problematic):
+
+https://user-images.githubusercontent.com/26390946/194924545-1712b63b-2a25-4182-b731-db49ecc50c23.mov
+
+New behavior (expected):
+
+https://github.com/user-attachments/assets/9ef89285-7d6a-45f9-87aa-d589d8d89c5e
+
 ## Features:
 
 - Dismiss to any direction
@@ -87,15 +111,19 @@ class SecondPage extends StatelessWidget {
       onDismissed: () {
         Navigator.of(context).pop();
       },
+      interactionMode: DismissiblePageInteractionMode.scroll,
       // Note that scrollable widget inside DismissiblePage might limit the functionality
       // If scroll direction matches DismissiblePage direction
       direction: DismissiblePageDismissDirection.multi,
       isFullScreen: false,
-      child: Hero(
-        tag: 'Unique tag',
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
+      builder: (_, scrollController) => SingleChildScrollView(
+        controller: scrollController,
+        child: Hero(
+          tag: 'Unique tag',
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );
@@ -107,8 +135,9 @@ class SecondPage extends StatelessWidget {
 
 ``` dart
   const DismissiblePage({
-    required this.child,
+    required this.builder,
     required this.onDismissed,
+    required this.interactionMode,
     this.onDragStart,
     this.onDragEnd,
     this.onDragUpdate,
@@ -132,6 +161,9 @@ class SecondPage extends StatelessWidget {
   /// Called when the widget has been dismissed.
   final VoidCallback onDismissed;
 
+  /// Controls scroll-aware dismissal behavior.
+  final DismissiblePageInteractionMode interactionMode;
+
   /// Called when the user starts dragging the widget.
   final VoidCallback? onDragStart;
 
@@ -142,7 +174,7 @@ class SecondPage extends StatelessWidget {
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
 
   /// If true widget will ignore device padding
-  /// [MediaQuery.of(context).padding]
+  /// [MediaQuery.paddingOf(context)]
   final bool isFullScreen;
 
   /// The minimum amount of scale widget can have while dragging
@@ -162,14 +194,20 @@ class SecondPage extends StatelessWidget {
   /// If true the widget will ignore gestures
   final bool disabled;
 
-  /// Widget that should be dismissed
-  final Widget child;
+  /// Builder that receives a [ScrollController] for scroll-aware mode.
+  final DismissiblePageBuilder builder;
 
   /// Background color of [DismissiblePage]
   final Color backgroundColor;
 
   /// The amount of opacity [backgroundColor] will have when start dragging the widget.
   final double startingOpacity;
+
+  /// Whether to enable background opacity animation.
+  final bool enableBackgroundOpacity;
+
+  /// The minimum opacity of the background when the page is displayed.
+  final double minOpacity;
 
   /// The direction in which the widget can be dismissed.
   final DismissiblePageDismissDirection direction;
