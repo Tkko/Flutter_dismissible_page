@@ -1,0 +1,18 @@
+name: Deploy Demo
+
+on:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    uses: Tkko/Flutter_Pinput/.github/workflows/deploy-demo.yml@master
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

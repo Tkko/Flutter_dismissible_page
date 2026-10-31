@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      full-matrix:
+        description: 'Also run Android, iOS, and macOS integration tests'
+        type: boolean
+        default: true
+      include-windows:
+        description: 'Also run Windows integration tests'
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ci:
+    uses: Tkko/Flutter_Pinput/.github/workflows/ci.yml@master
+    with:
+      full-matrix: ${{ inputs.full-matrix || false }}
+      include-windows: ${{ inputs.include-windows || false }}
+      integration-test-target: integration_test/dismissible_flow_test.dart
+    permissions:
+      contents: read
+      pull-requests: read
