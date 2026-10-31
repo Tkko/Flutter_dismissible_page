@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
-import 'package:example/demo/pages/dismissible_page_demo.dart';
+import 'package:dismissible_page_example/demo/pages/dismissible_page_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

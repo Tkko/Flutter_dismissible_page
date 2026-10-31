@@ -57,7 +57,7 @@ class _DismissiblePageListener extends StatelessWidget {
   }
 
   bool _isSameDirections(ScrollMetrics metrics) {
-    final Axis axis = metrics.axis;
+    final axis = metrics.axis;
     switch (direction) {
       case DismissiblePageDismissDirection.vertical:
         return axis == Axis.vertical;

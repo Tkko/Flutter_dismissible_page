@@ -1,7 +1,7 @@
 import 'package:dismissible_page/dismissible_page.dart';
-import 'package:example/demo/models/models.dart';
-import 'package:example/demo/pages/story_page.dart';
-import 'package:example/demo/widgets/cubic_page_view.dart';
+import 'package:dismissible_page_example/demo/models/models.dart';
+import 'package:dismissible_page_example/demo/pages/story_page.dart';
+import 'package:dismissible_page_example/demo/widgets/cubic_page_view.dart';
 import 'package:flutter/material.dart';
 
 class StoriesWrapper extends StatefulWidget {
