@@ -27,13 +27,13 @@ class AppView extends StatelessWidget {
           theme: ThemeData(
             primaryColor: accentColor,
             scaffoldBackgroundColor: Colors.white,
-            appBarTheme: AppBarTheme(color: Colors.white),
+            appBarTheme: AppBarTheme(backgroundColor: Colors.white),
             chipTheme: ChipThemeData(selectedColor: accentColor),
             sliderTheme: SliderThemeData(
               activeTrackColor: accentColor,
               activeTickMarkColor: accentColor,
               thumbColor: accentColor,
-              inactiveTrackColor: accentColor.withOpacity(.2),
+              inactiveTrackColor: accentColor.withValues(alpha: .2),
             ),
           ),
           home: ScrollConfiguration(

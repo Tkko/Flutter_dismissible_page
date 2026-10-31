@@ -183,18 +183,18 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
       child: ValueListenableBuilder<DismissiblePageDragUpdateDetails>(
         valueListenable: _dragNotifier,
         child: widget.child,
-        builder: (_, details, Widget? child) {
+        builder: (_, details, child) {
           final backgroundColor = widget.backgroundColor == Colors.transparent
               ? Colors.transparent
-              : widget.backgroundColor.withOpacity(details.opacity);
+              : widget.backgroundColor.withValues(alpha: details.opacity);
 
           return Container(
             padding: widget.contentPadding,
             color: backgroundColor,
             child: Transform(
               transform: Matrix4.identity()
-                ..translate(details.offset.dx, details.offset.dy)
-                ..scale(details.scale, details.scale),
+                ..translateByDouble(details.offset.dx, details.offset.dy, 1, 1)
+                ..scaleByDouble(details.scale, details.scale, 1, 1),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(details.radius),
                 child: child,

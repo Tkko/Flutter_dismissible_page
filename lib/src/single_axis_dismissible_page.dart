@@ -272,7 +272,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
           builder: (context, child) {
             final backgroundColor = widget.backgroundColor == Colors.transparent
                 ? Colors.transparent
-                : widget.backgroundColor.withOpacity(_opacity);
+                : widget.backgroundColor.withValues(alpha: _opacity);
 
             return Container(
               padding: widget.contentPadding,
