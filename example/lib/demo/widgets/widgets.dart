@@ -103,16 +103,14 @@ class DurationSlider extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(
-              '$title - ',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
+            Expanded(
+              child: Text(
+                '$title - ${duration.inMilliseconds}ms',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-            Text(
-              '${duration.inMilliseconds}ms',
-              style: GoogleFonts.poppins(fontSize: 16),
             ),
           ],
         ),

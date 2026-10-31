@@ -4,185 +4,181 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-part 'dismissible_extensions.dart';
-
-part 'dismissible_routes.dart';
-
-part 'multi_axis_dismissible_page.dart';
-
-part 'dismissible_page_dismiss_direction.dart';
-
-part 'single_axis_dismissible_page.dart';
-
-part 'dismissible_page_drag_update_details.dart';
-
-part 'dismissible_page_helpers.dart';
+part 'controller/dismissible_page_arbiter.dart';
+part 'controller/dismissible_page_scroll_controller.dart';
+part 'extensions/dismissible_extensions.dart';
+part 'models/dismissible_page_background.dart';
+part 'models/dismissible_page_dismiss_direction.dart';
+part 'models/dismissible_page_drag_update_details.dart';
+part 'models/dismissible_page_radius.dart';
+part 'routing/dismissible_routes.dart';
+part 'widgets/dismissible_page_core.dart';
 
 const double _kDismissThreshold = 0.15;
 
-/// Flutter widget that allows you to dismiss page to any direction, forget the boring back button and
-/// plain transitions.
-///
-/// - Dismiss to any direction
-/// - Works with nested list view
-/// - Animating border
-/// - Animating background
-/// - Animating scale
+/// Flutter widget that allows you to dismiss page in any direction,
+/// coordinating seamlessly with inner scrollables ([ListView], [CustomScrollView], [PageView], etc.).
 class DismissiblePage extends StatelessWidget {
   const DismissiblePage({
-    required this.child,
     required this.onDismissed,
+    this.controller,
+    this.child,
+    this.builder,
     this.onDragStart,
     this.onDragEnd,
+    this.onDragCancel,
     this.onDragUpdate,
     this.isFullScreen = true,
-    this.disabled = false,
-    this.backgroundColor = Colors.black,
+    this.enabled = true,
+    this.background = const DismissiblePageBackground.transition(
+      from: Colors.black,
+      to: Colors.transparent,
+    ),
+    this.borderRadius = const DismissiblePageRadius.transition(),
     this.direction = DismissiblePageDismissDirection.vertical,
     this.dismissThresholds = const <DismissiblePageDismissDirection, double>{},
-    this.dragStartBehavior = DragStartBehavior.down,
     this.dragSensitivity = 0.7,
-    this.minRadius = 7,
-    this.minScale = .85,
-    this.maxRadius = 30,
-    this.maxTransformValue = .4,
-    this.startingOpacity = 1,
+    this.minScale = 0.85,
+    this.maxTransformValue = 0.4,
+    this.dragStartBehavior = DragStartBehavior.down,
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
-  /// Called when the widget has been dismissed.
-  final VoidCallback onDismissed;
+  /// An optional [DismissiblePageScrollController] for coordinating scrollables.
+  final DismissiblePageScrollController? controller;
 
-  /// Called when the user starts dragging the widget.
-  final VoidCallback? onDragStart;
+  /// The widget below this widget in the tree.
+  final Widget? child;
 
-  /// Called when the user ends dragging the widget.
-  final VoidCallback? onDragEnd;
-
-  /// Called when the widget has been dragged. (0.0 - 1.0)
-  final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
-
-  /// If true widget will ignore device padding
-  /// [MediaQuery.of(context).padding]
-  final bool isFullScreen;
-
-  /// The minimum amount of scale widget can have while dragging
-  /// Note that scale decreases as user drags
-  final double minScale;
-
-  /// The minimum amount fo border radius widget can have
-  final double minRadius;
-
-  /// The maximum amount of border radius widget can have while dragging
-  /// Note that radius increases as user drags
-  final double maxRadius;
-
-  /// The amount of distance widget is able to drag. value (0.0 - 1.0)
-  final double maxTransformValue;
-
-  /// If true the widget will ignore gestures
-  final bool disabled;
-
-  /// Widget that should be dismissed
-  final Widget child;
-
-  /// Background color of [DismissiblePage]
-  final Color backgroundColor;
-
-  /// The amount of opacity [backgroundColor] will have when start dragging the widget.
-  final double startingOpacity;
-
-  /// The direction in which the widget can be dismissed.
-  final DismissiblePageDismissDirection direction;
-
-  /// The offset threshold the item has to be dragged in order to be considered
-  /// dismissed. default is [_kDismissThreshold], value (0.0 - 1.0)
-  final Map<DismissiblePageDismissDirection, double> dismissThresholds;
-
-  /// Represents how much responsive dragging the widget will be
-  /// Doesn't work on [DismissiblePageDismissDirection.multi]
-  final double dragSensitivity;
+  /// A builder function providing a [DismissiblePageScrollController].
+  final Widget Function(
+    BuildContext context,
+    DismissiblePageScrollController controller,
+  )? builder;
 
   /// Determines the way that drag start behavior is handled.
   final DragStartBehavior dragStartBehavior;
 
-  /// The amount of time the widget will spend returning to initial position if widget is not dismissed after drag
+  /// Called when the widget has been dismissed.
+  final VoidCallback onDismissed;
+
+  /// Called when dragging starts.
+  final VoidCallback? onDragStart;
+
+  /// Called when dragging ends (either settling or dismissed).
+  final VoidCallback? onDragEnd;
+
+  /// Called when a drag gesture is cancelled.
+  final VoidCallback? onDragCancel;
+
+  /// Called during dragging with progress, offset, radius, scale and opacity details.
+  final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
+
+  /// If true, padding from [MediaQuery.paddingOf] is ignored.
+  final bool isFullScreen;
+
+  /// Whether dismiss gesture interactions and transitions are enabled.
+  final bool enabled;
+
+  /// Configuration for the background scrim behind the dismissing widget.
+  final DismissiblePageBackground background;
+
+  /// Configuration for the corner radius applied to the content during drag.
+  final DismissiblePageRadius borderRadius;
+
+  /// The direction in which the page can be dismissed.
+  final DismissiblePageDismissDirection direction;
+
+  /// Thresholds (0.0 to 1.0) needed to trigger dismissal per direction.
+  final Map<DismissiblePageDismissDirection, double> dismissThresholds;
+
+  /// Multiplier applied to drag movements.
+  final double dragSensitivity;
+
+  /// The scale of the widget at maximum drag.
+  final double minScale;
+
+  /// Fraction of viewport dimension (0.0 to 1.0) representing maximum transform.
+  final double maxTransformValue;
+
+  /// Duration to animate back to original position when not dismissed.
   final Duration reverseDuration;
 
   /// How to behave during hit tests.
-  ///
-  /// This defaults to [HitTestBehavior.opaque].
   final HitTestBehavior hitTestBehavior;
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      child != null || builder != null,
+      'Either child or builder must be provided to DismissiblePage',
+    );
     final contentPadding =
-        isFullScreen ? EdgeInsets.zero : MediaQuery.of(context).padding;
+        isFullScreen ? EdgeInsets.zero : MediaQuery.paddingOf(context);
 
-    if (disabled) {
-      return DecoratedBox(
-        decoration: BoxDecoration(color: backgroundColor),
-        child: Padding(
-          padding: contentPadding,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(minRadius),
-            child: child,
-          ),
-        ),
-      );
+    Widget buildContent(
+      BuildContext context,
+      DismissiblePageScrollController controller,
+    ) {
+      if (builder != null) {
+        return builder!(context, controller);
+      }
+      return child!;
     }
 
-    if (direction == DismissiblePageDismissDirection.multi) {
-      return ScrollConfiguration(
-        behavior: const _DismissiblePageScrollBehavior(),
-        child: MultiAxisDismissiblePage(
-          onDismissed: onDismissed,
-          isFullScreen: isFullScreen,
-          backgroundColor: backgroundColor,
-          direction: direction,
-          dismissThresholds: dismissThresholds,
-          dragStartBehavior: dragStartBehavior,
-          dragSensitivity: dragSensitivity,
-          minRadius: minRadius,
-          minScale: minScale,
-          maxRadius: maxRadius,
-          maxTransformValue: maxTransformValue,
-          startingOpacity: startingOpacity,
-          onDragStart: onDragStart,
-          onDragEnd: onDragEnd,
-          onDragUpdate: onDragUpdate,
-          reverseDuration: reverseDuration,
-          hitTestBehavior: hitTestBehavior,
-          contentPadding: contentPadding,
-          child: child,
-        ),
+    if (!enabled) {
+      final initialColor = background.resolveColor(0);
+      final initialRadius = borderRadius.resolveRadius(0);
+
+      var content = child ??
+          builder!(
+            context,
+            controller ?? DismissiblePageScrollController(),
+          );
+      if (initialRadius > 0) {
+        content = ClipRRect(
+          borderRadius: BorderRadius.circular(initialRadius),
+          child: content,
+        );
+      }
+
+      Widget body = Padding(
+        padding: contentPadding,
+        child: content,
       );
+
+      if (initialColor != null) {
+        body = ColoredBox(
+          color: initialColor,
+          child: body,
+        );
+      }
+
+      return body;
     }
-    return ScrollConfiguration(
-      behavior: const _DismissiblePageScrollBehavior(),
-      child: SingleAxisDismissiblePage(
-        onDismissed: onDismissed,
-        isFullScreen: isFullScreen,
-        backgroundColor: backgroundColor,
-        direction: direction,
-        dismissThresholds: dismissThresholds,
-        dragStartBehavior: dragStartBehavior,
-        dragSensitivity: dragSensitivity,
-        minRadius: minRadius,
-        minScale: minScale,
-        maxRadius: maxRadius,
-        maxTransformValue: maxTransformValue,
-        startingOpacity: startingOpacity,
-        onDragStart: onDragStart,
-        onDragEnd: onDragEnd,
-        onDragUpdate: onDragUpdate,
-        reverseDuration: reverseDuration,
-        hitTestBehavior: hitTestBehavior,
-        contentPadding: contentPadding,
-        child: child,
-      ),
+
+    return _DismissiblePageCore(
+      controller: controller,
+      onDismissed: onDismissed,
+      isFullScreen: isFullScreen,
+      background: background,
+      borderRadius: borderRadius,
+      direction: direction,
+      dismissThresholds: dismissThresholds,
+      dragSensitivity: dragSensitivity,
+      minScale: minScale,
+      maxTransformValue: maxTransformValue,
+      dragStartBehavior: dragStartBehavior,
+      onDragStart: onDragStart,
+      onDragEnd: onDragEnd,
+      onDragCancel: onDragCancel,
+      onDragUpdate: onDragUpdate,
+      reverseDuration: reverseDuration,
+      hitTestBehavior: hitTestBehavior,
+      contentPadding: contentPadding,
+      contentBuilder: buildContent,
     );
   }
 }

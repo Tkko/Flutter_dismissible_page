@@ -1,4 +1,4 @@
-part of 'dismissible_page.dart';
+part of '../dismissible_page.dart';
 
 /// Details outputted by [DismissiblePage.onDragUpdate] method
 @immutable
