@@ -246,6 +246,97 @@ void main() {
         isFalse,
       );
     });
+
+    testWidgets('asserts on invalid thresholds when building', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DismissiblePage(
+            onDismissed: () {},
+            dismissThresholds: const {DismissiblePageSide.down: 1.5},
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isAssertionError);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DismissiblePage.builder(
+            onDismissed: () {},
+            dismissThresholds: const {DismissiblePageSide.up: -0.1},
+            builder: (_, __) => const SizedBox(),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isAssertionError);
+    });
+
+    test('constructor asserts validate scalar configuration properties', () {
+      expect(
+        () => DismissiblePage(
+          onDismissed: () {},
+          minScale: -0.1,
+          child: const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => DismissiblePage(
+          onDismissed: () {},
+          minScale: 1.1,
+          child: const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => DismissiblePage(
+          onDismissed: () {},
+          maxTransformValue: -0.1,
+          child: const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => DismissiblePage(
+          onDismissed: () {},
+          maxTransformValue: 1.1,
+          child: const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => DismissiblePage(
+          onDismissed: () {},
+          dragSensitivity: 0,
+          child: const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => DismissiblePage.builder(
+          onDismissed: () {},
+          minScale: -0.5,
+          builder: (_, __) => const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => DismissiblePage.builder(
+          onDismissed: () {},
+          maxTransformValue: 2,
+          builder: (_, __) => const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => DismissiblePage.builder(
+          onDismissed: () {},
+          dragSensitivity: -1,
+          builder: (_, __) => const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+    });
   });
 
   testWidgets('builder preserves and disposes its internal controller',
