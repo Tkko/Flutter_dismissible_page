@@ -20,7 +20,10 @@ class _DismissibleArbiter extends ChangeNotifier {
     this.onDragEnd,
     this.onDragCancel,
     this.onDragUpdate,
-  }) {
+  }) : assert(
+          dismissThresholds.values.every((value) => value >= 0 && value <= 1),
+          'Dismiss thresholds must be between 0.0 and 1.0',
+        ) {
     _animationController = AnimationController(
       duration: reverseDuration,
       vsync: vsync,

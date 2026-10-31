@@ -5,14 +5,23 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 part 'controller/dismissible_page_arbiter.dart';
+
 part 'controller/dismissible_page_scroll_controller.dart';
+
 part 'extensions/dismissible_extensions.dart';
+
 part 'models/dismissible_page_background.dart';
+
 part 'models/dismissible_page_dismiss_direction.dart';
+
 part 'models/dismissible_page_drag_update_details.dart';
+
 part 'models/dismissible_page_radius.dart';
+
 part 'models/dismissible_page_side.dart';
+
 part 'routing/dismissible_routes.dart';
+
 part 'widgets/dismissible_page_core.dart';
 
 const double _kDismissThreshold = 0.15;
@@ -44,7 +53,16 @@ class DismissiblePage extends StatelessWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
     super.key,
-  })  : _child = child,
+  })  : assert(dragSensitivity > 0, 'dragSensitivity must be greater than 0'),
+        assert(
+          minScale >= 0 && minScale <= 1,
+          'minScale must be between 0.0 and 1.0',
+        ),
+        assert(
+          maxTransformValue >= 0 && maxTransformValue <= 1,
+          'maxTransformValue must be between 0.0 and 1.0',
+        ),
+        _child = child,
         _builder = null;
 
   /// Builds content with a controller for explicit scroll coordination.
@@ -75,7 +93,16 @@ class DismissiblePage extends StatelessWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
     super.key,
-  })  : _child = null,
+  })  : assert(dragSensitivity > 0, 'dragSensitivity must be greater than 0'),
+        assert(
+          minScale >= 0 && minScale <= 1,
+          'minScale must be between 0.0 and 1.0',
+        ),
+        assert(
+          maxTransformValue >= 0 && maxTransformValue <= 1,
+          'maxTransformValue must be between 0.0 and 1.0',
+        ),
+        _child = null,
         _builder = builder;
 
   /// An optional [DismissiblePageScrollController] for coordinating scrollables.
