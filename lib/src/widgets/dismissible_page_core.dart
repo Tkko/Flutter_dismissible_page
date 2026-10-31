@@ -3,6 +3,7 @@ part of '../dismissible_page.dart';
 class _DismissiblePageCore extends StatefulWidget {
   const _DismissiblePageCore({
     required this.contentBuilder,
+    required this.enabled,
     required this.onDismissed,
     required this.isFullScreen,
     required this.background,
@@ -29,11 +30,12 @@ class _DismissiblePageCore extends StatefulWidget {
   ) contentBuilder;
   final DismissiblePageScrollController? controller;
   final VoidCallback onDismissed;
+  final bool enabled;
   final bool isFullScreen;
   final DismissiblePageBackground background;
   final DismissiblePageRadius borderRadius;
   final DismissiblePageDismissDirection direction;
-  final Map<DismissiblePageDismissDirection, double> dismissThresholds;
+  final Map<DismissiblePageSide, double> dismissThresholds;
   final double dragSensitivity;
   final double minScale;
   final double maxTransformValue;
@@ -63,7 +65,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
   void initState() {
     super.initState();
     _initArbiter();
-    _effectiveController._arbiter = _arbiter;
+    _effectiveController._arbiter = widget.enabled ? _arbiter : null;
   }
 
   @override
@@ -77,10 +79,10 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
       onDragUpdate: widget.onDragUpdate,
     );
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller?._arbiter = null;
-      _effectiveController._arbiter = _arbiter;
+      (oldWidget.controller ?? _internalController)?._arbiter = null;
     }
-    if (widget.direction != oldWidget.direction ||
+    if (widget.enabled != oldWidget.enabled ||
+        widget.direction != oldWidget.direction ||
         widget.dismissThresholds != oldWidget.dismissThresholds ||
         widget.dragSensitivity != oldWidget.dragSensitivity ||
         widget.background != oldWidget.background ||
@@ -90,8 +92,8 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
         widget.reverseDuration != oldWidget.reverseDuration) {
       _arbiter.dispose();
       _initArbiter();
-      _effectiveController._arbiter = _arbiter;
     }
+    _effectiveController._arbiter = widget.enabled ? _arbiter : null;
   }
 
   void _initArbiter() {
@@ -135,7 +137,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
       DismissiblePageDismissDirection.startToEnd ||
       DismissiblePageDismissDirection.endToStart =>
         details.velocity.pixelsPerSecond.dx,
-      DismissiblePageDismissDirection.multi =>
+      DismissiblePageDismissDirection.all =>
         _arbiter.offset.dx.abs() > _arbiter.offset.dy.abs()
             ? details.velocity.pixelsPerSecond.dx
             : details.velocity.pixelsPerSecond.dy,
@@ -146,28 +148,6 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
 
   void _handlePanCancel() {
     _arbiter.cancelDrag();
-  }
-
-  bool _isSameDirections(ScrollMetrics metrics) {
-    final axis = metrics.axis;
-    switch (widget.direction) {
-      case DismissiblePageDismissDirection.vertical:
-        return axis == Axis.vertical;
-      case DismissiblePageDismissDirection.up:
-        return axis == Axis.vertical && metrics.extentAfter == 0;
-      case DismissiblePageDismissDirection.down:
-        return axis == Axis.vertical && metrics.extentBefore == 0;
-      case DismissiblePageDismissDirection.horizontal:
-        return axis == Axis.horizontal;
-      case DismissiblePageDismissDirection.endToStart:
-        return axis == Axis.horizontal && metrics.extentAfter == 0;
-      case DismissiblePageDismissDirection.startToEnd:
-        return axis == Axis.horizontal && metrics.extentBefore == 0;
-      case DismissiblePageDismissDirection.none:
-        return false;
-      case DismissiblePageDismissDirection.multi:
-        return true;
-    }
   }
 
   bool _onScrollNotification(ScrollNotification notification) {
@@ -185,10 +165,14 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     }
 
     if (notification is OverscrollNotification) {
-      if (_isSameDirections(notification.metrics)) {
-        final delta = notification.metrics.axis == Axis.vertical
-            ? Offset(0, -notification.overscroll)
-            : Offset(-notification.overscroll, 0);
+      final physicalDelta = _physicalScrollDelta(
+        -notification.overscroll,
+        notification.metrics.axisDirection,
+      );
+      final delta = notification.metrics.axis == Axis.vertical
+          ? Offset(0, physicalDelta)
+          : Offset(physicalDelta, 0);
+      if (_arbiter.isDeltaAllowed(delta)) {
         _arbiter.applyDelta(delta);
       }
       return false;
@@ -200,17 +184,19 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
 
       // If page is currently offset, consume reverse scroll back towards origin
       if (currentCoord != 0) {
-        final scrollDelta = notification.scrollDelta ?? 0;
+        final physicalDelta = _physicalScrollDelta(
+          -(notification.scrollDelta ?? 0),
+          notification.metrics.axisDirection,
+        );
         final delta =
-            isVertical ? Offset(0, -scrollDelta) : Offset(-scrollDelta, 0);
+            isVertical ? Offset(0, physicalDelta) : Offset(physicalDelta, 0);
         _arbiter.applyDelta(delta);
         return false;
       }
 
-      if (notification.metrics.outOfRange &&
-          _isSameDirections(notification.metrics)) {
+      if (notification.metrics.outOfRange) {
         final dragDetails = notification.dragDetails;
-        if (dragDetails != null) {
+        if (dragDetails != null && _arbiter.isDeltaAllowed(dragDetails.delta)) {
           _arbiter.applyDelta(dragDetails.delta);
         }
       }
@@ -235,6 +221,25 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
       child: widget.contentBuilder(context, effectiveController),
     );
 
+    if (!widget.enabled) {
+      final initialColor = widget.background.resolveColor(0);
+      final initialRadius = widget.borderRadius.resolveRadius(0);
+      Widget content = contentWithController;
+      if (initialRadius > 0) {
+        content = ClipRRect(
+          borderRadius: BorderRadius.circular(initialRadius),
+          child: content,
+        );
+      }
+      final body = Padding(
+        padding: widget.contentPadding,
+        child: content,
+      );
+      return initialColor == null
+          ? body
+          : ColoredBox(color: initialColor, child: body);
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         _arbiter.updateLayout(
@@ -256,7 +261,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
               builder: (context, child) {
                 final details = _arbiter.currentDetails;
                 final bgColor =
-                    widget.background.resolveColor(details.overallDragValue);
+                    widget.background.resolveColor(details.progress);
 
                 var content = child!;
                 if (details.radius > 0) {

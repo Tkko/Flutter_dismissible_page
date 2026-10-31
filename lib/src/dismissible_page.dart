@@ -11,6 +11,7 @@ part 'models/dismissible_page_background.dart';
 part 'models/dismissible_page_dismiss_direction.dart';
 part 'models/dismissible_page_drag_update_details.dart';
 part 'models/dismissible_page_radius.dart';
+part 'models/dismissible_page_side.dart';
 part 'routing/dismissible_routes.dart';
 part 'widgets/dismissible_page_core.dart';
 
@@ -21,9 +22,8 @@ const double _kDismissThreshold = 0.15;
 class DismissiblePage extends StatelessWidget {
   const DismissiblePage({
     required this.onDismissed,
+    required Widget child,
     this.controller,
-    this.child,
-    this.builder,
     this.onDragStart,
     this.onDragEnd,
     this.onDragCancel,
@@ -36,7 +36,7 @@ class DismissiblePage extends StatelessWidget {
     ),
     this.borderRadius = const DismissiblePageRadius.transition(),
     this.direction = DismissiblePageDismissDirection.vertical,
-    this.dismissThresholds = const <DismissiblePageDismissDirection, double>{},
+    this.dismissThresholds = const <DismissiblePageSide, double>{},
     this.dragSensitivity = 0.7,
     this.minScale = 0.85,
     this.maxTransformValue = 0.4,
@@ -44,19 +44,52 @@ class DismissiblePage extends StatelessWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
     super.key,
-  });
+  })  : _child = child,
+        _builder = null;
+
+  /// Builds content with a controller for explicit scroll coordination.
+  const DismissiblePage.builder({
+    required this.onDismissed,
+    required Widget Function(
+      BuildContext context,
+      DismissiblePageScrollController controller,
+    ) builder,
+    this.controller,
+    this.onDragStart,
+    this.onDragEnd,
+    this.onDragCancel,
+    this.onDragUpdate,
+    this.isFullScreen = true,
+    this.enabled = true,
+    this.background = const DismissiblePageBackground.transition(
+      from: Colors.black,
+      to: Colors.transparent,
+    ),
+    this.borderRadius = const DismissiblePageRadius.transition(),
+    this.direction = DismissiblePageDismissDirection.vertical,
+    this.dismissThresholds = const <DismissiblePageSide, double>{},
+    this.dragSensitivity = 0.7,
+    this.minScale = 0.85,
+    this.maxTransformValue = 0.4,
+    this.dragStartBehavior = DragStartBehavior.down,
+    this.hitTestBehavior = HitTestBehavior.opaque,
+    this.reverseDuration = const Duration(milliseconds: 200),
+    super.key,
+  })  : _child = null,
+        _builder = builder;
 
   /// An optional [DismissiblePageScrollController] for coordinating scrollables.
   final DismissiblePageScrollController? controller;
 
-  /// The widget below this widget in the tree.
-  final Widget? child;
+  /// The content widget, or null when using [DismissiblePage.builder].
+  Widget? get child => _child;
 
-  /// A builder function providing a [DismissiblePageScrollController].
+  final Widget? _child;
+
   final Widget Function(
     BuildContext context,
     DismissiblePageScrollController controller,
-  )? builder;
+  )? _builder;
 
   /// Determines the way that drag start behavior is handled.
   final DragStartBehavior dragStartBehavior;
@@ -91,8 +124,14 @@ class DismissiblePage extends StatelessWidget {
   /// The direction in which the page can be dismissed.
   final DismissiblePageDismissDirection direction;
 
-  /// Thresholds (0.0 to 1.0) needed to trigger dismissal per direction.
-  final Map<DismissiblePageDismissDirection, double> dismissThresholds;
+  /// Page displacement thresholds (0.0 to 1.0) per destination side.
+  ///
+  /// Up/down use a fraction of page height; start/end use page width.
+  /// Start/end follow [Directionality]. Missing sides default to 0.15.
+  /// With [DismissiblePageDismissDirection.all], either axis can dismiss.
+  /// These thresholds are independent of [maxTransformValue].
+  /// A fast outward fling can dismiss before reaching a distance threshold.
+  final Map<DismissiblePageSide, double> dismissThresholds;
 
   /// Multiplier applied to drag movements.
   final double dragSensitivity;
@@ -100,7 +139,9 @@ class DismissiblePage extends StatelessWidget {
   /// The scale of the widget at maximum drag.
   final double minScale;
 
-  /// Fraction of viewport dimension (0.0 to 1.0) representing maximum transform.
+  /// Fraction of page dimension at which visual effects reach their final values.
+  ///
+  /// Does not limit translation or affect [dismissThresholds].
   final double maxTransformValue;
 
   /// Duration to animate back to original position when not dismissed.
@@ -112,8 +153,8 @@ class DismissiblePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(
-      child != null || builder != null,
-      'Either child or builder must be provided to DismissiblePage',
+      dismissThresholds.values.every((value) => value >= 0 && value <= 1),
+      'Dismiss thresholds must be between 0.0 and 1.0',
     );
     final contentPadding =
         isFullScreen ? EdgeInsets.zero : MediaQuery.paddingOf(context);
@@ -122,44 +163,14 @@ class DismissiblePage extends StatelessWidget {
       BuildContext context,
       DismissiblePageScrollController controller,
     ) {
-      if (builder != null) {
-        return builder!(context, controller);
+      if (_builder != null) {
+        return _builder!(context, controller);
       }
       return child!;
     }
 
-    if (!enabled) {
-      final initialColor = background.resolveColor(0);
-      final initialRadius = borderRadius.resolveRadius(0);
-
-      var content = child ??
-          builder!(
-            context,
-            controller ?? DismissiblePageScrollController(),
-          );
-      if (initialRadius > 0) {
-        content = ClipRRect(
-          borderRadius: BorderRadius.circular(initialRadius),
-          child: content,
-        );
-      }
-
-      Widget body = Padding(
-        padding: contentPadding,
-        child: content,
-      );
-
-      if (initialColor != null) {
-        body = ColoredBox(
-          color: initialColor,
-          child: body,
-        );
-      }
-
-      return body;
-    }
-
     return _DismissiblePageCore(
+      enabled: enabled,
       controller: controller,
       onDismissed: onDismissed,
       isFullScreen: isFullScreen,

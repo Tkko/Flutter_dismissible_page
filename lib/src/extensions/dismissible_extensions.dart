@@ -13,7 +13,7 @@ extension DismissibleContextExt on BuildContext {
     bool rootNavigator = false,
   }) {
     return Navigator.of(this, rootNavigator: rootNavigator).push(
-      TransparentRoute(
+      TransparentRoute<T>(
         builder: (_) => page,
         backgroundColor: backgroundColor,
         transitionDuration: transitionDuration,

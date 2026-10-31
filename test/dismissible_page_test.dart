@@ -83,7 +83,7 @@ void main() {
       await tester.pump();
 
       expect(lastDetails, isNotNull);
-      expect(lastDetails!.overallDragValue, greaterThan(0));
+      expect(lastDetails!.progress, greaterThan(0));
       expect(lastDetails!.offset.dy, greaterThan(0));
     });
 
@@ -295,7 +295,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: DismissiblePage(
-              direction: DismissiblePageDismissDirection.multi,
+              direction: DismissiblePageDismissDirection.all,
               onDismissed: () {},
               onDragUpdate: (details) => lastDetails = details,
               child: ListView.builder(
