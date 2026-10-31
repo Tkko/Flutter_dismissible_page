@@ -8,11 +8,12 @@ class DismissiblePageDragUpdateDetails {
     required this.radius,
     required this.opacity,
     this.offset = Offset.zero,
-    this.overallDragValue = 0.0,
+    this.progress = 0.0,
     this.scale = 1.0,
   });
 
-  final double overallDragValue;
+  /// Visual effect progress from 0.0 to 1.0, not dismissal distance progress.
+  final double progress;
   final double radius;
   final double opacity;
   final double scale;
@@ -29,7 +30,7 @@ class DismissiblePageDragUpdateDetails {
   int get hashCode => offset.hashCode;
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'overallDragValue': overallDragValue,
+        'progress': progress,
         'radius': radius,
         'opacity': opacity,
         'scale': scale,

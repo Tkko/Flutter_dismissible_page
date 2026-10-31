@@ -30,7 +30,7 @@ class _DismissibleArbiter extends ChangeNotifier {
   }
 
   final DismissiblePageDismissDirection direction;
-  final Map<DismissiblePageDismissDirection, double> dismissThresholds;
+  final Map<DismissiblePageSide, double> dismissThresholds;
   final DismissiblePageBackground background;
   final DismissiblePageRadius borderRadius;
   final double minScale;
@@ -76,7 +76,7 @@ class _DismissibleArbiter extends ChangeNotifier {
     this.onDragUpdate = onDragUpdate;
   }
 
-  double get overallDragValue {
+  double get progress {
     if (_layoutSize.isEmpty) return 0;
     final normalizedX =
         (_dragOffset.dx.abs() / _layoutSize.width) / maxTransformValue;
@@ -92,25 +92,25 @@ class _DismissibleArbiter extends ChangeNotifier {
       case DismissiblePageDismissDirection.up:
       case DismissiblePageDismissDirection.down:
         return normalizedY.clamp(0, 1);
-      case DismissiblePageDismissDirection.multi:
+      case DismissiblePageDismissDirection.all:
         return max(normalizedX, normalizedY).clamp(0, 1);
       case DismissiblePageDismissDirection.none:
         return 0;
     }
   }
 
-  double get radius => borderRadius.resolveRadius(overallDragValue);
-  double get scale => lerpDouble(1, minScale, overallDragValue)!;
+  double get radius => borderRadius.resolveRadius(progress);
+  double get scale => lerpDouble(1, minScale, progress)!;
   double get opacity {
-    final color = background.resolveColor(overallDragValue);
-    if (color == null) return (1.0 - overallDragValue).clamp(0.0, 1.0);
+    final color = background.resolveColor(progress);
+    if (color == null) return (1.0 - progress).clamp(0.0, 1.0);
     return color.a;
   }
 
   DismissiblePageDragUpdateDetails get currentDetails =>
       DismissiblePageDragUpdateDetails(
         offset: _dragOffset,
-        overallDragValue: overallDragValue,
+        progress: progress,
         radius: radius,
         opacity: opacity,
         scale: scale,
@@ -135,7 +135,7 @@ class _DismissibleArbiter extends ChangeNotifier {
   /// Evaluates whether a delta can be consumed in the configured direction.
   bool isDeltaAllowed(Offset delta) {
     if (direction == DismissiblePageDismissDirection.none) return false;
-    if (direction == DismissiblePageDismissDirection.multi) return true;
+    if (direction == DismissiblePageDismissDirection.all) return true;
 
     final isHorizontal =
         direction == DismissiblePageDismissDirection.horizontal ||
@@ -202,7 +202,7 @@ class _DismissibleArbiter extends ChangeNotifier {
         final nextX = _dragOffset.dx + effectiveDelta.dx;
         effectiveDelta =
             Offset(sign * nextX >= 0 ? effectiveDelta.dx : -_dragOffset.dx, 0);
-      case DismissiblePageDismissDirection.multi:
+      case DismissiblePageDismissDirection.all:
         break;
       case DismissiblePageDismissDirection.none:
         return;
@@ -217,13 +217,7 @@ class _DismissibleArbiter extends ChangeNotifier {
     if (!_isDragging) return;
     _isDragging = false;
 
-    final threshold = dismissThresholds[direction] ??
-        dismissThresholds[DismissiblePageDismissDirection.vertical] ??
-        dismissThresholds[DismissiblePageDismissDirection.horizontal] ??
-        dismissThresholds[DismissiblePageDismissDirection.multi] ??
-        _kDismissThreshold;
-
-    final shouldDismiss = overallDragValue >= threshold ||
+    final shouldDismiss = _hasReachedDismissThreshold ||
         (velocity.abs() > 800 && _isVelocityOutward(velocity));
 
     if (shouldDismiss && isOffsetNonZero) {
@@ -235,13 +229,33 @@ class _DismissibleArbiter extends ChangeNotifier {
     }
   }
 
+  bool get _hasReachedDismissThreshold {
+    if (_layoutSize.isEmpty) return false;
+
+    final horizontalSide =
+        (_dragOffset.dx > 0) == (_textDirection == TextDirection.ltr)
+            ? DismissiblePageSide.end
+            : DismissiblePageSide.start;
+    final verticalSide =
+        _dragOffset.dy > 0 ? DismissiblePageSide.down : DismissiblePageSide.up;
+
+    return (isDeltaAllowed(Offset(_dragOffset.dx, 0)) &&
+            _dragOffset.dx != 0 &&
+            _dragOffset.dx.abs() / _layoutSize.width >=
+                (dismissThresholds[horizontalSide] ?? _kDismissThreshold)) ||
+        (isDeltaAllowed(Offset(0, _dragOffset.dy)) &&
+            _dragOffset.dy != 0 &&
+            _dragOffset.dy.abs() / _layoutSize.height >=
+                (dismissThresholds[verticalSide] ?? _kDismissThreshold));
+  }
+
   bool _isVelocityOutward(double velocity) {
     final isHorizontal = switch (direction) {
       DismissiblePageDismissDirection.horizontal ||
       DismissiblePageDismissDirection.startToEnd ||
       DismissiblePageDismissDirection.endToStart =>
         true,
-      DismissiblePageDismissDirection.multi =>
+      DismissiblePageDismissDirection.all =>
         _dragOffset.dx.abs() > _dragOffset.dy.abs(),
       _ => false,
     };

@@ -4,9 +4,9 @@ class TransparentRoute<T> extends PageRoute<T>
     with CupertinoRouteTransitionMixin<T> {
   TransparentRoute({
     required this.builder,
-    required this.backgroundColor,
-    required this.transitionDuration,
-    required this.reverseTransitionDuration,
+    this.backgroundColor = Colors.transparent,
+    this.transitionDuration = _transitionDuration,
+    this.reverseTransitionDuration = _transitionDuration,
     this.title,
     super.settings,
     this.maintainState = true,

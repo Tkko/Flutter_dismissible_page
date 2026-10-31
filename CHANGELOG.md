@@ -1,3 +1,11 @@
+## Unreleased
+- Breaking: require `child` on `DismissiblePage` and move builder content to `DismissiblePage.builder`.
+- Breaking: rename `DismissiblePageDismissDirection.multi` to `all` and drag details `overallDragValue` to `progress` (including `toMap()`).
+- Breaking: key `dismissThresholds` by directional destination sides (`DismissiblePageSide.up`, `down`, `start`, `end`). Measure page displacement against page dimensions independently of visual effects; either axis can dismiss diagonal drags. Missing sides default to 0.15.
+- Default `TransparentRoute` to a transparent background and 250 ms forward/reverse transitions.
+- Preserve and dispose the internally owned scroll controller for disabled builder content.
+- Resolve scroll-edge deltas in screen coordinates so directional thresholds also work with RTL and reversed scroll axes.
+
 ## 1.0.3
 - Fixed unexpected behavior of dismissing the page when user is scrolling the opposite direction [Issue](https://github.com/Tkko/Flutter_dismissible_page/issues/14#issuecomment-1599097053)
 

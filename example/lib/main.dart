@@ -65,7 +65,7 @@ class SecondPage extends StatelessWidget {
       borderRadius: const DismissiblePageRadius.fixed(10),
       dragSensitivity: 1.0,
       maxTransformValue: .8,
-      direction: DismissiblePageDismissDirection.multi,
+      direction: DismissiblePageDismissDirection.all,
       background: const DismissiblePageBackground.solid(Colors.black),
       onDragStart: () {
         print('onDragStart');
@@ -74,7 +74,10 @@ class SecondPage extends StatelessWidget {
         print(details);
       },
       dismissThresholds: const {
-        DismissiblePageDismissDirection.vertical: .2,
+        DismissiblePageSide.up: .2,
+        DismissiblePageSide.down: .2,
+        DismissiblePageSide.start: .3,
+        DismissiblePageSide.end: .3,
       },
       minScale: .8,
       reverseDuration: const Duration(milliseconds: 250),

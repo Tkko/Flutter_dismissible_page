@@ -56,8 +56,8 @@ class DismissiblePageModel {
       const DismissiblePageRadius.transition(from: 7, to: 30);
   DismissiblePageDismissDirection direction =
       DismissiblePageDismissDirection.vertical;
-  Map<DismissiblePageDismissDirection, double> dismissThresholds =
-      const <DismissiblePageDismissDirection, double>{};
+  Map<DismissiblePageSide, double> dismissThresholds =
+      const <DismissiblePageSide, double>{};
   DragStartBehavior dragStartBehavior = DragStartBehavior.down;
   Duration reverseDuration = const Duration(milliseconds: 200);
   HitTestBehavior behavior = HitTestBehavior.opaque;

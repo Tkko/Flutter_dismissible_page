@@ -1,5 +1,9 @@
 part of '../dismissible_page.dart';
 
+// Scroll offsets follow the axis direction; page offsets follow screen coordinates.
+double _physicalScrollDelta(double delta, AxisDirection direction) =>
+    axisDirectionIsReversed(direction) ? -delta : delta;
+
 /// A [ScrollController] that seamlessly bridges a scrollable widget
 /// ([ListView], [CustomScrollView], [GridView], etc.) with a [DismissiblePage].
 ///
@@ -60,7 +64,10 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
     }
 
     final isVertical = axis == Axis.vertical;
-    final currentCoord = isVertical ? arbiter.offset.dy : arbiter.offset.dx;
+    final currentCoord = _physicalScrollDelta(
+      isVertical ? arbiter.offset.dy : arbiter.offset.dx,
+      axisDirection,
+    );
     final sensitivity = arbiter.dragSensitivity;
 
     // 1. If page is currently offset away from origin:
@@ -87,7 +94,9 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
       }
 
       // Absorb into page drag
-      final offsetDelta = isVertical ? Offset(0, delta) : Offset(delta, 0);
+      final physicalDelta = _physicalScrollDelta(delta, axisDirection);
+      final offsetDelta =
+          isVertical ? Offset(0, physicalDelta) : Offset(physicalDelta, 0);
       arbiter.applyDelta(offsetDelta);
       return;
     }
@@ -97,7 +106,9 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
     final atEnd = pixels >= maxScrollExtent;
 
     if ((delta > 0 && atStart) || (delta < 0 && atEnd)) {
-      final offsetDelta = isVertical ? Offset(0, delta) : Offset(delta, 0);
+      final physicalDelta = _physicalScrollDelta(delta, axisDirection);
+      final offsetDelta =
+          isVertical ? Offset(0, physicalDelta) : Offset(physicalDelta, 0);
       if (arbiter.isDeltaAllowed(offsetDelta)) {
         if (!_isDismissDragging) {
           _isDismissDragging = true;
@@ -116,7 +127,9 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
     final arbiter = _arbiter;
     if (arbiter != null && _isDismissDragging) {
       _isDismissDragging = false;
-      arbiter.endDrag(velocity: -velocity);
+      arbiter.endDrag(
+        velocity: _physicalScrollDelta(-velocity, axisDirection),
+      );
       beginActivity(IdleScrollActivity(this));
       return;
     }

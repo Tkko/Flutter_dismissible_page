@@ -23,7 +23,7 @@ enum DismissiblePageDismissDirection {
   down,
 
   /// Can be dismissed by dragging any direction.
-  multi,
+  all,
 
   /// Cannot be dismissed by dragging.
   none
