@@ -61,32 +61,27 @@ class SecondPage extends StatelessWidget {
       onDismissed: () => Navigator.of(context).pop(),
       // Start of the optional properties
       isFullScreen: false,
-      disabled: false,
-      minRadius: 10,
-      maxRadius: 10,
+      enabled: true,
+      borderRadius: const DismissiblePageRadius.fixed(10),
       dragSensitivity: 1.0,
       maxTransformValue: .8,
       direction: DismissiblePageDismissDirection.multi,
-      backgroundColor: Colors.black,
+      background: const DismissiblePageBackground.solid(Colors.black),
       onDragStart: () {
         print('onDragStart');
       },
       onDragUpdate: (details) {
         print(details);
       },
-      dismissThresholds: {
+      dismissThresholds: const {
         DismissiblePageDismissDirection.vertical: .2,
       },
       minScale: .8,
-      startingOpacity: 1,
       reverseDuration: const Duration(milliseconds: 250),
       // End of the optional properties
       child: Scaffold(
         body: SingleChildScrollView(
-          // Expected result For ClampingScrollPhysics (https://user-images.githubusercontent.com/26390946/194924545-1712b63b-2a25-4182-b731-db49ecc50c23.mov)
-          // Expected result for BouncingScrollPhysics (https://user-images.githubusercontent.com/26390946/194924598-eb3d3d54-b1de-4ba1-a22a-52a08e3c25b3.mov)
-          physics: ClampingScrollPhysics(),
-          // physics: BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           child: Column(
             children: [
               Hero(

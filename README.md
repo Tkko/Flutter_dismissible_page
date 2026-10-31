@@ -103,31 +103,62 @@ class SecondPage extends StatelessWidget {
 }
 ```
 
+## Scrollable Coordination (ListView, CustomScrollView, PageView)
+
+`DismissiblePage` coordinates seamlessly with inner scrollables:
+- **Zero Configuration**: Any `ListView`, `GridView`, or `CustomScrollView` passed to `child:` automatically inherits the controller via `PrimaryScrollController`.
+- **Builder pattern**: Use `builder: (context, controller)` to explicitly attach `controller` to your scrollable.
+- **Authentic Scroll Physics**: Works natively with both iOS `BouncingScrollPhysics` and Android `ClampingScrollPhysics`. Inner scroll momentum, bounce, and deceleration remain 100% authentic.
+
+```dart
+DismissiblePage(
+  onDismissed: () => Navigator.of(context).pop(),
+  builder: (context, controller) => ListView.builder(
+    controller: controller,
+    itemCount: 50,
+    itemBuilder: (context, index) => ListTile(title: Text('Item $index')),
+  ),
+)
+```
+
 ## Properties
 
 ``` dart
   const DismissiblePage({
-    required this.child,
     required this.onDismissed,
+    this.controller,
+    this.child,
+    this.builder,
     this.onDragStart,
     this.onDragEnd,
+    this.onDragCancel,
     this.onDragUpdate,
     this.isFullScreen = true,
-    this.disabled = false,
-    this.backgroundColor = Colors.black,
+    this.enabled = true,
+    this.background = const DismissiblePageBackground.transition(
+      from: Colors.black,
+      to: Colors.transparent,
+    ),
+    this.borderRadius = const DismissiblePageRadius.transition(),
     this.direction = DismissiblePageDismissDirection.vertical,
     this.dismissThresholds = const <DismissiblePageDismissDirection, double>{},
     this.dragStartBehavior = DragStartBehavior.down,
     this.dragSensitivity = 0.7,
-    this.minRadius = 7,
     this.minScale = .85,
-    this.maxRadius = 30,
     this.maxTransformValue = .4,
-    this.startingOpacity = 1,
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
+
+  /// An optional [DismissiblePageScrollController] for coordinating scrollables.
+  final DismissiblePageScrollController? controller;
+
+  /// The widget below this widget in the tree.
+  final Widget? child;
+
+  /// A builder function providing a [DismissiblePageScrollController].
+  final Widget Function(BuildContext context, DismissiblePageScrollController controller)? builder;
 
   /// Called when the widget has been dismissed.
   final VoidCallback onDismissed;
@@ -138,38 +169,31 @@ class SecondPage extends StatelessWidget {
   /// Called when the user ends dragging the widget.
   final VoidCallback? onDragEnd;
 
-  /// Called when the widget has been dragged. (0.0 - 1.0)
+  /// Called when a drag gesture is cancelled.
+  final VoidCallback? onDragCancel;
+
+  /// Called when the widget has been dragged with progress, offset, radius, scale and opacity details.
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
 
   /// If true widget will ignore device padding
   /// [MediaQuery.of(context).padding]
   final bool isFullScreen;
 
+  /// If false, dismiss gesture interactions are disabled.
+  final bool enabled;
+
+  /// Configuration for the background scrim behind the dismissing widget.
+  final DismissiblePageBackground background;
+
+  /// Configuration for the corner radius applied to the content during drag.
+  final DismissiblePageRadius borderRadius;
+
   /// The minimum amount of scale widget can have while dragging
   /// Note that scale decreases as user drags
   final double minScale;
 
-  /// The minimum amount fo border radius widget can have
-  final double minRadius;
-
-  /// The maximum amount of border radius widget can have while dragging
-  /// Note that radius increases as user drags
-  final double maxRadius;
-
   /// The amount of distance widget is able to drag. value (0.0 - 1.0)
   final double maxTransformValue;
-
-  /// If true the widget will ignore gestures
-  final bool disabled;
-
-  /// Widget that should be dismissed
-  final Widget child;
-
-  /// Background color of [DismissiblePage]
-  final Color backgroundColor;
-
-  /// The amount of opacity [backgroundColor] will have when start dragging the widget.
-  final double startingOpacity;
 
   /// The direction in which the widget can be dismissed.
   final DismissiblePageDismissDirection direction;
@@ -179,7 +203,6 @@ class SecondPage extends StatelessWidget {
   final Map<DismissiblePageDismissDirection, double> dismissThresholds;
 
   /// Represents how much responsive dragging the widget will be
-  /// Doesn't work on [DismissiblePageDismissDirection.multi]
   final double dragSensitivity;
 
   /// Determines the way that drag start behavior is handled.

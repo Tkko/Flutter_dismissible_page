@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:dismissible_page_example/demo/models/models.dart';
+import 'package:dismissible_page_example/demo/pages/showcase_gallery.dart';
 import 'package:dismissible_page_example/demo/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,6 +28,8 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: max(20, MediaQuery.of(context).padding.top)),
+            ShowcaseGallery(pageModel: pageModel),
+            const SizedBox(height: 20),
             Contacts(pageModel: pageModel),
             Stories(pageModel: pageModel),
             LargeImages(pageModel: pageModel),
@@ -69,7 +72,10 @@ class _PropertiesState extends State<Properties> {
   Widget build(BuildContext context) {
     return DismissibleDemo(
       pageModel: pageModel,
-      startingOpacity: .5,
+      background: DismissiblePageBackground.fadeOut(
+        Colors.black,
+        startOpacity: .5,
+      ),
       child: GestureDetector(
         onTap: () => Navigator.of(context).pop(),
         behavior: HitTestBehavior.translucent,
@@ -95,9 +101,9 @@ class _PropertiesState extends State<Properties> {
                       ),
                       AppChip(
                         onSelected: () => setState(
-                            () => pageModel.disabled = !pageModel.disabled),
-                        isSelected: pageModel.disabled,
-                        title: 'disabled',
+                            () => pageModel.enabled = !pageModel.enabled),
+                        isSelected: pageModel.enabled,
+                        title: 'enabled',
                       ),
                     ]),
                     SizedBox(height: 20),
@@ -114,7 +120,9 @@ class _PropertiesState extends State<Properties> {
                           },
                           isSelected: item == pageModel.direction,
                           title: '$item'.replaceAll(
-                              'DismissiblePageDismissDirection.', ''),
+                            'DismissiblePageDismissDirection.',
+                            '',
+                          ),
                         );
                       }).toList(),
                     ),
@@ -286,13 +294,13 @@ class Stories extends StatelessWidget {
 class DismissibleDemo extends StatelessWidget {
   final DismissiblePageModel pageModel;
   final Widget child;
-  final double startingOpacity;
+  final DismissiblePageBackground? background;
 
   const DismissibleDemo({
     Key? key,
     required this.pageModel,
     required this.child,
-    this.startingOpacity = 1,
+    this.background,
   }) : super(key: key);
 
   @override
@@ -300,17 +308,15 @@ class DismissibleDemo extends StatelessWidget {
     return DismissiblePage(
       onDismissed: () => Navigator.of(context).pop(),
       isFullScreen: pageModel.isFullScreen,
-      minRadius: pageModel.minRadius,
-      maxRadius: pageModel.maxRadius,
+      borderRadius: pageModel.borderRadius,
       dragSensitivity: pageModel.dragSensitivity,
       maxTransformValue: pageModel.maxTransformValue,
       direction: pageModel.direction,
-      disabled: pageModel.disabled,
-      backgroundColor: pageModel.backgroundColor,
+      enabled: pageModel.enabled,
+      background: background ?? pageModel.background,
       dismissThresholds: pageModel.dismissThresholds,
       dragStartBehavior: pageModel.dragStartBehavior,
       minScale: pageModel.minScale,
-      startingOpacity: startingOpacity,
       hitTestBehavior: pageModel.behavior,
       reverseDuration: pageModel.reverseDuration,
       // onDragUpdate: (d) => print(d.offset.dy),

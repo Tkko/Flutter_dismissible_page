@@ -5,40 +5,55 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class DismissiblePageModel {
+  static const List<String> naturePhotos = [
+    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=600&auto=format&fit=crop&q=80',
+  ];
+
+  static const List<String> foodPhotos = [
+    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&auto=format&fit=crop&q=80',
+  ];
+
   DismissiblePageModel() {
     stories = [
-      StoryModel(title: 'Random', imageUrl: randomNature),
-      StoryModel(title: 'Photos', imageUrl: randomNature),
-      StoryModel(title: 'From', imageUrl: randomFood),
-      StoryModel(title: 'Unsplash', imageUrl: randomNature),
+      StoryModel(title: 'Random', imageUrl: naturePhotos[0]),
+      StoryModel(title: 'Photos', imageUrl: naturePhotos[1]),
+      StoryModel(title: 'From', imageUrl: foodPhotos[0]),
+      StoryModel(title: 'Unsplash', imageUrl: naturePhotos[2]),
     ];
   }
 
-  String get randomFood =>
-      'https://source.unsplash.com/collection/1424340/${Random().nextInt(20) + 400}x${Random().nextInt(20) + 600}';
+  String get randomFood => foodPhotos[Random().nextInt(foodPhotos.length)];
 
   String get randomNature =>
-      'https://source.unsplash.com/collection/1319040/${Random().nextInt(20) + 400}x${Random().nextInt(20) + 600}';
+      naturePhotos[Random().nextInt(naturePhotos.length)];
 
   List<StoryModel> stories = [];
   final contacts = {
     'GitHub': 'https://github.com/Tkko',
     'LinkedIn': 'https://www.linkedin.com/in/thornike/',
-    'Medium': 'https://thornike.medium.com/',
-    'Pub': 'https://pub.dev/publishers/fman.ge/packages',
+    'Pub': 'https://pub.dev/publishers/tornike.dev/packages',
   };
 
   Duration transitionDuration = const Duration(milliseconds: 250);
   Duration reverseTransitionDuration = const Duration(milliseconds: 250);
   bool isFullScreen = true;
-  bool disabled = false;
-  double startingOpacity = 1;
+  bool enabled = true;
   double minScale = .85;
-  double minRadius = 7;
-  double maxRadius = 30;
   double maxTransformValue = .5;
   double dragSensitivity = .7;
-  Color backgroundColor = Colors.black;
+  DismissiblePageBackground background =
+      const DismissiblePageBackground.transition(
+    from: Colors.black,
+    to: Colors.transparent,
+  );
+  DismissiblePageRadius borderRadius =
+      const DismissiblePageRadius.transition(from: 7, to: 30);
   DismissiblePageDismissDirection direction =
       DismissiblePageDismissDirection.vertical;
   Map<DismissiblePageDismissDirection, double> dismissThresholds =

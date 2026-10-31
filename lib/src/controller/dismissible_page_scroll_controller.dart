@@ -1,0 +1,132 @@
+part of '../dismissible_page.dart';
+
+/// A [ScrollController] that seamlessly bridges a scrollable widget
+/// ([ListView], [CustomScrollView], [GridView], etc.) with a [DismissiblePage].
+///
+/// Automatically coordinates with [BouncingScrollPhysics] (iOS) and
+/// [ClampingScrollPhysics] (Android) to preserve authentic scroll friction,
+/// velocity, and spring simulations while enabling drag-to-dismiss.
+class DismissiblePageScrollController extends ScrollController {
+  DismissiblePageScrollController({
+    super.initialScrollOffset,
+    super.keepScrollOffset,
+    super.debugLabel,
+  });
+
+  _DismissibleArbiter? _arbiter;
+
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return _DismissiblePageScrollPosition(
+      physics: physics,
+      context: context,
+      oldPosition: oldPosition,
+      getArbiter: () => _arbiter,
+      initialPixels: initialScrollOffset,
+      keepScrollOffset: keepScrollOffset,
+      debugLabel: debugLabel,
+    );
+  }
+}
+
+class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
+  _DismissiblePageScrollPosition({
+    required super.physics,
+    required super.context,
+    required this.getArbiter,
+    super.initialPixels,
+    super.keepScrollOffset,
+    super.oldPosition,
+    super.debugLabel,
+  });
+
+  final _DismissibleArbiter? Function() getArbiter;
+
+  _DismissibleArbiter? get _arbiter => getArbiter();
+
+  bool _isDismissDragging = false;
+
+  @override
+  void applyUserOffset(double delta) {
+    final arbiter = _arbiter;
+    if (arbiter == null ||
+        arbiter.direction == DismissiblePageDismissDirection.none) {
+      super.applyUserOffset(delta);
+      return;
+    }
+
+    final isVertical = axis == Axis.vertical;
+    final currentCoord = isVertical ? arbiter.offset.dy : arbiter.offset.dx;
+    final sensitivity = arbiter.dragSensitivity;
+
+    // 1. If page is currently offset away from origin:
+    // Any reverse drag must return the page to origin first (Fixes Issue #36)
+    if (currentCoord != 0) {
+      final isReversing =
+          (currentCoord > 0 && delta < 0) || (currentCoord < 0 && delta > 0);
+      if (isReversing) {
+        final neededDelta = -currentCoord / sensitivity;
+        if (delta.abs() >= neededDelta.abs()) {
+          // Reached or crossed origin: reset coordinate to 0 and pass leftover to list!
+          final leftover = delta - neededDelta;
+          arbiter.setOffset(
+            isVertical
+                ? Offset(arbiter.offset.dx, 0)
+                : Offset(0, arbiter.offset.dy),
+          );
+          _isDismissDragging = false;
+          if (leftover != 0.0) {
+            super.applyUserOffset(leftover);
+          }
+          return;
+        }
+      }
+
+      // Absorb into page drag
+      final offsetDelta = isVertical ? Offset(0, delta) : Offset(delta, 0);
+      arbiter.applyDelta(offsetDelta);
+      return;
+    }
+
+    // 2. At edges (top or bottom):
+    final atStart = pixels <= minScrollExtent;
+    final atEnd = pixels >= maxScrollExtent;
+
+    if ((delta > 0 && atStart) || (delta < 0 && atEnd)) {
+      final offsetDelta = isVertical ? Offset(0, delta) : Offset(delta, 0);
+      if (arbiter.isDeltaAllowed(offsetDelta)) {
+        if (!_isDismissDragging) {
+          _isDismissDragging = true;
+          arbiter.startDrag();
+        }
+        arbiter.applyDelta(offsetDelta);
+        return;
+      }
+    }
+
+    super.applyUserOffset(delta);
+  }
+
+  @override
+  void goBallistic(double velocity) {
+    final arbiter = _arbiter;
+    if (arbiter != null && _isDismissDragging) {
+      _isDismissDragging = false;
+      arbiter.endDrag(velocity: -velocity);
+      beginActivity(IdleScrollActivity(this));
+      return;
+    }
+
+    super.goBallistic(velocity);
+  }
+
+  @override
+  void dispose() {
+    _isDismissDragging = false;
+    super.dispose();
+  }
+}

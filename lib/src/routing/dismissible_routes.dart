@@ -1,4 +1,4 @@
-part of 'dismissible_page.dart';
+part of '../dismissible_page.dart';
 
 class TransparentRoute<T> extends PageRoute<T>
     with CupertinoRouteTransitionMixin<T> {
@@ -8,10 +8,10 @@ class TransparentRoute<T> extends PageRoute<T>
     required this.transitionDuration,
     required this.reverseTransitionDuration,
     this.title,
-    RouteSettings? settings,
+    super.settings,
     this.maintainState = true,
-    bool fullscreenDialog = true,
-  }) : super(settings: settings, fullscreenDialog: fullscreenDialog);
+    super.fullscreenDialog = true,
+  });
 
   final WidgetBuilder builder;
 

@@ -1,4 +1,4 @@
-part of 'dismissible_page.dart';
+part of '../dismissible_page.dart';
 
 const _transitionDuration = Duration(milliseconds: 250);
 
