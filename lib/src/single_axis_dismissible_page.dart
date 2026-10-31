@@ -269,10 +269,10 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
         direction: widget.direction,
         child: AnimatedBuilder(
           animation: _moveAnimation,
-          builder: (BuildContext context, Widget? child) {
+          builder: (context, child) {
             final backgroundColor = widget.backgroundColor == Colors.transparent
                 ? Colors.transparent
-                : widget.backgroundColor.withOpacity(_opacity);
+                : widget.backgroundColor.withValues(alpha: _opacity);
 
             return Container(
               padding: widget.contentPadding,

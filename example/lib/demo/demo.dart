@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
-import 'package:example/demo/pages/dismissible_page_demo.dart';
+import 'package:dismissible_page_example/demo/pages/dismissible_page_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -27,13 +27,13 @@ class AppView extends StatelessWidget {
           theme: ThemeData(
             primaryColor: accentColor,
             scaffoldBackgroundColor: Colors.white,
-            appBarTheme: AppBarTheme(color: Colors.white),
+            appBarTheme: AppBarTheme(backgroundColor: Colors.white),
             chipTheme: ChipThemeData(selectedColor: accentColor),
             sliderTheme: SliderThemeData(
               activeTrackColor: accentColor,
               activeTickMarkColor: accentColor,
               thumbColor: accentColor,
-              inactiveTrackColor: accentColor.withOpacity(.2),
+              inactiveTrackColor: accentColor.withValues(alpha: .2),
             ),
           ),
           home: ScrollConfiguration(

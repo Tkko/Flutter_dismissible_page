@@ -11,7 +11,6 @@ mixin _DismissiblePageMixin {
   late final AnimationController _moveController;
   int _activePointerCount = 0;
 
-  // ignore: prefer_final_fields
   bool _dragUnderway = false;
 
   bool get _isActive => _dragUnderway || _moveController.isAnimating;
@@ -57,7 +56,7 @@ class _DismissiblePageListener extends StatelessWidget {
   }
 
   bool _isSameDirections(ScrollMetrics metrics) {
-    final Axis axis = metrics.axis;
+    final axis = metrics.axis;
     switch (direction) {
       case DismissiblePageDismissDirection.vertical:
         return axis == Axis.vertical;
@@ -103,7 +102,7 @@ class _DismissiblePageListener extends StatelessWidget {
     onPointerDown?.call(event);
   }
 
-  void _onPointerUp(_) {
+  void _onPointerUp(PointerEvent event) {
     parentState._activePointerCount--;
     if (_dragUnderway && parentState._activePointerCount == 0) {
       onEnd(DragEndDetails());

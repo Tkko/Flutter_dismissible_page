@@ -7,6 +7,7 @@ analyzer:
   exclude:
     - flutter/**
     - lib/api/*.dart
+    - build/**
 
 
 linter:
@@ -17,7 +18,7 @@ linter:
     library_private_types_in_public_api: false
     no_default_cases: false
     avoid_renaming_method_parameters: false
-    omit_local_variable_types: false
+    omit_local_variable_types: true
     require_trailing_commas: true
     prefer_const_constructors: true
     prefer_const_declarations: true

@@ -22,7 +22,7 @@ class SimpleExample extends StatelessWidget {
         titleTextStyle: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          color: Colors.black.withOpacity(.85),
+          color: Colors.black.withValues(alpha: .85),
         ),
       ),
       body: Center(

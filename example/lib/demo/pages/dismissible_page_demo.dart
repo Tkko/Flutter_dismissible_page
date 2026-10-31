@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:dismissible_page/dismissible_page.dart';
-import 'package:example/demo/models/models.dart';
-import 'package:example/demo/widgets/widgets.dart';
+import 'package:dismissible_page_example/demo/models/models.dart';
+import 'package:dismissible_page_example/demo/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
