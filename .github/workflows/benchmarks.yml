@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Tkko/better-actions
-          ref: ddf7928512e456918edc559fe00502d073d162ee
+          ref: main
           path: .github/workflow-actions
           sparse-checkout: .github/actions
           sparse-checkout-cone-mode: false
