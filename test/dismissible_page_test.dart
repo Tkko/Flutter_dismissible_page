@@ -1,5 +1,6 @@
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -85,6 +86,61 @@ void main() {
       expect(lastDetails, isNotNull);
       expect(lastDetails!.progress, greaterThan(0));
       expect(lastDetails!.offset.dy, greaterThan(0));
+    });
+
+    testWidgets('zero maxTransformValue applies effects after first movement',
+        (tester) async {
+      DismissiblePageDragUpdateDetails? details;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DismissiblePage(
+            maxTransformValue: 0,
+            minScale: 0.5,
+            onDismissed: () {},
+            onDragUpdate: (value) => details = value,
+            child: const SizedBox.expand(),
+          ),
+        ),
+      );
+
+      await tester.drag(
+        find.byType(DismissiblePage),
+        const Offset(0, 1),
+      );
+      await tester.pump();
+
+      expect(details, isNotNull);
+      expect(details!.progress, 1);
+      expect(details!.scale, 0.5);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('disallowed-axis pan does not start page drag callbacks',
+        (tester) async {
+      var started = false;
+      var ended = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DismissiblePage(
+            direction: DismissiblePageDismissDirection.down,
+            onDismissed: () {},
+            onDragStart: () => started = true,
+            onDragEnd: () => ended = true,
+            child: const SizedBox.expand(),
+          ),
+        ),
+      );
+
+      await tester.drag(
+        find.byType(DismissiblePage),
+        const Offset(100, 0),
+      );
+      await tester.pumpAndSettle();
+
+      expect(started, isFalse);
+      expect(ended, isFalse);
     });
 
     testWidgets('calls onDragStart, onDragEnd, onDismissed on fling',
@@ -344,6 +400,48 @@ void main() {
       expect(find.text('Update'), findsOneWidget);
     });
 
+    testWidgets('equivalent threshold maps preserve an active drag',
+        (tester) async {
+      var thresholds = <DismissiblePageSide, double>{
+        DismissiblePageSide.down: 0.2,
+      };
+      StateSetter? rebuild;
+      DismissiblePageDragUpdateDetails? details;
+
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (context, setState) {
+            rebuild = setState;
+            return MaterialApp(
+              home: DismissiblePage(
+                dismissThresholds: thresholds,
+                onDismissed: () {},
+                onDragUpdate: (value) => details = value,
+                child: const SizedBox.expand(),
+              ),
+            );
+          },
+        ),
+      );
+
+      final gesture = await tester.startGesture(const Offset(200, 200));
+      await gesture.moveBy(const Offset(0, 40));
+      await tester.pump();
+      final initialOffset = details!.offset.dy;
+
+      rebuild!(() {
+        thresholds = Map.of(thresholds);
+      });
+      await tester.pump();
+
+      await gesture.moveBy(const Offset(0, 10));
+      await tester.pump();
+      expect(details!.offset.dy, greaterThan(initialOffset));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
     testWidgets('didUpdateWidget uses updated callbacks', (tester) async {
       var useLatestCallback = false;
       var oldCallbackCalled = false;
@@ -555,6 +653,21 @@ void main() {
       expect(bg1.hashCode, equals(bg2.hashCode));
       expect(bg1, isNot(equals(bg3)));
     });
+
+    test('isNone returns true only for none', () {
+      expect(const DismissiblePageBackground.none().isNone, isTrue);
+      expect(
+        const DismissiblePageBackground.transition(
+          from: Colors.black,
+          to: Colors.transparent,
+        ).isNone,
+        isFalse,
+      );
+      expect(
+        const DismissiblePageBackground.solid(Colors.white).isNone,
+        isFalse,
+      );
+    });
   });
 
   group('DismissiblePageRadius Tests', () {
@@ -587,5 +700,80 @@ void main() {
       expect(r1.hashCode, equals(r2.hashCode));
       expect(r1, isNot(equals(r3)));
     });
+
+    test('isNone returns true only for none', () {
+      expect(const DismissiblePageRadius.none().isNone, isTrue);
+      expect(
+        const DismissiblePageRadius.transition(from: 0, to: 10).isNone,
+        isFalse,
+      );
+      expect(const DismissiblePageRadius.fixed(10).isNone, isFalse);
+    });
   });
+
+  group('DismissiblePage Performance & Repaint Isolation Tests', () {
+    testWidgets('child content is not repainted during drag gesture updates',
+        (tester) async {
+      var childPaintCount = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DismissiblePage(
+              onDismissed: () {},
+              child: _RepaintCounter(
+                onPaint: () => childPaintCount++,
+                child: const SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: Text('Performance test content'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Initial layout and paint
+      expect(childPaintCount, 1);
+
+      // Perform a multi-step drag
+      final gesture = await tester.startGesture(const Offset(100, 100));
+      for (var i = 0; i < 5; i++) {
+        await gesture.moveBy(const Offset(0, 15));
+        await tester.pump();
+      }
+
+      // Child should NOT have been repainted during drag updates
+      expect(childPaintCount, 1);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Even during reverse snap-back animation, child is not repainted
+      expect(childPaintCount, 1);
+    });
+  });
+}
+
+class _RepaintCounter extends SingleChildRenderObjectWidget {
+  const _RepaintCounter({required this.onPaint, super.child});
+
+  final VoidCallback onPaint;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderRepaintCounter(onPaint);
+}
+
+class _RenderRepaintCounter extends RenderProxyBox {
+  _RenderRepaintCounter(this.onPaint);
+
+  final VoidCallback onPaint;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    onPaint();
+    super.paint(context, offset);
+  }
 }

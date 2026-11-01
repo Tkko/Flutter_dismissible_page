@@ -73,6 +73,12 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
     // 1. If page is currently offset away from origin:
     // Any reverse drag must return the page to origin first (Fixes Issue #36)
     if (currentCoord != 0) {
+      // Touching a displaced page (also one still rebounding) takes it over
+      // before anything else, which stops the rebound animation.
+      if (!_isDismissDragging) {
+        _isDismissDragging = true;
+        arbiter.startDrag();
+      }
       final isReversing =
           (currentCoord > 0 && delta < 0) || (currentCoord < 0 && delta > 0);
       if (isReversing) {
@@ -85,7 +91,9 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
                 ? Offset(arbiter.offset.dx, 0)
                 : Offset(0, arbiter.offset.dy),
           );
+          // The page is home again; the rest of the gesture belongs to the list.
           _isDismissDragging = false;
+          arbiter.endDrag();
           if (leftover != 0.0) {
             super.applyUserOffset(leftover);
           }
@@ -93,7 +101,7 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
         }
       }
 
-      // Absorb into page drag
+      // Absorb into page drag.
       final physicalDelta = _physicalScrollDelta(delta, axisDirection);
       final offsetDelta =
           isVertical ? Offset(0, physicalDelta) : Offset(physicalDelta, 0);
@@ -124,9 +132,10 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void goBallistic(double velocity) {
+    final wasDismissDragging = _isDismissDragging;
+    _isDismissDragging = false;
     final arbiter = _arbiter;
-    if (arbiter != null && _isDismissDragging) {
-      _isDismissDragging = false;
+    if (wasDismissDragging && arbiter != null && arbiter.isDragging) {
       arbiter.endDrag(
         velocity: _physicalScrollDelta(-velocity, axisDirection),
       );
@@ -139,7 +148,10 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void dispose() {
-    _isDismissDragging = false;
+    if (_isDismissDragging) {
+      _isDismissDragging = false;
+      _arbiter?.cancelDrag();
+    }
     super.dispose();
   }
 }

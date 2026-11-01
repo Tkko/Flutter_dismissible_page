@@ -21,7 +21,7 @@ class _DismissibleArbiter extends ChangeNotifier {
     this.onDragCancel,
     this.onDragUpdate,
   }) : assert(
-          dismissThresholds.values.every((value) => value >= 0 && value <= 1),
+          _validThresholds(dismissThresholds),
           'Dismiss thresholds must be between 0.0 and 1.0',
         ) {
     _animationController = AnimationController(
@@ -32,14 +32,14 @@ class _DismissibleArbiter extends ChangeNotifier {
       ..addStatusListener(_handleAnimationStatus);
   }
 
-  final DismissiblePageDismissDirection direction;
-  final Map<DismissiblePageSide, double> dismissThresholds;
-  final DismissiblePageBackground background;
-  final DismissiblePageRadius borderRadius;
-  final double minScale;
-  final double maxTransformValue;
-  final double dragSensitivity;
-  final Duration reverseDuration;
+  DismissiblePageDismissDirection direction;
+  Map<DismissiblePageSide, double> dismissThresholds;
+  DismissiblePageBackground background;
+  DismissiblePageRadius borderRadius;
+  double minScale;
+  double maxTransformValue;
+  double dragSensitivity;
+  Duration reverseDuration;
 
   VoidCallback onDismissed;
   VoidCallback? onDragStart;
@@ -51,6 +51,7 @@ class _DismissibleArbiter extends ChangeNotifier {
 
   Offset _dragOffset = Offset.zero;
   Offset _animationStartOffset = Offset.zero;
+  DismissiblePageDragUpdateDetails? _details;
   bool _isDragging = false;
   Size _layoutSize = Size.zero;
   TextDirection _textDirection = TextDirection.ltr;
@@ -61,8 +62,43 @@ class _DismissibleArbiter extends ChangeNotifier {
   Offset get offset => _dragOffset;
 
   void updateLayout(Size size, TextDirection textDirection) {
+    if (_layoutSize == size && _textDirection == textDirection) return;
     _layoutSize = size;
     _textDirection = textDirection;
+    _details = null;
+  }
+
+  static bool _validThresholds(Map<DismissiblePageSide, double> thresholds) =>
+      thresholds.values.every((value) => value >= 0 && value <= 1);
+
+  /// Applies new configuration in place so an active drag or rebound
+  /// survives rebuilds of the owning widget.
+  void updateConfig({
+    required DismissiblePageDismissDirection direction,
+    required Map<DismissiblePageSide, double> dismissThresholds,
+    required DismissiblePageBackground background,
+    required DismissiblePageRadius borderRadius,
+    required double minScale,
+    required double maxTransformValue,
+    required double dragSensitivity,
+    required Duration reverseDuration,
+  }) {
+    assert(
+      _validThresholds(dismissThresholds),
+      'Dismiss thresholds must be between 0.0 and 1.0',
+    );
+    this.direction = direction;
+    this.dismissThresholds = dismissThresholds;
+    this.background = background;
+    this.borderRadius = borderRadius;
+    this.minScale = minScale;
+    this.maxTransformValue = maxTransformValue;
+    this.dragSensitivity = dragSensitivity;
+    if (this.reverseDuration != reverseDuration) {
+      this.reverseDuration = reverseDuration;
+      _animationController.duration = reverseDuration;
+    }
+    _details = null;
   }
 
   void updateCallbacks({
@@ -81,6 +117,10 @@ class _DismissibleArbiter extends ChangeNotifier {
 
   double get progress {
     if (_layoutSize.isEmpty) return 0;
+    if (maxTransformValue == 0) {
+      return _dragOffset == Offset.zero ? 0 : 1;
+    }
+
     final normalizedX =
         (_dragOffset.dx.abs() / _layoutSize.width) / maxTransformValue;
     final normalizedY =
@@ -110,8 +150,9 @@ class _DismissibleArbiter extends ChangeNotifier {
     return color.a;
   }
 
+  /// Snapshot of the current drag state, computed once per offset change.
   DismissiblePageDragUpdateDetails get currentDetails =>
-      DismissiblePageDragUpdateDetails(
+      _details ??= DismissiblePageDragUpdateDetails(
         offset: _dragOffset,
         progress: progress,
         radius: radius,
@@ -119,10 +160,16 @@ class _DismissibleArbiter extends ChangeNotifier {
         scale: scale,
       );
 
-  void setOffset(Offset newOffset) {
+  void _publish(Offset newOffset) {
     _dragOffset = newOffset;
+    _details = null;
     onDragUpdate?.call(currentDetails);
     notifyListeners();
+  }
+
+  void setOffset(Offset newOffset) {
+    if (newOffset == _dragOffset) return;
+    _publish(newOffset);
   }
 
   void startDrag() {
@@ -178,8 +225,6 @@ class _DismissibleArbiter extends ChangeNotifier {
 
   /// Applies a drag delta constrained to allowed axes.
   void applyDelta(Offset delta) {
-    if (!_isDragging) startDrag();
-
     var effectiveDelta = delta * dragSensitivity;
 
     switch (direction) {
@@ -211,9 +256,11 @@ class _DismissibleArbiter extends ChangeNotifier {
         return;
     }
 
-    _dragOffset += effectiveDelta;
-    onDragUpdate?.call(currentDetails);
-    notifyListeners();
+    if (effectiveDelta == Offset.zero) return;
+
+    if (!_isDragging) startDrag();
+
+    _publish(_dragOffset + effectiveDelta);
   }
 
   void endDrag({double velocity = 0.0}) {
@@ -227,9 +274,19 @@ class _DismissibleArbiter extends ChangeNotifier {
       onDragEnd?.call();
       onDismissed();
     } else {
-      animateToZero();
+      if (isOffsetNonZero) animateToZero();
       onDragEnd?.call();
     }
+  }
+
+  /// Abandons any drag or rebound immediately and returns to the origin.
+  void reset() {
+    final wasDragging = _isDragging;
+    _isDragging = false;
+    _animationController.stop();
+    _animationStartOffset = Offset.zero;
+    setOffset(Offset.zero);
+    if (wasDragging) onDragCancel?.call();
   }
 
   bool get _hasReachedDismissThreshold {
@@ -274,7 +331,7 @@ class _DismissibleArbiter extends ChangeNotifier {
   void cancelDrag() {
     if (!_isDragging) return;
     _isDragging = false;
-    animateToZero();
+    if (isOffsetNonZero) animateToZero();
     onDragCancel?.call();
   }
 
@@ -284,22 +341,20 @@ class _DismissibleArbiter extends ChangeNotifier {
   }
 
   void _handleAnimationTick() {
-    _dragOffset = Offset.lerp(
-      _animationStartOffset,
-      Offset.zero,
-      Curves.easeOutCubic.transform(_animationController.value),
-    )!;
-    onDragUpdate?.call(currentDetails);
-    notifyListeners();
+    setOffset(
+      Offset.lerp(
+        _animationStartOffset,
+        Offset.zero,
+        Curves.easeOutCubic.transform(_animationController.value),
+      )!,
+    );
   }
 
   void _handleAnimationStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      _dragOffset = Offset.zero;
       _animationStartOffset = Offset.zero;
       _animationController.reset();
-      onDragUpdate?.call(currentDetails);
-      notifyListeners();
+      setOffset(Offset.zero);
     }
   }
 

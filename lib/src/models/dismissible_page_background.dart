@@ -35,6 +35,9 @@ class DismissiblePageBackground {
         endColor = null,
         curve = Curves.linear;
 
+  /// Whether this background configuration defines no background painting.
+  bool get isNone => startColor == null && endColor == null;
+
   /// The color at the start of the drag gesture (progress = 0.0).
   final Color? startColor;
 

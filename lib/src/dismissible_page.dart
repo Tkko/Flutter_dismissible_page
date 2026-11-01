@@ -169,6 +169,7 @@ class DismissiblePage extends StatelessWidget {
   /// Fraction of page dimension at which visual effects reach their final values.
   ///
   /// Does not limit translation or affect [dismissThresholds].
+  /// When zero, effects reach their final values at any nonzero offset.
   final double maxTransformValue;
 
   /// Duration to animate back to original position when not dismissed.

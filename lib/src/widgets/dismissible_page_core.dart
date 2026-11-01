@@ -57,6 +57,10 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
   late _DismissibleArbiter _arbiter;
   DismissiblePageScrollController? _internalController;
 
+  // Keeps the content subtree (and its scroll state) alive when [enabled]
+  // flips and the wrapper structure around it changes.
+  final GlobalKey _contentKey = GlobalKey();
+
   DismissiblePageScrollController get _effectiveController =>
       widget.controller ??
       (_internalController ??= DismissiblePageScrollController());
@@ -81,17 +85,21 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     if (widget.controller != oldWidget.controller) {
       (oldWidget.controller ?? _internalController)?._arbiter = null;
     }
-    if (widget.enabled != oldWidget.enabled ||
-        widget.direction != oldWidget.direction ||
-        widget.dismissThresholds != oldWidget.dismissThresholds ||
-        widget.dragSensitivity != oldWidget.dragSensitivity ||
-        widget.background != oldWidget.background ||
-        widget.borderRadius != oldWidget.borderRadius ||
-        widget.minScale != oldWidget.minScale ||
-        widget.maxTransformValue != oldWidget.maxTransformValue ||
-        widget.reverseDuration != oldWidget.reverseDuration) {
-      _arbiter.dispose();
-      _initArbiter();
+    _arbiter.updateConfig(
+      direction: widget.direction,
+      dismissThresholds: widget.dismissThresholds,
+      background: widget.background,
+      borderRadius: widget.borderRadius,
+      minScale: widget.minScale,
+      maxTransformValue: widget.maxTransformValue,
+      dragSensitivity: widget.dragSensitivity,
+      reverseDuration: widget.reverseDuration,
+    );
+    if (oldWidget.enabled && !widget.enabled) {
+      // Callbacks must not run mid-build, so settle the page after this frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !widget.enabled) _arbiter.reset();
+      });
     }
     _effectiveController._arbiter = widget.enabled ? _arbiter : null;
   }
@@ -117,33 +125,49 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
 
   @override
   void dispose() {
-    _effectiveController._arbiter = null;
+    (widget.controller ?? _internalController)?._arbiter = null;
     _internalController?.dispose();
     _arbiter.dispose();
     super.dispose();
-  }
-
-  void _handlePanStart(DragStartDetails details) {
-    _arbiter.startDrag();
   }
 
   void _handlePanUpdate(DragUpdateDetails details) {
     _arbiter.applyDelta(details.delta);
   }
 
-  void _handlePanEnd(DragEndDetails details) {
-    final velocity = switch (widget.direction) {
+  double _axisVelocity(Offset pixelsPerSecond) {
+    return switch (widget.direction) {
       DismissiblePageDismissDirection.horizontal ||
       DismissiblePageDismissDirection.startToEnd ||
       DismissiblePageDismissDirection.endToStart =>
-        details.velocity.pixelsPerSecond.dx,
+        pixelsPerSecond.dx,
       DismissiblePageDismissDirection.all =>
         _arbiter.offset.dx.abs() > _arbiter.offset.dy.abs()
-            ? details.velocity.pixelsPerSecond.dx
-            : details.velocity.pixelsPerSecond.dy,
-      _ => details.velocity.pixelsPerSecond.dy,
+            ? pixelsPerSecond.dx
+            : pixelsPerSecond.dy,
+      _ => pixelsPerSecond.dy,
     };
-    _arbiter.endDrag(velocity: velocity);
+  }
+
+  void _handlePanEnd(DragEndDetails details) {
+    _arbiter.endDrag(velocity: _axisVelocity(details.velocity.pixelsPerSecond));
+  }
+
+  // Bouncing scrollables hand over to a spring when the finger lifts, and no
+  // notification carries the release velocity, so it is estimated from the
+  // deltas applied to the page.
+  VelocityTracker _releaseTracker = VelocityTracker.withKind(
+    PointerDeviceKind.touch,
+  );
+
+  void _applyScrollDelta(Offset delta, Duration? timeStamp) {
+    if (!_arbiter.isDragging) {
+      _releaseTracker = VelocityTracker.withKind(PointerDeviceKind.touch);
+    }
+    _arbiter.applyDelta(delta);
+    if (timeStamp != null) {
+      _releaseTracker.addPosition(timeStamp, _arbiter.offset);
+    }
   }
 
   void _handlePanCancel() {
@@ -173,12 +197,27 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           ? Offset(0, physicalDelta)
           : Offset(physicalDelta, 0);
       if (_arbiter.isDeltaAllowed(delta)) {
-        _arbiter.applyDelta(delta);
+        _applyScrollDelta(delta, notification.dragDetails?.sourceTimeStamp);
       }
       return false;
     }
 
     if (notification is ScrollUpdateNotification) {
+      final dragDetails = notification.dragDetails;
+      if (dragDetails == null) {
+        // Movement without a finger is the list's own spring or fling: the
+        // finger has lifted. Settle the page now rather than letting the
+        // spring drag it back to the origin.
+        if (_arbiter.isDragging) {
+          _arbiter.endDrag(
+            velocity: _axisVelocity(
+              _releaseTracker.getVelocity().pixelsPerSecond,
+            ),
+          );
+        }
+        return false;
+      }
+
       final isVertical = notification.metrics.axis == Axis.vertical;
       final currentCoord = isVertical ? _arbiter.offset.dy : _arbiter.offset.dx;
 
@@ -190,22 +229,25 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
         );
         final delta =
             isVertical ? Offset(0, physicalDelta) : Offset(physicalDelta, 0);
-        _arbiter.applyDelta(delta);
+        _applyScrollDelta(delta, dragDetails.sourceTimeStamp);
         return false;
       }
 
       if (notification.metrics.outOfRange) {
-        final dragDetails = notification.dragDetails;
-        if (dragDetails != null && _arbiter.isDeltaAllowed(dragDetails.delta)) {
-          _arbiter.applyDelta(dragDetails.delta);
+        if (_arbiter.isDeltaAllowed(dragDetails.delta)) {
+          _applyScrollDelta(dragDetails.delta, dragDetails.sourceTimeStamp);
         }
       }
       return false;
     }
 
     if (notification is ScrollEndNotification) {
-      if (_arbiter.isOffsetNonZero) {
-        _arbiter.endDrag();
+      if (_arbiter.isDragging || _arbiter.isOffsetNonZero) {
+        // Fling velocity comes from the drag that ended the scroll, if any.
+        final endVelocity = notification.dragDetails?.velocity.pixelsPerSecond;
+        _arbiter.endDrag(
+          velocity: endVelocity == null ? 0 : _axisVelocity(endVelocity),
+        );
       }
       return false;
     }
@@ -216,9 +258,12 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
   @override
   Widget build(BuildContext context) {
     final effectiveController = _effectiveController;
-    final contentWithController = PrimaryScrollController(
-      controller: effectiveController,
-      child: widget.contentBuilder(context, effectiveController),
+    final contentWithController = RepaintBoundary(
+      key: _contentKey,
+      child: PrimaryScrollController(
+        controller: effectiveController,
+        child: widget.contentBuilder(context, effectiveController),
+      ),
     );
 
     if (!widget.enabled) {
@@ -231,14 +276,19 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           child: content,
         );
       }
-      final body = Padding(
-        padding: widget.contentPadding,
-        child: content,
-      );
+      final body = widget.contentPadding == EdgeInsets.zero
+          ? content
+          : Padding(
+              padding: widget.contentPadding,
+              child: content,
+            );
       return initialColor == null
           ? body
           : ColoredBox(color: initialColor, child: body);
     }
+
+    final hasRadius = !widget.borderRadius.isNone;
+    final hasBackground = !widget.background.isNone;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -252,48 +302,61 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           child: GestureDetector(
             behavior: widget.hitTestBehavior,
             dragStartBehavior: widget.dragStartBehavior,
-            onPanStart: _handlePanStart,
             onPanUpdate: _handlePanUpdate,
             onPanEnd: _handlePanEnd,
             onPanCancel: _handlePanCancel,
-            child: ListenableBuilder(
-              listenable: _arbiter,
-              builder: (context, child) {
-                final details = _arbiter.currentDetails;
-                final bgColor =
-                    widget.background.resolveColor(details.progress);
+            child: RepaintBoundary(
+              child: ListenableBuilder(
+                listenable: _arbiter,
+                builder: (context, child) {
+                  final details = _arbiter.currentDetails;
 
-                var content = child!;
-                if (details.radius > 0) {
-                  content = ClipRRect(
-                    borderRadius: BorderRadius.circular(details.radius),
+                  var content = child!;
+                  if (hasRadius) {
+                    content = ClipRRect(
+                      borderRadius: BorderRadius.circular(details.radius),
+                      clipBehavior:
+                          details.radius > 0 ? Clip.antiAlias : Clip.none,
+                      child: content,
+                    );
+                  }
+
+                  Widget body = Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.diagonal3Values(
+                      details.scale,
+                      details.scale,
+                      1,
+                    )..setTranslationRaw(
+                        details.offset.dx,
+                        details.offset.dy,
+                        0,
+                      ),
                     child: content,
                   );
-                }
 
-                Widget body = Padding(
-                  padding: widget.contentPadding,
-                  child: Transform.translate(
-                    offset: details.offset,
-                    child: Transform.scale(
-                      scale: details.scale,
-                      child: content,
-                    ),
-                  ),
-                );
+                  if (widget.contentPadding != EdgeInsets.zero) {
+                    body = Padding(
+                      padding: widget.contentPadding,
+                      child: body,
+                    );
+                  }
 
-                if (bgColor != null) {
-                  body = ColoredBox(
-                    color: bgColor,
-                    child: body,
-                  );
-                }
+                  if (hasBackground) {
+                    final bgColor =
+                        widget.background.resolveColor(details.progress);
+                    if (bgColor != null && bgColor.a > 0) {
+                      body = ColoredBox(
+                        color: bgColor,
+                        child: body,
+                      );
+                    }
+                  }
 
-                return RepaintBoundary(
-                  child: body,
-                );
-              },
-              child: contentWithController,
+                  return body;
+                },
+                child: contentWithController,
+              ),
             ),
           ),
         );

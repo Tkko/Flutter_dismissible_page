@@ -1,0 +1,77 @@
+name: Performance Benchmarks
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  benchmark-macos:
+    name: macOS Desktop Benchmark (--profile)
+    runs-on: macos-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Checkout shared actions
+        uses: actions/checkout@v4
+        with:
+          repository: Tkko/Flutter_Pinput
+          ref: master
+          path: .github/workflow-actions
+          sparse-checkout: .github/actions
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Set up Flutter
+        uses: ./.github/workflow-actions/.github/actions/setup-flutter
+        with:
+          flutter-version: '3.47.8'
+
+      - name: Install Example Dependencies
+        run: cd example && flutter pub get
+
+      - name: Run Performance Benchmark (macOS Profile Mode)
+        run: ./scripts/run_perf_benchmarks.sh --macos
+
+      - name: Publish Benchmark Summary to GitHub Actions Summary
+        if: always()
+        run: |
+          if [ -f example/build/performance_summary.json ]; then
+            python3 -c "
+          import json
+          with open('example/build/performance_summary.json') as f:
+              data = json.load(f)
+
+          print('### 🚀 macOS E2E Performance Benchmark Results\n')
+          print('| Scenario | Avg Build (UI) | Worst Build (UI) | Worst Raster (GPU) | Build Budget | Raster Target | Status |')
+          print('| :--- | :---: | :---: | :---: | :---: | :---: | :---: |')
+          for s in data.get('scenarios', []):
+              status_raw = s.get('status', '')
+              if '120fps' in status_raw:
+                  status = '✅ PASS (120 FPS)'
+              elif '60fps' in status_raw:
+                  status = '⚡ PASS (60 FPS)'
+              else:
+                  status = '❌ FAIL (Jank)'
+              build_budget = s.get('build_budget', '< 4.00ms')
+              raster_target = s.get('raster_target', '< 8.33ms (120fps)')
+              print(f\"| **{s['scenario']}** | {s['avg_build_ms']:.2f} ms | {s['worst_build_ms']:.2f} ms | {s['worst_raster_ms']:.2f} ms | {build_budget} | {raster_target} | {status} |\")
+          " >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Performance Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-summary-macos
+          path: |
+            example/build/*.timeline.json
+            example/build/*.timeline_summary.json
+            example/build/performance_summary.json

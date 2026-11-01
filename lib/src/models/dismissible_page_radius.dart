@@ -22,6 +22,9 @@ class DismissiblePageRadius {
         to = 0.0,
         curve = Curves.linear;
 
+  /// Whether this radius configuration applies no corner clipping.
+  bool get isNone => from == 0.0 && to == 0.0;
+
   /// Corner radius at the start of the drag gesture (progress = 0.0).
   final double from;
 
