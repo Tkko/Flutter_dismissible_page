@@ -216,9 +216,11 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
   @override
   Widget build(BuildContext context) {
     final effectiveController = _effectiveController;
-    final contentWithController = PrimaryScrollController(
-      controller: effectiveController,
-      child: widget.contentBuilder(context, effectiveController),
+    final contentWithController = RepaintBoundary(
+      child: PrimaryScrollController(
+        controller: effectiveController,
+        child: widget.contentBuilder(context, effectiveController),
+      ),
     );
 
     if (!widget.enabled) {
@@ -231,14 +233,19 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           child: content,
         );
       }
-      final body = Padding(
-        padding: widget.contentPadding,
-        child: content,
-      );
+      final body = widget.contentPadding == EdgeInsets.zero
+          ? content
+          : Padding(
+              padding: widget.contentPadding,
+              child: content,
+            );
       return initialColor == null
           ? body
           : ColoredBox(color: initialColor, child: body);
     }
+
+    final hasRadius = !widget.borderRadius.isNone;
+    final hasBackground = !widget.background.isNone;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -256,44 +263,58 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
             onPanUpdate: _handlePanUpdate,
             onPanEnd: _handlePanEnd,
             onPanCancel: _handlePanCancel,
-            child: ListenableBuilder(
-              listenable: _arbiter,
-              builder: (context, child) {
-                final details = _arbiter.currentDetails;
-                final bgColor =
-                    widget.background.resolveColor(details.progress);
+            child: RepaintBoundary(
+              child: ListenableBuilder(
+                listenable: _arbiter,
+                builder: (context, child) {
+                  final details = _arbiter.currentDetails;
 
-                var content = child!;
-                if (details.radius > 0) {
-                  content = ClipRRect(
-                    borderRadius: BorderRadius.circular(details.radius),
+                  var content = child!;
+                  if (hasRadius) {
+                    content = ClipRRect(
+                      borderRadius: BorderRadius.circular(details.radius),
+                      clipBehavior:
+                          details.radius > 0 ? Clip.antiAlias : Clip.none,
+                      child: content,
+                    );
+                  }
+
+                  Widget body = Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.diagonal3Values(
+                      details.scale,
+                      details.scale,
+                      1,
+                    )..setTranslationRaw(
+                        details.offset.dx,
+                        details.offset.dy,
+                        0,
+                      ),
                     child: content,
                   );
-                }
 
-                Widget body = Padding(
-                  padding: widget.contentPadding,
-                  child: Transform.translate(
-                    offset: details.offset,
-                    child: Transform.scale(
-                      scale: details.scale,
-                      child: content,
-                    ),
-                  ),
-                );
+                  if (widget.contentPadding != EdgeInsets.zero) {
+                    body = Padding(
+                      padding: widget.contentPadding,
+                      child: body,
+                    );
+                  }
 
-                if (bgColor != null) {
-                  body = ColoredBox(
-                    color: bgColor,
-                    child: body,
-                  );
-                }
+                  if (hasBackground) {
+                    final bgColor =
+                        widget.background.resolveColor(details.progress);
+                    if (bgColor != null && bgColor.a > 0) {
+                      body = ColoredBox(
+                        color: bgColor,
+                        child: body,
+                      );
+                    }
+                  }
 
-                return RepaintBoundary(
-                  child: body,
-                );
-              },
-              child: contentWithController,
+                  return body;
+                },
+                child: contentWithController,
+              ),
             ),
           ),
         );

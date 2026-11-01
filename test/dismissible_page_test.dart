@@ -1,5 +1,6 @@
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -555,6 +556,21 @@ void main() {
       expect(bg1.hashCode, equals(bg2.hashCode));
       expect(bg1, isNot(equals(bg3)));
     });
+
+    test('isNone returns true only for none', () {
+      expect(const DismissiblePageBackground.none().isNone, isTrue);
+      expect(
+        const DismissiblePageBackground.transition(
+          from: Colors.black,
+          to: Colors.transparent,
+        ).isNone,
+        isFalse,
+      );
+      expect(
+        const DismissiblePageBackground.solid(Colors.white).isNone,
+        isFalse,
+      );
+    });
   });
 
   group('DismissiblePageRadius Tests', () {
@@ -587,5 +603,80 @@ void main() {
       expect(r1.hashCode, equals(r2.hashCode));
       expect(r1, isNot(equals(r3)));
     });
+
+    test('isNone returns true only for none', () {
+      expect(const DismissiblePageRadius.none().isNone, isTrue);
+      expect(
+        const DismissiblePageRadius.transition(from: 0, to: 10).isNone,
+        isFalse,
+      );
+      expect(const DismissiblePageRadius.fixed(10).isNone, isFalse);
+    });
   });
+
+  group('DismissiblePage Performance & Repaint Isolation Tests', () {
+    testWidgets('child content is not repainted during drag gesture updates',
+        (tester) async {
+      var childPaintCount = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DismissiblePage(
+              onDismissed: () {},
+              child: _RepaintCounter(
+                onPaint: () => childPaintCount++,
+                child: const SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: Text('Performance test content'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Initial layout and paint
+      expect(childPaintCount, 1);
+
+      // Perform a multi-step drag
+      final gesture = await tester.startGesture(const Offset(100, 100));
+      for (var i = 0; i < 5; i++) {
+        await gesture.moveBy(const Offset(0, 15));
+        await tester.pump();
+      }
+
+      // Child should NOT have been repainted during drag updates
+      expect(childPaintCount, 1);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Even during reverse snap-back animation, child is not repainted
+      expect(childPaintCount, 1);
+    });
+  });
+}
+
+class _RepaintCounter extends SingleChildRenderObjectWidget {
+  const _RepaintCounter({required this.onPaint, super.child});
+
+  final VoidCallback onPaint;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderRepaintCounter(onPaint);
+}
+
+class _RenderRepaintCounter extends RenderProxyBox {
+  _RenderRepaintCounter(this.onPaint);
+
+  final VoidCallback onPaint;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    onPaint();
+    super.paint(context, offset);
+  }
 }

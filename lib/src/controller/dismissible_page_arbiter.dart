@@ -178,8 +178,6 @@ class _DismissibleArbiter extends ChangeNotifier {
 
   /// Applies a drag delta constrained to allowed axes.
   void applyDelta(Offset delta) {
-    if (!_isDragging) startDrag();
-
     var effectiveDelta = delta * dragSensitivity;
 
     switch (direction) {
@@ -210,6 +208,10 @@ class _DismissibleArbiter extends ChangeNotifier {
       case DismissiblePageDismissDirection.none:
         return;
     }
+
+    if (effectiveDelta == Offset.zero) return;
+
+    if (!_isDragging) startDrag();
 
     _dragOffset += effectiveDelta;
     onDragUpdate?.call(currentDetails);

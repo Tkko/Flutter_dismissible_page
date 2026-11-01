@@ -67,12 +67,6 @@ class SecondPage extends StatelessWidget {
       maxTransformValue: .8,
       direction: DismissiblePageDismissDirection.all,
       background: const DismissiblePageBackground.solid(Colors.black),
-      onDragStart: () {
-        print('onDragStart');
-      },
-      onDragUpdate: (details) {
-        print(details);
-      },
       dismissThresholds: const {
         DismissiblePageSide.up: .2,
         DismissiblePageSide.down: .2,
