@@ -281,10 +281,12 @@ class _DismissibleArbiter extends ChangeNotifier {
 
   /// Abandons any drag or rebound immediately and returns to the origin.
   void reset() {
+    final wasDragging = _isDragging;
     _isDragging = false;
     _animationController.stop();
     _animationStartOffset = Offset.zero;
     setOffset(Offset.zero);
+    if (wasDragging) onDragCancel?.call();
   }
 
   bool get _hasReachedDismissThreshold {
@@ -329,7 +331,7 @@ class _DismissibleArbiter extends ChangeNotifier {
   void cancelDrag() {
     if (!_isDragging) return;
     _isDragging = false;
-    animateToZero();
+    if (isOffsetNonZero) animateToZero();
     onDragCancel?.call();
   }
 

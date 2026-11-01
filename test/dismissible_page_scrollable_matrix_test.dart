@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 typedef _Build = Widget Function(
-  DismissiblePageScrollController? controller,
+  ScrollController? controller,
   Axis axis, {
   required bool reverse,
 });
@@ -70,6 +70,10 @@ void main() {
           testWidgets('vertical: $name', (tester) async {
             final controller =
                 withController ? DismissiblePageScrollController() : null;
+            // A scrollable with its own controller bypasses the page's
+            // controller and exercises the notification fallback.
+            final scrollController = controller ?? ScrollController();
+            addTearDown(scrollController.dispose);
             var dy = 0.0;
             var dismissed = false;
 
@@ -84,7 +88,7 @@ void main() {
                       behavior: const MaterialScrollBehavior()
                           .copyWith(physics: physics.value),
                       child: entry.value(
-                        controller,
+                        scrollController,
                         Axis.vertical,
                         reverse: reverse,
                       ),
@@ -149,6 +153,8 @@ void main() {
           (tester) async {
         final controller =
             withController ? DismissiblePageScrollController() : null;
+        final scrollController = controller ?? ScrollController();
+        addTearDown(scrollController.dispose);
         var dx = 0.0;
         var dismissed = false;
 
@@ -163,7 +169,7 @@ void main() {
                   onDismissed: () => dismissed = true,
                   onDragUpdate: (d) => dx = d.offset.dx,
                   child: ListView.builder(
-                    controller: controller,
+                    controller: scrollController,
                     scrollDirection: Axis.horizontal,
                     itemCount: 40,
                     itemBuilder: (_, __) => _items(Axis.horizontal),

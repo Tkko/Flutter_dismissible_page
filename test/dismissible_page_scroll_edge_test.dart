@@ -7,6 +7,7 @@ Widget _app({
   VoidCallback? onDismissed,
   VoidCallback? onDragStart,
   VoidCallback? onDragEnd,
+  VoidCallback? onDragCancel,
   ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate,
   bool enabled = true,
   DismissiblePageDismissDirection direction =
@@ -23,6 +24,7 @@ Widget _app({
         onDismissed: onDismissed ?? () {},
         onDragStart: onDragStart,
         onDragEnd: onDragEnd,
+        onDragCancel: onDragCancel,
         onDragUpdate: onDragUpdate,
         child: ListView.builder(
           controller: controller,
@@ -86,6 +88,111 @@ void main() {
 
       expect(dy, 0, reason: 'page must settle back to origin');
       expect(ends, starts, reason: 'every drag start needs a drag end');
+    });
+
+    testWidgets(
+        're-grab that crosses the origin in one event stops the rebound',
+        (tester) async {
+      final controller = DismissiblePageScrollController();
+      var starts = 0;
+      var ends = 0;
+      var dy = 0.0;
+
+      await tester.pumpWidget(
+        _app(
+          controller: controller,
+          onDragStart: () => starts++,
+          onDragEnd: () => ends++,
+          onDragUpdate: (d) => dy = d.offset.dy,
+        ),
+      );
+
+      final first = await tester.startGesture(const Offset(200, 100));
+      await _dragBy(tester, first, 40);
+      await first.up();
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(dy, greaterThan(0));
+
+      final second = await tester.startGesture(const Offset(200, 100));
+      await second.moveBy(const Offset(0, -30)); // consumed by touch slop
+      await second.moveBy(const Offset(0, -60)); // crosses origin at once
+      await tester.pump(const Duration(milliseconds: 16));
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(dy, 0, reason: 'rebound must not pull the page away again');
+      await second.up();
+      await tester.pumpAndSettle();
+      expect(dy, 0);
+      expect(ends, starts);
+    });
+
+    testWidgets('plain scrollable: releasing exactly at the origin ends drag',
+        (tester) async {
+      final ownController = ScrollController();
+      addTearDown(ownController.dispose);
+      var starts = 0;
+      var ends = 0;
+      var dy = 0.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DismissiblePage(
+              onDismissed: () {},
+              onDragStart: () => starts++,
+              onDragEnd: () => ends++,
+              onDragUpdate: (d) => dy = d.offset.dy,
+              child: ListView.builder(
+                // Own controller: bypasses the page controller entirely.
+                controller: ownController,
+                itemCount: 50,
+                itemBuilder: (_, i) => SizedBox(height: 56, child: Text('$i')),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      for (var round = 1; round <= 2; round++) {
+        final g = await tester.startGesture(const Offset(200, 100));
+        // Round 2 first scrolls the list back to the top, then overscrolls.
+        await _dragBy(tester, g, round == 1 ? 80 : 200);
+        expect(dy, greaterThan(0), reason: 'round $round');
+        await _dragBy(tester, g, round == 1 ? -80 : -250);
+        expect(dy, 0);
+        await g.up();
+        await tester.pumpAndSettle();
+        expect(starts, round, reason: 'round $round start');
+        expect(ends, round, reason: 'round $round end');
+      }
+    });
+
+    testWidgets('disabling mid-drag reports onDragCancel', (tester) async {
+      final controller = DismissiblePageScrollController();
+      var enabled = true;
+      var cancels = 0;
+      late StateSetter rebuild;
+
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (context, setState) {
+            rebuild = setState;
+            return _app(
+              controller: controller,
+              enabled: enabled,
+              onDragCancel: () => cancels++,
+            );
+          },
+        ),
+      );
+
+      final g = await tester.startGesture(const Offset(200, 100));
+      await _dragBy(tester, g, 40);
+      rebuild(() => enabled = false);
+      await tester.pump();
+      await tester.pump();
+      await g.up();
+      await tester.pumpAndSettle();
+      expect(cancels, 1);
     });
 
     testWidgets('dragging back past the origin ends the page drag',

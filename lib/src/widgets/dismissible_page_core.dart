@@ -153,6 +153,23 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     _arbiter.endDrag(velocity: _axisVelocity(details.velocity.pixelsPerSecond));
   }
 
+  // Bouncing scrollables hand over to a spring when the finger lifts, and no
+  // notification carries the release velocity, so it is estimated from the
+  // deltas applied to the page.
+  VelocityTracker _releaseTracker = VelocityTracker.withKind(
+    PointerDeviceKind.touch,
+  );
+
+  void _applyScrollDelta(Offset delta, Duration? timeStamp) {
+    if (!_arbiter.isDragging) {
+      _releaseTracker = VelocityTracker.withKind(PointerDeviceKind.touch);
+    }
+    _arbiter.applyDelta(delta);
+    if (timeStamp != null) {
+      _releaseTracker.addPosition(timeStamp, _arbiter.offset);
+    }
+  }
+
   void _handlePanCancel() {
     _arbiter.cancelDrag();
   }
@@ -180,12 +197,27 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           ? Offset(0, physicalDelta)
           : Offset(physicalDelta, 0);
       if (_arbiter.isDeltaAllowed(delta)) {
-        _arbiter.applyDelta(delta);
+        _applyScrollDelta(delta, notification.dragDetails?.sourceTimeStamp);
       }
       return false;
     }
 
     if (notification is ScrollUpdateNotification) {
+      final dragDetails = notification.dragDetails;
+      if (dragDetails == null) {
+        // Movement without a finger is the list's own spring or fling: the
+        // finger has lifted. Settle the page now rather than letting the
+        // spring drag it back to the origin.
+        if (_arbiter.isDragging) {
+          _arbiter.endDrag(
+            velocity: _axisVelocity(
+              _releaseTracker.getVelocity().pixelsPerSecond,
+            ),
+          );
+        }
+        return false;
+      }
+
       final isVertical = notification.metrics.axis == Axis.vertical;
       final currentCoord = isVertical ? _arbiter.offset.dy : _arbiter.offset.dx;
 
@@ -197,21 +229,20 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
         );
         final delta =
             isVertical ? Offset(0, physicalDelta) : Offset(physicalDelta, 0);
-        _arbiter.applyDelta(delta);
+        _applyScrollDelta(delta, dragDetails.sourceTimeStamp);
         return false;
       }
 
       if (notification.metrics.outOfRange) {
-        final dragDetails = notification.dragDetails;
-        if (dragDetails != null && _arbiter.isDeltaAllowed(dragDetails.delta)) {
-          _arbiter.applyDelta(dragDetails.delta);
+        if (_arbiter.isDeltaAllowed(dragDetails.delta)) {
+          _applyScrollDelta(dragDetails.delta, dragDetails.sourceTimeStamp);
         }
       }
       return false;
     }
 
     if (notification is ScrollEndNotification) {
-      if (_arbiter.isOffsetNonZero) {
+      if (_arbiter.isDragging || _arbiter.isOffsetNonZero) {
         // Fling velocity comes from the drag that ended the scroll, if any.
         final endVelocity = notification.dragDetails?.velocity.pixelsPerSecond;
         _arbiter.endDrag(
