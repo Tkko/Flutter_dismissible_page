@@ -1,4 +1,4 @@
-## Unreleased
+## 2.0.0-beta.1
 - Breaking: require `child` on `DismissiblePage` and move builder content to `DismissiblePage.builder`.
 - Breaking: rename `DismissiblePageDismissDirection.multi` to `all` and drag details `overallDragValue` to `progress` (including `toMap()`).
 - Breaking: key `dismissThresholds` by directional destination sides (`DismissiblePageSide.up`, `down`, `start`, `end`). Measure page displacement against page dimensions independently of visual effects; either axis can dismiss diagonal drags. Missing sides default to 0.15.
