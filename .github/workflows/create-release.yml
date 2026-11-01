@@ -20,7 +20,7 @@ on:
 
 jobs:
   release:
-    uses: Tkko/Flutter_Pinput/.github/workflows/create-release.yml@master
+    uses: Tkko/better-actions/.github/workflows/create-release.yml@ddf7928512e456918edc559fe00502d073d162ee
     with:
       tag_name: ${{ inputs.tag_name }}
       dry_run: ${{ inputs.dry_run }}
