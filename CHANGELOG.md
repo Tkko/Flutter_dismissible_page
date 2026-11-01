@@ -30,6 +30,32 @@
 - Updated example app with cross-platform support (Android, iOS, macOS, Windows, Linux, Web).
 - Modernized codebase to `very_good_analysis ^11.0.0` and Flutter's `Color.withValues()` API.
 
+### Example
+```dart
+// Standard widget usage with new properties:
+DismissiblePage(
+  onDismissed: () => Navigator.of(context).pop(),
+  direction: DismissiblePageDismissDirection.all, // renamed from .multi
+  dismissThresholds: const {
+    DismissiblePageSide.down: 0.2, // keyed by DismissiblePageSide
+  },
+  background: DismissiblePageBackground.fadeOut(Colors.black),
+  borderRadius: const DismissiblePageRadius.transition(from: 0.0, to: 28.0),
+  onDragCancel: () => debugPrint('Cancelled'),
+  onDragUpdate: (details) => debugPrint('Progress: ${details.progress}'),
+  child: const MyPageContent(),
+)
+
+// With explicit scroll coordination:
+DismissiblePage.builder(
+  onDismissed: () => Navigator.of(context).pop(),
+  builder: (context, controller) => ListView(
+    controller: controller,
+    children: [...],
+  ),
+)
+```
+
 ## 1.0.3
 - Fixed unexpected behavior of dismissing the page when user is scrolling the opposite direction [Issue](https://github.com/Tkko/Flutter_dismissible_page/issues/14#issuecomment-1599097053)
 
