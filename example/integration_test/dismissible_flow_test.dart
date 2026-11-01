@@ -229,17 +229,20 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. Swipe left to next page
-      await tester.fling(find.text('Card 0'), const Offset(-500, 0), 1000);
+      await tester.fling(find.text('Card 0'), const Offset(-150, 0), 1000);
       await tester.pumpAndSettle();
       expect(find.text('Card 1'), findsOneWidget);
 
       // 2. Swipe right back to page 0
-      await tester.fling(find.text('Card 1'), const Offset(500, 0), 1000);
+      await tester.fling(find.text('Card 1'), const Offset(150, 0), 1000);
       await tester.pumpAndSettle();
       expect(find.text('Card 0'), findsOneWidget);
 
       // 3. At page 0, drag right past start: triggers route dismiss!
-      await tester.drag(find.text('Card 0'), const Offset(400, 0));
+      // Scale with the screen: the dismiss threshold is a fraction of width.
+      final width =
+          tester.view.physicalSize.width / tester.view.devicePixelRatio;
+      await tester.drag(find.text('Card 0'), Offset(width * 0.45, 0));
       await tester.pumpAndSettle();
 
       // Route popped!
