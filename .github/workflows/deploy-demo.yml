@@ -5,10 +5,6 @@ on:
     branches:
       - master
 
-concurrency:
-  group: github-pages
-  cancel-in-progress: false
-
 jobs:
   deploy:
     uses: Tkko/Flutter_Pinput/.github/workflows/deploy-demo.yml@master

@@ -6,10 +6,6 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
   workflow_dispatch:
 
-concurrency:
-  group: publish-${{ github.repository }}-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
   publish:
     uses: Tkko/Flutter_Pinput/.github/workflows/publish.yml@master

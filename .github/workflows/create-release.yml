@@ -18,10 +18,6 @@ on:
         default: false
         type: boolean
 
-concurrency:
-  group: create-release-${{ github.repository }}
-  cancel-in-progress: false
-
 jobs:
   release:
     uses: Tkko/Flutter_Pinput/.github/workflows/create-release.yml@master
