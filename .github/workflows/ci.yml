@@ -17,7 +17,7 @@ on:
 
 jobs:
   ci:
-    uses: Tkko/Flutter_Pinput/.github/workflows/ci.yml@master
+    uses: Tkko/better-actions/.github/workflows/ci.yml@ddf7928512e456918edc559fe00502d073d162ee
     with:
       full-matrix: ${{ inputs.full-matrix || false }}
       include-windows: ${{ inputs.include-windows || false }}

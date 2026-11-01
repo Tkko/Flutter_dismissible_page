@@ -22,8 +22,8 @@ jobs:
       - name: Checkout shared actions
         uses: actions/checkout@v4
         with:
-          repository: Tkko/Flutter_Pinput
-          ref: master
+          repository: Tkko/better-actions
+          ref: ddf7928512e456918edc559fe00502d073d162ee
           path: .github/workflow-actions
           sparse-checkout: .github/actions
           sparse-checkout-cone-mode: false
