@@ -1,10 +1,60 @@
-## Unreleased
-- Breaking: require `child` on `DismissiblePage` and move builder content to `DismissiblePage.builder`.
-- Breaking: rename `DismissiblePageDismissDirection.multi` to `all` and drag details `overallDragValue` to `progress` (including `toMap()`).
-- Breaking: key `dismissThresholds` by directional destination sides (`DismissiblePageSide.up`, `down`, `start`, `end`). Measure page displacement against page dimensions independently of visual effects; either axis can dismiss diagonal drags. Missing sides default to 0.15.
-- Default `TransparentRoute` to a transparent background and 250 ms forward/reverse transitions.
-- Preserve and dispose the internally owned scroll controller for disabled builder content.
-- Resolve scroll-edge deltas in screen coordinates so directional thresholds also work with RTL and reversed scroll axes.
+## 2.0.0-beta.1
+
+### Breaking Changes
+- Require `child` on `DismissiblePage` and move builder content to `DismissiblePage.builder`.
+- Rename `DismissiblePageDismissDirection.multi` to `DismissiblePageDismissDirection.all`.
+- Rename `overallDragValue` to `progress` in `DismissiblePageDragUpdateDetails` (including `toMap()`).
+- Key `dismissThresholds` by directional destination sides (`DismissiblePageSide.up`, `down`, `start`, `end`) instead of directions. Missing sides default to `0.15`.
+- Updated minimum SDK constraints to Dart `>=3.0.0 <5.0.0` and Flutter `>=3.10.0`.
+
+### New Features & Enhancements
+- **`DismissiblePageBackground`**: Introduced a structured class with `.color()`, `.widget()`, and `.custom()` factories for animated background rendering and opacity blending.
+- **`DismissiblePageRadius`**: Introduced a dedicated model (`.circular()`, `.all()`, etc.) for managing corner radius transformations during drag interactions.
+- **`onDragCancel` callback**: Added callback invoked when a drag gesture is cancelled or released without triggering a dismissal.
+- **`maxTransformValue: 0` support**: Allows scaling and opacity effects without spatial translation.
+- **Trackpad gesture support**: Added trackpad support as a pointer drag device alongside touch and stylus.
+- **Discrete mouse wheel filtering**: Pointer wheel scrolls no longer trigger dismiss gestures on desktop and web.
+- **Configuration assertions**: Added runtime assertions for scalar configuration parameters (`minScale`, `maxRadius`, `minRadius`, `maxTransformValue`, and dismiss thresholds) for faster bug detection during development.
+- **`TransparentRoute` updates**: Default transparent background and streamlined 250 ms forward/reverse transition durations.
+
+### Scroll Coordination & Performance
+- **Universal scroll arbiter**: Introduced `DismissiblePageArbiter` to smoothly coordinate nested scrollables (`ListView`, `GridView`, `CustomScrollView`, `SingleChildScrollView`) without requiring explicit listeners.
+- **Edge cases & RTL support**: Resolved scroll-edge deltas in screen coordinates so directional dismiss thresholds work correctly with reverse axes and RTL text directions.
+- **Optimized drag rendering**: Reduced unnecessary widget rebuilds during drag gestures by isolating visual updates (transform, opacity, border radius).
+- **Controller lifecycle**: Properly preserve and dispose internally owned scroll controllers for disabled builder content.
+
+### Tooling, Tests & CI/CD
+- Added comprehensive integration test suite (`dismissible_flow_test.dart`).
+- Added performance benchmarking suite (`run_perf_benchmarks.sh`, `perf_driver.dart`, `benchmarks.yml`) measuring raster and frame build times.
+- Automated CI testing across platforms and pub.dev OIDC publishing workflow.
+- Updated example app with cross-platform support (Android, iOS, macOS, Windows, Linux, Web).
+- Modernized codebase to `very_good_analysis ^11.0.0` and Flutter's `Color.withValues()` API.
+
+### Example
+```dart
+// Standard widget usage with new properties:
+DismissiblePage(
+  onDismissed: () => Navigator.of(context).pop(),
+  direction: DismissiblePageDismissDirection.all, // renamed from .multi
+  dismissThresholds: const {
+    DismissiblePageSide.down: 0.2, // keyed by DismissiblePageSide
+  },
+  background: DismissiblePageBackground.fadeOut(Colors.black),
+  borderRadius: const DismissiblePageRadius.transition(from: 0.0, to: 28.0),
+  onDragCancel: () => debugPrint('Cancelled'),
+  onDragUpdate: (details) => debugPrint('Progress: ${details.progress}'),
+  child: const MyPageContent(),
+)
+
+// With explicit scroll coordination:
+DismissiblePage.builder(
+  onDismissed: () => Navigator.of(context).pop(),
+  builder: (context, controller) => ListView(
+    controller: controller,
+    children: [...],
+  ),
+)
+```
 
 ## 1.0.3
 - Fixed unexpected behavior of dismissing the page when user is scrolling the opposite direction [Issue](https://github.com/Tkko/Flutter_dismissible_page/issues/14#issuecomment-1599097053)
