@@ -85,7 +85,9 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
                 ? Offset(arbiter.offset.dx, 0)
                 : Offset(0, arbiter.offset.dy),
           );
+          // The page is home again; the rest of the gesture belongs to the list.
           _isDismissDragging = false;
+          arbiter.endDrag();
           if (leftover != 0.0) {
             super.applyUserOffset(leftover);
           }
@@ -93,7 +95,12 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
         }
       }
 
-      // Absorb into page drag
+      // Absorb into page drag. This also covers re-grabbing a page that is
+      // still rebounding, which must be released through [goBallistic] too.
+      if (!_isDismissDragging) {
+        _isDismissDragging = true;
+        arbiter.startDrag();
+      }
       final physicalDelta = _physicalScrollDelta(delta, axisDirection);
       final offsetDelta =
           isVertical ? Offset(0, physicalDelta) : Offset(physicalDelta, 0);
@@ -124,9 +131,10 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void goBallistic(double velocity) {
+    final wasDismissDragging = _isDismissDragging;
+    _isDismissDragging = false;
     final arbiter = _arbiter;
-    if (arbiter != null && _isDismissDragging) {
-      _isDismissDragging = false;
+    if (wasDismissDragging && arbiter != null && arbiter.isDragging) {
       arbiter.endDrag(
         velocity: _physicalScrollDelta(-velocity, axisDirection),
       );
@@ -139,7 +147,10 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void dispose() {
-    _isDismissDragging = false;
+    if (_isDismissDragging) {
+      _isDismissDragging = false;
+      _arbiter?.cancelDrag();
+    }
     super.dispose();
   }
 }

@@ -1,14 +1,5 @@
 part of '../dismissible_page.dart';
 
-bool _sameDismissThresholds(
-  Map<DismissiblePageSide, double> first,
-  Map<DismissiblePageSide, double> second,
-) {
-  if (identical(first, second)) return true;
-  if (first.length != second.length) return false;
-  return first.entries.every((entry) => second[entry.key] == entry.value);
-}
-
 class _DismissiblePageCore extends StatefulWidget {
   const _DismissiblePageCore({
     required this.contentBuilder,
@@ -66,6 +57,10 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
   late _DismissibleArbiter _arbiter;
   DismissiblePageScrollController? _internalController;
 
+  // Keeps the content subtree (and its scroll state) alive when [enabled]
+  // flips and the wrapper structure around it changes.
+  final GlobalKey _contentKey = GlobalKey();
+
   DismissiblePageScrollController get _effectiveController =>
       widget.controller ??
       (_internalController ??= DismissiblePageScrollController());
@@ -90,20 +85,21 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     if (widget.controller != oldWidget.controller) {
       (oldWidget.controller ?? _internalController)?._arbiter = null;
     }
-    if (widget.enabled != oldWidget.enabled ||
-        widget.direction != oldWidget.direction ||
-        !_sameDismissThresholds(
-          widget.dismissThresholds,
-          oldWidget.dismissThresholds,
-        ) ||
-        widget.dragSensitivity != oldWidget.dragSensitivity ||
-        widget.background != oldWidget.background ||
-        widget.borderRadius != oldWidget.borderRadius ||
-        widget.minScale != oldWidget.minScale ||
-        widget.maxTransformValue != oldWidget.maxTransformValue ||
-        widget.reverseDuration != oldWidget.reverseDuration) {
-      _arbiter.dispose();
-      _initArbiter();
+    _arbiter.updateConfig(
+      direction: widget.direction,
+      dismissThresholds: widget.dismissThresholds,
+      background: widget.background,
+      borderRadius: widget.borderRadius,
+      minScale: widget.minScale,
+      maxTransformValue: widget.maxTransformValue,
+      dragSensitivity: widget.dragSensitivity,
+      reverseDuration: widget.reverseDuration,
+    );
+    if (oldWidget.enabled && !widget.enabled) {
+      // Callbacks must not run mid-build, so settle the page after this frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !widget.enabled) _arbiter.reset();
+      });
     }
     _effectiveController._arbiter = widget.enabled ? _arbiter : null;
   }
@@ -129,7 +125,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
 
   @override
   void dispose() {
-    _effectiveController._arbiter = null;
+    (widget.controller ?? _internalController)?._arbiter = null;
     _internalController?.dispose();
     _arbiter.dispose();
     super.dispose();
@@ -139,19 +135,22 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     _arbiter.applyDelta(details.delta);
   }
 
-  void _handlePanEnd(DragEndDetails details) {
-    final velocity = switch (widget.direction) {
+  double _axisVelocity(Offset pixelsPerSecond) {
+    return switch (widget.direction) {
       DismissiblePageDismissDirection.horizontal ||
       DismissiblePageDismissDirection.startToEnd ||
       DismissiblePageDismissDirection.endToStart =>
-        details.velocity.pixelsPerSecond.dx,
+        pixelsPerSecond.dx,
       DismissiblePageDismissDirection.all =>
         _arbiter.offset.dx.abs() > _arbiter.offset.dy.abs()
-            ? details.velocity.pixelsPerSecond.dx
-            : details.velocity.pixelsPerSecond.dy,
-      _ => details.velocity.pixelsPerSecond.dy,
+            ? pixelsPerSecond.dx
+            : pixelsPerSecond.dy,
+      _ => pixelsPerSecond.dy,
     };
-    _arbiter.endDrag(velocity: velocity);
+  }
+
+  void _handlePanEnd(DragEndDetails details) {
+    _arbiter.endDrag(velocity: _axisVelocity(details.velocity.pixelsPerSecond));
   }
 
   void _handlePanCancel() {
@@ -213,7 +212,11 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
 
     if (notification is ScrollEndNotification) {
       if (_arbiter.isOffsetNonZero) {
-        _arbiter.endDrag();
+        // Fling velocity comes from the drag that ended the scroll, if any.
+        final endVelocity = notification.dragDetails?.velocity.pixelsPerSecond;
+        _arbiter.endDrag(
+          velocity: endVelocity == null ? 0 : _axisVelocity(endVelocity),
+        );
       }
       return false;
     }
@@ -225,6 +228,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
   Widget build(BuildContext context) {
     final effectiveController = _effectiveController;
     final contentWithController = RepaintBoundary(
+      key: _contentKey,
       child: PrimaryScrollController(
         controller: effectiveController,
         child: widget.contentBuilder(context, effectiveController),

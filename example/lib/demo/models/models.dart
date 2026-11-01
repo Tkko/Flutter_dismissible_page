@@ -55,7 +55,7 @@ class DismissiblePageModel {
   DismissiblePageRadius borderRadius =
       const DismissiblePageRadius.transition(from: 7, to: 30);
   DismissiblePageDismissDirection direction =
-      DismissiblePageDismissDirection.vertical;
+      DismissiblePageDismissDirection.all;
   Map<DismissiblePageSide, double> dismissThresholds =
       const <DismissiblePageSide, double>{};
   DragStartBehavior dragStartBehavior = DragStartBehavior.down;
