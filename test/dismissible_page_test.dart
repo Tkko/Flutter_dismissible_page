@@ -88,6 +88,61 @@ void main() {
       expect(lastDetails!.offset.dy, greaterThan(0));
     });
 
+    testWidgets('zero maxTransformValue applies effects after first movement',
+        (tester) async {
+      DismissiblePageDragUpdateDetails? details;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DismissiblePage(
+            maxTransformValue: 0,
+            minScale: 0.5,
+            onDismissed: () {},
+            onDragUpdate: (value) => details = value,
+            child: const SizedBox.expand(),
+          ),
+        ),
+      );
+
+      await tester.drag(
+        find.byType(DismissiblePage),
+        const Offset(0, 1),
+      );
+      await tester.pump();
+
+      expect(details, isNotNull);
+      expect(details!.progress, 1);
+      expect(details!.scale, 0.5);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('disallowed-axis pan does not start page drag callbacks',
+        (tester) async {
+      var started = false;
+      var ended = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DismissiblePage(
+            direction: DismissiblePageDismissDirection.down,
+            onDismissed: () {},
+            onDragStart: () => started = true,
+            onDragEnd: () => ended = true,
+            child: const SizedBox.expand(),
+          ),
+        ),
+      );
+
+      await tester.drag(
+        find.byType(DismissiblePage),
+        const Offset(100, 0),
+      );
+      await tester.pumpAndSettle();
+
+      expect(started, isFalse);
+      expect(ended, isFalse);
+    });
+
     testWidgets('calls onDragStart, onDragEnd, onDismissed on fling',
         (tester) async {
       var started = false;
@@ -343,6 +398,48 @@ void main() {
       await tester.pump();
 
       expect(find.text('Update'), findsOneWidget);
+    });
+
+    testWidgets('equivalent threshold maps preserve an active drag',
+        (tester) async {
+      var thresholds = <DismissiblePageSide, double>{
+        DismissiblePageSide.down: 0.2,
+      };
+      StateSetter? rebuild;
+      DismissiblePageDragUpdateDetails? details;
+
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (context, setState) {
+            rebuild = setState;
+            return MaterialApp(
+              home: DismissiblePage(
+                dismissThresholds: thresholds,
+                onDismissed: () {},
+                onDragUpdate: (value) => details = value,
+                child: const SizedBox.expand(),
+              ),
+            );
+          },
+        ),
+      );
+
+      final gesture = await tester.startGesture(const Offset(200, 200));
+      await gesture.moveBy(const Offset(0, 40));
+      await tester.pump();
+      final initialOffset = details!.offset.dy;
+
+      rebuild!(() {
+        thresholds = Map.of(thresholds);
+      });
+      await tester.pump();
+
+      await gesture.moveBy(const Offset(0, 10));
+      await tester.pump();
+      expect(details!.offset.dy, greaterThan(initialOffset));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
 
     testWidgets('didUpdateWidget uses updated callbacks', (tester) async {

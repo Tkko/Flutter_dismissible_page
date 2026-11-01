@@ -19,9 +19,10 @@ void main() {
                     onPressed: () {
                       context.pushTransparentRoute(
                         Scaffold(
-                          body: DismissiblePage(
+                          body: DismissiblePage.builder(
                             onDismissed: () => Navigator.of(context).pop(),
-                            child: ListView.builder(
+                            builder: (context, controller) => ListView.builder(
+                              controller: controller,
                               itemCount: 40,
                               itemBuilder: (ctx, i) => ListTile(
                                 title: Text('List Item $i'),
@@ -58,7 +59,7 @@ void main() {
     testWidgets(
         'Full flow: mid-scroll cannot dismiss, but top scrolls back and dismisses',
         (tester) async {
-      final scrollController = ScrollController();
+      late DismissiblePageScrollController scrollController;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -70,15 +71,18 @@ void main() {
                     onPressed: () {
                       context.pushTransparentRoute(
                         Scaffold(
-                          body: DismissiblePage(
+                          body: DismissiblePage.builder(
                             onDismissed: () => Navigator.of(context).pop(),
-                            child: ListView.builder(
-                              controller: scrollController,
-                              itemCount: 60,
-                              itemBuilder: (ctx, i) => ListTile(
-                                title: Text('Scroll Item $i'),
-                              ),
-                            ),
+                            builder: (context, controller) {
+                              scrollController = controller;
+                              return ListView.builder(
+                                controller: controller,
+                                itemCount: 60,
+                                itemBuilder: (ctx, i) => ListTile(
+                                  title: Text('Scroll Item $i'),
+                                ),
+                              );
+                            },
                           ),
                         ),
                       );
@@ -135,9 +139,10 @@ void main() {
                     onPressed: () {
                       context.pushTransparentRoute(
                         Scaffold(
-                          body: DismissiblePage(
+                          body: DismissiblePage.builder(
                             onDismissed: () => Navigator.of(context).pop(),
-                            child: CustomScrollView(
+                            builder: (context, controller) => CustomScrollView(
+                              controller: controller,
                               slivers: [
                                 const SliverAppBar(
                                   title: Text('Sliver Header'),
@@ -198,6 +203,10 @@ void main() {
                             onDismissed: () => Navigator.of(context).pop(),
                             child: PageView(
                               controller: pageController,
+                              // PageView owns its controller; clamping keeps
+                              // edge overscroll stable for notification-based
+                              // dismissal coordination across platforms.
+                              physics: const ClampingScrollPhysics(),
                               children: const [
                                 Center(child: Text('Card 0')),
                                 Center(child: Text('Card 1')),

@@ -81,6 +81,10 @@ class _DismissibleArbiter extends ChangeNotifier {
 
   double get progress {
     if (_layoutSize.isEmpty) return 0;
+    if (maxTransformValue == 0) {
+      return _dragOffset == Offset.zero ? 0 : 1;
+    }
+
     final normalizedX =
         (_dragOffset.dx.abs() / _layoutSize.width) / maxTransformValue;
     final normalizedY =

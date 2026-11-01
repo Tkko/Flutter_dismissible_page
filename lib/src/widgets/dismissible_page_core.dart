@@ -1,5 +1,14 @@
 part of '../dismissible_page.dart';
 
+bool _sameDismissThresholds(
+  Map<DismissiblePageSide, double> first,
+  Map<DismissiblePageSide, double> second,
+) {
+  if (identical(first, second)) return true;
+  if (first.length != second.length) return false;
+  return first.entries.every((entry) => second[entry.key] == entry.value);
+}
+
 class _DismissiblePageCore extends StatefulWidget {
   const _DismissiblePageCore({
     required this.contentBuilder,
@@ -83,7 +92,10 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     }
     if (widget.enabled != oldWidget.enabled ||
         widget.direction != oldWidget.direction ||
-        widget.dismissThresholds != oldWidget.dismissThresholds ||
+        !_sameDismissThresholds(
+          widget.dismissThresholds,
+          oldWidget.dismissThresholds,
+        ) ||
         widget.dragSensitivity != oldWidget.dragSensitivity ||
         widget.background != oldWidget.background ||
         widget.borderRadius != oldWidget.borderRadius ||
@@ -121,10 +133,6 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     _internalController?.dispose();
     _arbiter.dispose();
     super.dispose();
-  }
-
-  void _handlePanStart(DragStartDetails details) {
-    _arbiter.startDrag();
   }
 
   void _handlePanUpdate(DragUpdateDetails details) {
@@ -259,7 +267,6 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           child: GestureDetector(
             behavior: widget.hitTestBehavior,
             dragStartBehavior: widget.dragStartBehavior,
-            onPanStart: _handlePanStart,
             onPanUpdate: _handlePanUpdate,
             onPanEnd: _handlePanEnd,
             onPanCancel: _handlePanCancel,
