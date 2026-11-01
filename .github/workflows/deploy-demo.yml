@@ -1,0 +1,14 @@
+name: Deploy Demo
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    uses: Tkko/Flutter_Pinput/.github/workflows/deploy-demo.yml@master
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

@@ -30,6 +30,7 @@ example/media/*
 .packages
 .pub-cache/
 .pub/
+build/
 example/build/
 
 # Web related
