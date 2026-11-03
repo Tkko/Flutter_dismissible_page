@@ -1,14 +1,5 @@
 part of '../dismissible_page.dart';
 
-/// Winds up by about 1.5% of the travel, then accelerates away. Unlike
-/// [Curves.easeInBack], whose wind-up is roughly 10%, it reads as a nudge
-/// instead of a bounce.
-const Curve _kExitCurve = Cubic(0.55, -0.12, 0.85, 0.45);
-
-/// Release speed, in page pixels per second, from which a page leaving the
-/// screen keeps its momentum instead of accelerating away from rest.
-const double _kMomentumVelocity = 400;
-
 /// Which way a released drag is flung relative to the page's offset.
 enum _FlingDirection { outward, inward, none }
 
@@ -414,7 +405,7 @@ class _DismissibleArbiter extends ChangeNotifier {
     _animateTo(
       target,
       Offset.zero,
-      duration: exit.duration ?? const Duration(milliseconds: 340),
+      duration: exit.duration ?? _kDismissDuration,
       curve: exit.curve ?? _kExitCurve,
     );
     onDismissed();
@@ -455,7 +446,7 @@ class _DismissibleArbiter extends ChangeNotifier {
       _animateTo(
         target,
         Offset.zero,
-        duration: const Duration(milliseconds: 280),
+        duration: _kSlowExitDuration,
         curve: Curves.easeIn,
       );
       return;
@@ -463,11 +454,15 @@ class _DismissibleArbiter extends ChangeNotifier {
 
     // easeOutCubic starts at three times the average speed, so this makes the
     // page leave at the speed it was released at.
-    final milliseconds = 3000 * distance / speed;
+    final milliseconds = _kEaseOutCubicStartSlope * 1000 * distance / speed;
     _animateTo(
       target,
       _velocityVector(velocity),
-      duration: Duration(milliseconds: milliseconds.clamp(140, 260).round()),
+      duration: Duration(
+        milliseconds: milliseconds
+            .clamp(_kMomentumExitMinMs, _kMomentumExitMaxMs)
+            .round(),
+      ),
       curve: Curves.easeOutCubic,
     );
   }
@@ -503,10 +498,9 @@ class _DismissibleArbiter extends ChangeNotifier {
           0,
           1,
           fractionVelocity,
-          // Settle once the remaining motion is below a quarter pixel and 5px/s.
           tolerance: Tolerance(
-            distance: 0.25 / delta.distance,
-            velocity: 5 / delta.distance,
+            distance: _kSpringDistanceTolerance / delta.distance,
+            velocity: _kSpringVelocityTolerance / delta.distance,
           ),
         ),
       );

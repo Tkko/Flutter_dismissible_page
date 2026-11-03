@@ -1,7 +1,5 @@
 part of '../dismissible_page.dart';
 
-const _transitionDuration = Duration(milliseconds: 250);
-
 /// BuildContext Helper methods
 extension DismissibleContextExt on BuildContext {
   /// Navigates to desired page with transparent transition background
