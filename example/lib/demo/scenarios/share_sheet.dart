@@ -99,7 +99,7 @@ class ShareSheetPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DismissibleDemo(
-      // A sheet leaves downwards, over a scrim that is already dimmed at rest.
+      // The scrim is already dimmed at rest.
       direction: DismissiblePageDismissDirection.down,
       background: DismissiblePageBackground.fadeOut(
         Colors.black,
@@ -112,7 +112,6 @@ class ShareSheetPage extends StatelessWidget {
       child: Builder(
         builder: (context) => GestureDetector(
           behavior: HitTestBehavior.translucent,
-          // Tapping the scrim closes the sheet with the same exit.
           onTap: () => DismissiblePage.dismiss(context),
           child: Align(
             alignment: Alignment.bottomCenter,

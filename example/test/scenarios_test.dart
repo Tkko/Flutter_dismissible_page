@@ -22,7 +22,6 @@ Future<void> pumpApp(WidgetTester tester, Widget home) async {
   await tester.pump(const Duration(milliseconds: 100));
 }
 
-/// Drags [finder] by [delta] over [duration] and lets everything settle.
 Future<void> dragAndSettle(
   WidgetTester tester,
   Finder finder,
@@ -141,7 +140,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(DismissibleScreen), findsOneWidget);
 
-    // With gestures disabled in the shared settings, a swipe does nothing.
     await dragAndSettle(
       tester,
       find.byType(DismissibleScreen),
@@ -296,17 +294,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ProductPage), findsOneWidget);
 
-    // Scrolling down the page must not dismiss it.
     await tester.drag(find.byType(ListView), const Offset(0, -400));
     await tester.pumpAndSettle();
     expect(find.byType(ProductPage), findsOneWidget);
 
-    // Scrolling back up to the top does not dismiss it either.
     await tester.drag(find.byType(ListView), const Offset(0, 400));
     await tester.pumpAndSettle();
     expect(find.byType(ProductPage), findsOneWidget);
 
-    // A pull-down from the top does.
     await dragAndSettle(
       tester,
       find.byType(ProductPage),

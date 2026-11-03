@@ -146,7 +146,6 @@ void main() {
             );
             expect(dismissed, isFalse);
 
-            // A fresh pull from the edge dismisses.
             final pull = await tester.startGesture(const Offset(200, 300));
             for (var i = 0; i < 30; i++) {
               await pull.moveBy(Offset(0, edgeSign * 40));

@@ -14,7 +14,6 @@ import 'package:google_fonts/google_fonts.dart';
 class RealWorldScenarios extends StatelessWidget {
   const RealWorldScenarios({super.key});
 
-  // Every screen opens inside a DismissibleScreen, so it can be swiped away.
   void _open(BuildContext context, Widget page) {
     context.pushTransparentRoute(DismissibleScreen(child: page));
   }

@@ -12,7 +12,6 @@ import 'package:google_fonts/google_fonts.dart';
 const _labBackground = Color(0xff111318);
 const _labSurface = Color(0xff1b1e26);
 
-/// Entry card on the demo page.
 class MotionLabCard extends StatelessWidget {
   const MotionLabCard({required this.pageModel, super.key});
 
@@ -503,7 +502,6 @@ class _LabSwitch extends StatelessWidget {
   }
 }
 
-/// The numbers a designer reads off a spring.
 class _SpringMetrics {
   factory _SpringMetrics(double stiffness, double dampingRatio) {
     final simulation = _simulation(stiffness, dampingRatio);
@@ -575,7 +573,6 @@ class _SpringPainter extends CustomPainter {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
     }
 
-    // The target the spring is heading for.
     final targetY = dy(1);
     final dash = Paint()
       ..color = accentColor.withValues(alpha: 0.45)
@@ -614,7 +611,6 @@ class _SpringPainter extends CustomPainter {
         ..strokeJoin = StrokeJoin.round,
     );
 
-    // Where it stops moving visibly.
     var settle = 0;
     for (var i = 0; i <= samples; i++) {
       if ((values[i] - 1).abs() > 0.01) settle = i;

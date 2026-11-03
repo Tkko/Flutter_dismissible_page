@@ -236,7 +236,6 @@ void main() {
     });
 
     testWidgets('cancelVelocity is configurable', (tester) async {
-      // With a cancel speed of infinity, nothing ever cancels.
       expect(
         await _flick(
           tester,
@@ -411,7 +410,6 @@ void main() {
       await gesture.moveBy(const Offset(0, 400));
       await tester.pump();
       expect(flags.last, isTrue);
-      // Dragging back under the threshold turns it off again.
       await gesture.moveBy(const Offset(0, -300));
       await tester.pump();
       expect(flags.last, isFalse);

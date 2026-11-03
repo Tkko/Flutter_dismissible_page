@@ -1,6 +1,5 @@
 part of '../dismissible_page.dart';
 
-/// Which way a released drag is flung relative to the page's offset.
 enum _FlingDirection { outward, inward, none }
 
 /// Manages and coordinates the drag and dismiss state for a [DismissiblePage].
@@ -276,8 +275,6 @@ class _DismissibleArbiter extends ChangeNotifier {
     if (!_isDragging) return;
     _isDragging = false;
 
-    // Moving back towards the origin at release cancels a dismissal even when
-    // the page was released past the distance threshold.
     final shouldDismiss = switch (_flingDirection(velocity)) {
       _FlingDirection.outward => true,
       _FlingDirection.inward => false,
@@ -374,7 +371,6 @@ class _DismissibleArbiter extends ChangeNotifier {
     onDragCancel?.call();
   }
 
-  /// Eases the page back to the origin, carrying the release [velocity].
   void animateToZero([double velocity = 0]) {
     _animateTo(Offset.zero, _velocityVector(velocity));
   }
@@ -420,7 +416,6 @@ class _DismissibleArbiter extends ChangeNotifier {
         _ => DismissiblePageSide.down,
       };
 
-  /// Carries the page off-screen in the drag direction.
   void animateOut(double velocity) {
     final target = _isHorizontalAxis
         ? Offset(_dragOffset.dx.sign * _layoutSize.width, _dragOffset.dy)

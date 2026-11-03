@@ -11,7 +11,6 @@ import 'package:google_fonts/google_fonts.dart';
 class PhotoGalleryPage extends StatelessWidget {
   const PhotoGalleryPage({super.key});
 
-  // Alternating heights give the grid its masonry rhythm.
   static const _heights = [210.0, 150.0, 170.0, 230.0];
 
   @override

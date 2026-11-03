@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// A row on the home screen that opens one real-world scenario.
 class ScenarioCard extends StatelessWidget {
   const ScenarioCard({
     required this.title,

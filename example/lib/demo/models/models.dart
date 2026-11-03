@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 enum ReboundKind { spring, bouncy, curve, custom }
 
-/// The exit animations the Motion Lab offers.
 enum ExitKind {
   momentum('Momentum', 'DismissiblePageExit.momentum()'),
   ease(

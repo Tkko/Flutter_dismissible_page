@@ -7,8 +7,6 @@ part of 'dismissible_page.dart';
 // fields of `DismissiblePageMotion`) stay inline in their signatures instead,
 // so that the generated documentation shows their values.
 
-// -- Deciding a release ------------------------------------------------------
-
 /// The fraction of the page a drag must cover to dismiss it, for sides that
 /// have no entry in `dismissThresholds`.
 const double _kDismissThreshold = 0.18;
@@ -17,8 +15,6 @@ const double _kDismissThreshold = 0.18;
 /// resting at that edge, so a bounce that has not quite settled does not stop
 /// a pull from dismissing the page.
 const double _kEdgeTolerance = 2;
-
-// -- Leaving the screen ------------------------------------------------------
 
 /// Winds up by about 1.5% of the travel, then accelerates away. Unlike
 /// [Curves.easeInBack], whose wind-up is roughly 10%, it reads as a nudge
@@ -33,7 +29,6 @@ const Duration _kDismissDuration = Duration(milliseconds: 340);
 /// screen keeps its momentum instead of accelerating away from rest.
 const double _kMomentumVelocity = 400;
 
-/// How long a page released without momentum takes to leave.
 const Duration _kSlowExitDuration = Duration(milliseconds: 280);
 
 /// The shortest and longest a page leaving with momentum takes, in
@@ -45,15 +40,10 @@ const double _kMomentumExitMaxMs = 260;
 /// Used to make a page leave at the speed it was released at.
 const double _kEaseOutCubicStartSlope = 3;
 
-// -- Springs -----------------------------------------------------------------
-
 /// A spring is done once its remaining motion is below this many pixels...
 const double _kSpringDistanceTolerance = 0.25;
 
 /// ...and this many pixels per second, so it settles without a visible tail.
 const double _kSpringVelocityTolerance = 5;
 
-// -- Routes ------------------------------------------------------------------
-
-/// The default duration of a transparent route, forwards and in reverse.
 const Duration _transitionDuration = Duration(milliseconds: 250);

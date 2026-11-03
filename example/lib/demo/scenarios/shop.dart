@@ -107,7 +107,6 @@ class _ProductPageState extends State<ProductPage> {
     final product = widget.product;
 
     return DismissibleDemo(
-      // Pulling down from the top is how a product page closes.
       direction: DismissiblePageDismissDirection.down,
       // The Hero flight is the exit, so the page must not slide away too.
       exitsThroughHero: true,

@@ -101,7 +101,6 @@ class _StoryCardState extends State<_StoryCard> {
           reverseTransitionDuration: const Duration(milliseconds: 380),
         );
       },
-      // The card gives a little under the finger, like the real thing.
       child: AnimatedScale(
         scale: _pressed ? 0.97 : 1,
         duration: const Duration(milliseconds: 160),
@@ -206,7 +205,6 @@ class StoryPage extends StatefulWidget {
 }
 
 class _StoryPageState extends State<StoryPage> {
-  // The close button fades out as the page is dragged away.
   final _progress = ValueNotifier<double>(0);
 
   @override

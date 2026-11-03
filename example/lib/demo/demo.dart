@@ -26,7 +26,6 @@ class AppView extends StatefulWidget {
 }
 
 class _AppViewState extends State<AppView> {
-  // One model for the whole demo, shared through [DemoSettings].
   final _model = DismissiblePageModel();
 
   @override

@@ -219,7 +219,6 @@ class _NowPlayingPageState extends State<NowPlayingPage>
     final track = widget.track;
 
     return DismissibleDemo(
-      // A sheet leaves downwards.
       direction: DismissiblePageDismissDirection.down,
       child: Material(
         type: MaterialType.transparency,
