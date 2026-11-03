@@ -66,7 +66,9 @@ class DismissiblePageMotion {
     this.thresholdHaptics = false,
     this.flingVelocity = 1000,
     this.flingMinDistance = 0.1,
+    this.cancelVelocity = 300,
   })  : assert(flingVelocity > 0, 'flingVelocity must be greater than 0'),
+        assert(cancelVelocity >= 0, 'cancelVelocity must not be negative'),
         assert(
           flingMinDistance >= 0 && flingMinDistance <= 1,
           'flingMinDistance must be between 0.0 and 1.0',
@@ -86,18 +88,27 @@ class DismissiblePageMotion {
   /// threshold in either direction.
   final bool thresholdHaptics;
 
-  /// Release speed, in page pixels per second, above which a drag is a fling.
+  /// Release speed, in page pixels per second, above which an outward drag is
+  /// a fling that dismisses the page before it reaches its dismiss threshold.
   ///
-  /// An outward fling dismisses the page before it reaches its dismiss
-  /// threshold, and an inward fling cancels a dismissal. Page pixels are
-  /// [DismissiblePage.dragSensitivity] times finger pixels. Use
-  /// [double.infinity] to dismiss by distance only.
+  /// Page pixels are [DismissiblePage.dragSensitivity] times finger pixels.
+  /// Use [double.infinity] to dismiss by distance only.
   final double flingVelocity;
 
   /// Fraction of the page dimension the page must have moved before an
   /// outward fling can dismiss it, so a flick from a near-resting page does
   /// not.
   final double flingMinDistance;
+
+  /// Release speed, in page pixels per second, above which a drag back towards
+  /// the origin cancels the dismissal, even when the page is past its
+  /// threshold.
+  ///
+  /// It is much lower than [flingVelocity] on purpose: changing your mind
+  /// needs only a hint, while dismissing needs clear intent, so a page that is
+  /// drifting back is never dismissed by accident. Use 0 to cancel on any
+  /// inward movement, or [double.infinity] to never cancel.
+  final double cancelVelocity;
 
   @override
   bool operator ==(Object other) =>
@@ -107,7 +118,8 @@ class DismissiblePageMotion {
           continueOnDismiss == other.continueOnDismiss &&
           thresholdHaptics == other.thresholdHaptics &&
           flingVelocity == other.flingVelocity &&
-          flingMinDistance == other.flingMinDistance;
+          flingMinDistance == other.flingMinDistance &&
+          cancelVelocity == other.cancelVelocity;
 
   @override
   int get hashCode => Object.hash(
@@ -116,5 +128,6 @@ class DismissiblePageMotion {
         thresholdHaptics,
         flingVelocity,
         flingMinDistance,
+        cancelVelocity,
       );
 }

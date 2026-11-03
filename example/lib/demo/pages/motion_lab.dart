@@ -130,6 +130,7 @@ class _MotionLabPageState extends State<MotionLabPage> {
         '    continueOnDismiss: ${model.continueOnDismiss},\n'
         '    thresholdHaptics: ${model.thresholdHaptics},\n'
         '    flingVelocity: ${model.flingVelocity.round()},\n'
+        '    cancelVelocity: ${model.cancelVelocity.round()},\n'
         '    flingMinDistance: ${model.flingMinDistance.toStringAsFixed(2)},\n'
         '  ),\n'
         '  // ...\n'
@@ -285,6 +286,14 @@ class _MotionLabPageState extends State<MotionLabPage> {
                     max: 3000,
                     format: (v) => '${v.round()} px/s',
                     onChanged: (v) => _update(() => model.flingVelocity = v),
+                  ),
+                  _LabSlider(
+                    label: 'Cancel speed (drift back)',
+                    value: model.cancelVelocity,
+                    min: 0,
+                    max: 800,
+                    format: (v) => '${v.round()} px/s',
+                    onChanged: (v) => _update(() => model.cancelVelocity = v),
                   ),
                   _LabSlider(
                     label: 'Fling min distance',

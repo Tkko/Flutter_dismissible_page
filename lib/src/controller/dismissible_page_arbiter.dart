@@ -5,6 +5,10 @@ part of '../dismissible_page.dart';
 /// instead of a bounce.
 const Curve _kExitCurve = Cubic(0.55, -0.12, 0.85, 0.45);
 
+/// Release speed, in page pixels per second, from which a page leaving the
+/// screen keeps its momentum instead of accelerating away from rest.
+const double _kMomentumVelocity = 400;
+
 /// Which way a released drag is flung relative to the page's offset.
 enum _FlingDirection { outward, inward, none }
 
@@ -167,6 +171,7 @@ class _DismissibleArbiter extends ChangeNotifier {
         radius: radius,
         opacity: opacity,
         scale: scale,
+        willDismiss: _hasReachedDismissThreshold,
       );
 
   void _publish(Offset newOffset) {
@@ -280,8 +285,8 @@ class _DismissibleArbiter extends ChangeNotifier {
     if (!_isDragging) return;
     _isDragging = false;
 
-    // A hard flick back towards the origin cancels a dismissal even when the
-    // page was released past the distance threshold.
+    // Moving back towards the origin at release cancels a dismissal even when
+    // the page was released past the distance threshold.
     final shouldDismiss = switch (_flingDirection(velocity)) {
       _FlingDirection.outward => true,
       _FlingDirection.inward => false,
@@ -343,13 +348,24 @@ class _DismissibleArbiter extends ChangeNotifier {
         _ => false,
       };
 
+  /// Reads a release as a deliberate outward fling, a retreat back towards the
+  /// origin, or neither.
+  ///
+  /// The two are deliberately asymmetric: a retreat needs only a hint of
+  /// speed, an outward fling needs a clearly fast one and some distance. When
+  /// in doubt the page stays.
   _FlingDirection _flingDirection(double velocity) {
-    if (velocity.abs() <= motion.flingVelocity) return _FlingDirection.none;
-
     final isHorizontal = _isHorizontalAxis;
     final coordinate = isHorizontal ? _dragOffset.dx : _dragOffset.dy;
     if (coordinate == 0) return _FlingDirection.none;
-    if (coordinate * velocity < 0) return _FlingDirection.inward;
+
+    final speed = velocity.abs();
+    if (coordinate * velocity < 0) {
+      return speed > motion.cancelVelocity
+          ? _FlingDirection.inward
+          : _FlingDirection.none;
+    }
+    if (speed <= motion.flingVelocity) return _FlingDirection.none;
 
     final extent = isHorizontal ? _layoutSize.width : _layoutSize.height;
     if (extent <= 0 || coordinate.abs() / extent < motion.flingMinDistance) {
@@ -419,9 +435,23 @@ class _DismissibleArbiter extends ChangeNotifier {
         : Offset(_dragOffset.dx, _dragOffset.dy.sign * _layoutSize.height);
     final distance = (target - _dragOffset).distance;
     final speed = velocity.abs();
+
+    if (speed < _kMomentumVelocity) {
+      // Released slowly, so there is no momentum to carry. Easing out would
+      // make the page lurch away from a standstill; it is pushed off with a
+      // gentle acceleration instead.
+      _animateTo(
+        target,
+        Offset.zero,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeIn,
+      );
+      return;
+    }
+
     // easeOutCubic starts at three times the average speed, so this makes the
     // page leave at the speed it was released at.
-    final milliseconds = speed == 0 ? 260 : 3000 * distance / speed;
+    final milliseconds = 3000 * distance / speed;
     _animateTo(
       target,
       _velocityVector(velocity),

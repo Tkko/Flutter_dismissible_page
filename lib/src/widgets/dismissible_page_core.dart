@@ -192,6 +192,17 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     _arbiter.cancelDrag();
   }
 
+  // Where the scrollable was when the finger went down. A pull only dismisses
+  // the page when the gesture began at that edge: scrolling quickly to the top
+  // and carrying on must not turn into a dismissal.
+  bool _scrollBeganAtStart = false;
+  bool _scrollBeganAtEnd = false;
+
+  bool _isArmed(ScrollMetrics metrics) =>
+      metrics.pixels < (metrics.minScrollExtent + metrics.maxScrollExtent) / 2
+          ? _scrollBeganAtStart
+          : _scrollBeganAtEnd;
+
   bool _onScrollNotification(ScrollNotification notification) {
     if (widget.direction == DismissiblePageDismissDirection.none) {
       return false;
@@ -206,7 +217,20 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
       return false;
     }
 
+    if (notification is ScrollStartNotification) {
+      final metrics = notification.metrics;
+      _scrollBeganAtStart =
+          metrics.pixels <= metrics.minScrollExtent + _kEdgeTolerance;
+      _scrollBeganAtEnd =
+          metrics.pixels >= metrics.maxScrollExtent - _kEdgeTolerance;
+      return false;
+    }
+
     if (notification is OverscrollNotification) {
+      // Overscroll at the start edge reports a negative amount.
+      final armed =
+          notification.overscroll < 0 ? _scrollBeganAtStart : _scrollBeganAtEnd;
+      if (!armed) return false;
       final physicalDelta = _physicalScrollDelta(
         -notification.overscroll,
         notification.metrics.axisDirection,
@@ -252,7 +276,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
         return false;
       }
 
-      if (notification.metrics.outOfRange) {
+      if (notification.metrics.outOfRange && _isArmed(notification.metrics)) {
         if (_arbiter.isDeltaAllowed(dragDetails.delta)) {
           _applyScrollDelta(dragDetails.delta, dragDetails.sourceTimeStamp);
         }

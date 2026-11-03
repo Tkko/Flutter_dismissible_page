@@ -10,6 +10,7 @@ class DismissiblePageDragUpdateDetails {
     this.offset = Offset.zero,
     this.progress = 0.0,
     this.scale = 1.0,
+    this.willDismiss = false,
   });
 
   /// Visual effect progress from 0.0 to 1.0, not dismissal distance progress.
@@ -18,6 +19,14 @@ class DismissiblePageDragUpdateDetails {
   final double opacity;
   final double scale;
   final Offset offset;
+
+  /// Whether letting go now would dismiss by distance: the page has been
+  /// dragged past its dismiss threshold.
+  ///
+  /// Use it to show that the gesture is committed, for example a "release to
+  /// close" hint. A fast outward fling can still dismiss before this is true,
+  /// and a drift back towards the origin at release can still cancel it.
+  final bool willDismiss;
 
   @override
   bool operator ==(Object other) =>
@@ -35,6 +44,7 @@ class DismissiblePageDragUpdateDetails {
         'opacity': opacity,
         'scale': scale,
         'offset': offset,
+        'willDismiss': willDismiss,
       };
 
   @override

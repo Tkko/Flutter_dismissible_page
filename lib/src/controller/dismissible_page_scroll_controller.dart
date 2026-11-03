@@ -54,6 +54,19 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
 
   bool _isDismissDragging = false;
 
+  // Where the scrollable was when the finger went down. A pull only dismisses
+  // the page when the gesture began at that edge: scrolling quickly to the top
+  // and carrying on must not turn into a dismissal.
+  bool _dragBeganAtStart = false;
+  bool _dragBeganAtEnd = false;
+
+  @override
+  Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
+    _dragBeganAtStart = pixels <= minScrollExtent + _kEdgeTolerance;
+    _dragBeganAtEnd = pixels >= maxScrollExtent - _kEdgeTolerance;
+    return super.drag(details, dragCancelCallback);
+  }
+
   @override
   void applyUserOffset(double delta) {
     final arbiter = _arbiter;
@@ -113,7 +126,8 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
     final atStart = pixels <= minScrollExtent;
     final atEnd = pixels >= maxScrollExtent;
 
-    if ((delta > 0 && atStart) || (delta < 0 && atEnd)) {
+    if ((delta > 0 && atStart && _dragBeganAtStart) ||
+        (delta < 0 && atEnd && _dragBeganAtEnd)) {
       final physicalDelta = _physicalScrollDelta(delta, axisDirection);
       final offsetDelta =
           isVertical ? Offset(0, physicalDelta) : Offset(physicalDelta, 0);

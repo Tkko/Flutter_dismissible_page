@@ -215,6 +215,42 @@ void main() {
       );
     });
 
+    // 300px drag moves the page 210px, past the 108px threshold.
+    testWidgets(
+        'drifting back towards the origin cancels a past-threshold '
+        'release', (tester) async {
+      // 600 finger px/s is 420 page px/s, above the 300 cancel speed.
+      expect(
+        await _flick(tester, dragPx: 300, flickPx: -60, flickSpeed: 600),
+        isFalse,
+      );
+    });
+
+    testWidgets('a hesitation too slow to count still dismisses',
+        (tester) async {
+      // 150 finger px/s is 105 page px/s, below the cancel speed.
+      expect(
+        await _flick(tester, dragPx: 300, flickPx: -6, flickSpeed: 150),
+        isTrue,
+      );
+    });
+
+    testWidgets('cancelVelocity is configurable', (tester) async {
+      // With a cancel speed of infinity, nothing ever cancels.
+      expect(
+        await _flick(
+          tester,
+          dragPx: 300,
+          flickPx: -60,
+          flickSpeed: 600,
+          motion: const DismissiblePageMotion(
+            cancelVelocity: double.infinity,
+          ),
+        ),
+        isTrue,
+      );
+    });
+
     testWidgets('a hard flick back cancels a drag past the threshold',
         (tester) async {
       // 500px drag then a 120px flick back leaves the page 266px out, past
@@ -330,6 +366,57 @@ void main() {
       );
 
       expect(DismissiblePage.dismiss(captured), isFalse);
+    });
+  });
+
+  group('release physics', () {
+    testWidgets('a slow release accelerates away instead of lurching',
+        (tester) async {
+      final offsets = await _dragAndRelease(
+        tester,
+        motion: const DismissiblePageMotion(continueOnDismiss: true),
+        drag: 500,
+      );
+      final atRelease = offsets.last;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 32));
+
+      // The page is 600px tall. Two frames in, it has barely started moving.
+      final remaining = 600 - atRelease;
+      expect(offsets.last - atRelease, lessThan(remaining * 0.05));
+
+      await tester.pumpAndSettle();
+      expect(offsets.last, 600);
+    });
+
+    testWidgets('willDismiss turns on once the threshold is passed',
+        (tester) async {
+      final flags = <bool>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DismissiblePage(
+            // 0.5 of 600px, so 300px of page movement.
+            dismissThresholds: const {DismissiblePageSide.down: 0.5},
+            onDismissed: () {},
+            onDragUpdate: (details) => flags.add(details.willDismiss),
+            child: const SizedBox.expand(),
+          ),
+        ),
+      );
+
+      final gesture = await tester.startGesture(const Offset(200, 100));
+      await gesture.moveBy(const Offset(0, 100));
+      await tester.pump();
+      expect(flags.last, isFalse);
+      await gesture.moveBy(const Offset(0, 400));
+      await tester.pump();
+      expect(flags.last, isTrue);
+      // Dragging back under the threshold turns it off again.
+      await gesture.moveBy(const Offset(0, -300));
+      await tester.pump();
+      expect(flags.last, isFalse);
+      await gesture.cancel();
+      await tester.pumpAndSettle();
     });
   });
 

@@ -31,6 +31,11 @@ part 'widgets/dismissible_page_core.dart';
 
 const double _kDismissThreshold = 0.18;
 
+/// How far from its edge, in logical pixels, a scrollable still counts as
+/// resting at that edge, so a bounce that has not quite settled does not stop
+/// a pull from dismissing the page.
+const double _kEdgeTolerance = 2;
+
 /// Flutter widget that allows you to dismiss page in any direction,
 /// coordinating seamlessly with inner scrollables ([ListView], [CustomScrollView], [PageView], etc.).
 class DismissiblePage extends StatelessWidget {

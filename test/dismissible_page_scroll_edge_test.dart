@@ -153,11 +153,19 @@ void main() {
       );
 
       for (var round = 1; round <= 2; round++) {
+        if (round == 2) {
+          // The list was scrolled by round 1. Scrolling it back to the top is a
+          // gesture of its own: it must not carry on into the page.
+          final scroll = await tester.startGesture(const Offset(200, 100));
+          await _dragBy(tester, scroll, 200);
+          expect(dy, 0, reason: 'scrolling back to the top leaves the page');
+          await scroll.up();
+          await tester.pumpAndSettle();
+        }
         final g = await tester.startGesture(const Offset(200, 100));
-        // Round 2 first scrolls the list back to the top, then overscrolls.
-        await _dragBy(tester, g, round == 1 ? 80 : 200);
+        await _dragBy(tester, g, 80);
         expect(dy, greaterThan(0), reason: 'round $round');
-        await _dragBy(tester, g, round == 1 ? -80 : -250);
+        await _dragBy(tester, g, -80);
         expect(dy, 0);
         await g.up();
         await tester.pumpAndSettle();

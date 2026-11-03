@@ -90,11 +90,13 @@ class PhotoViewerPage extends StatefulWidget {
 class _PhotoViewerPageState extends State<PhotoViewerPage> {
   // Chrome fades out as the photo is dragged away, like the system gallery.
   final _progress = ValueNotifier<double>(0);
+  final _willDismiss = ValueNotifier<bool>(false);
   bool _liked = false;
 
   @override
   void dispose() {
     _progress.dispose();
+    _willDismiss.dispose();
     super.dispose();
   }
 
@@ -103,7 +105,10 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
     final photo = widget.photo;
 
     return DismissibleDemo(
-      onDragUpdate: (details) => _progress.value = details.progress,
+      onDragUpdate: (details) {
+        _progress.value = details.progress;
+        _willDismiss.value = details.willDismiss;
+      },
       // The Hero flight is the exit, so the page must not slide away too.
       exitsThroughHero: true,
       child: Material(
@@ -195,6 +200,43 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ),
+            ),
+            // Shown once letting go would close the photo, so the commit point
+            // is never a surprise.
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 48,
+              child: IgnorePointer(
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: _willDismiss,
+                  builder: (context, willDismiss, child) => AnimatedOpacity(
+                    opacity: willDismiss ? 1 : 0,
+                    duration: const Duration(milliseconds: 150),
+                    child: child,
+                  ),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Release to close',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

@@ -68,6 +68,7 @@ class DismissiblePageModel {
   double dampingRatio = 1.0;
   double dismissThreshold = 0.18;
   double flingVelocity = 1000;
+  double cancelVelocity = 300;
   double flingMinDistance = 0.1;
   bool continueOnDismiss = true;
   bool thresholdHaptics = true;
@@ -110,6 +111,7 @@ class DismissiblePageModel {
         continueOnDismiss: continueOnDismiss ?? this.continueOnDismiss,
         thresholdHaptics: thresholdHaptics,
         flingVelocity: flingVelocity,
+        cancelVelocity: cancelVelocity,
         flingMinDistance: flingMinDistance,
       );
 }

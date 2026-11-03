@@ -129,14 +129,30 @@ void main() {
             expect(dy, 0);
             expect(dismissed, isFalse);
 
-            // A fling from the edge dismisses.
+            // Scrolling back to the edge must not carry on into the page, even
+            // when the finger keeps going: a pull only dismisses the page when
+            // the gesture began at the edge.
             final back = await tester.startGesture(const Offset(200, 300));
-            // return to the edge first
             for (var i = 0; i < 30; i++) {
               await back.moveBy(Offset(0, edgeSign * 40));
               await tester.pump(const Duration(milliseconds: 16));
             }
             await back.up();
+            await tester.pumpAndSettle();
+            expect(
+              dy,
+              0,
+              reason: 'a scroll that reaches the edge stays a scroll',
+            );
+            expect(dismissed, isFalse);
+
+            // A fresh pull from the edge dismisses.
+            final pull = await tester.startGesture(const Offset(200, 300));
+            for (var i = 0; i < 30; i++) {
+              await pull.moveBy(Offset(0, edgeSign * 40));
+              await tester.pump(const Duration(milliseconds: 16));
+            }
+            await pull.up();
             await tester.pumpAndSettle();
             expect(dismissed, isTrue, reason: 'dragging far enough dismisses');
           });

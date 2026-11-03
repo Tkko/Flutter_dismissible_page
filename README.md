@@ -274,9 +274,13 @@ DismissiblePage(
     // A light haptic each time the dismiss threshold is crossed.
     thresholdHaptics: true,
     // Page pixels per second, and the fraction of the page that must already
-    // have moved, for an outward fling to dismiss. An inward fling cancels.
+    // have moved, for an outward fling to dismiss before the threshold.
     flingVelocity: 1000,
     flingMinDistance: 0.1,
+    // How little speed back towards the origin cancels a release that is past
+    // the threshold. Much lower than flingVelocity: changing your mind needs a
+    // hint, dismissing needs intent.
+    cancelVelocity: 300,
   ),
   onDismissed: () => Navigator.of(context).pop(),
   child: const SizedBox.expand(),
@@ -305,6 +309,24 @@ Builder(
 
 The context must be inside the page. Use a `Builder` when the button is built by
 the widget that creates the `DismissiblePage`.
+
+### Avoiding accidental dismissals
+
+Dismissing needs clear intent, and the defaults lean towards keeping the page:
+
+- A release past the threshold that is drifting back towards the origin
+  (faster than `cancelVelocity`) cancels, even though the page was far enough.
+- A fling only dismisses before the threshold when it is fast
+  (`flingVelocity`) and the page has already moved `flingMinDistance`.
+- A pull on a scrollable only dismisses the page when the gesture began at that
+  edge. Scrolling quickly to the top and carrying on stays a scroll; lift and
+  pull again to dismiss.
+- `onDragUpdate` reports `details.willDismiss`, true while letting go would
+  dismiss by distance, so you can show a "release to close" hint.
+
+If the page contains something draggable that competes with the dismiss
+gesture, such as a zoomable image or a slider, set `enabled: false` while it is
+being used.
 
 ## Transparent routes
 
