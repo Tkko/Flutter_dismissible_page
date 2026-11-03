@@ -31,6 +31,9 @@ class DismissiblePageDragRegion {
   final double _extent;
   final bool Function(Offset position, Size size)? _test;
 
+  /// Whether a drag may start anywhere, so there is nothing to check.
+  bool get isAnywhere => _side == null && _test == null;
+
   /// Whether a drag may start at [position] on a page of [size].
   bool contains(Offset position, Size size, TextDirection textDirection) {
     final test = _test;

@@ -84,6 +84,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
   void initState() {
     super.initState();
     _initArbiter();
+    _arbiter.dragRegionTest = _isInDragRegion;
     _effectiveController._arbiter = widget.enabled ? _arbiter : null;
   }
 
@@ -148,16 +149,42 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     super.dispose();
   }
 
-  void _handlePointerDown(PointerDownEvent event) {
-    _arbiter.pointerInRegion = widget.gesture.dragRegion.contains(
-      event.localPosition,
-      _arbiter.layoutSize,
-      _arbiter.textDirection,
+  // Whether a touch at [globalPosition] falls inside the drag region of the
+  // page. The region is measured on the page itself, as the user sees it: a
+  // page that is displaced or scaled by a drag or a rebound is mapped back to
+  // its resting frame first.
+  bool _isInDragRegion(Offset globalPosition) {
+    final region = widget.gesture.dragRegion;
+    if (region.isAnywhere) return true;
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return true;
+    final size = box.size;
+    final center = size.center(Offset.zero);
+    final scale = max(_arbiter.scale, 0.01);
+    final onPage = center +
+        (box.globalToLocal(globalPosition) - center - _arbiter.offset) / scale;
+    return region.contains(onPage, size, Directionality.of(context));
+  }
+
+  // The pan of the page itself. A pointer that goes down outside the drag
+  // region is not allowed, so it never enters the gesture arena and every
+  // finger is judged on its own.
+  GestureRecognizerFactory _panFactory(BuildContext context) {
+    final gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    return GestureRecognizerFactoryWithHandlers<_RegionPanGestureRecognizer>(
+      () => _RegionPanGestureRecognizer(isInRegion: _isInDragRegion),
+      (recognizer) {
+        recognizer
+          ..dragStartBehavior = widget.dragStartBehavior
+          ..gestureSettings = gestureSettings
+          ..onUpdate = _handlePanUpdate
+          ..onEnd = _handlePanEnd
+          ..onCancel = _handlePanCancel;
+      },
     );
   }
 
   void _handlePanUpdate(DragUpdateDetails details) {
-    if (!_arbiter.pointerInRegion) return;
     _arbiter.applyDelta(details.delta);
   }
 
@@ -209,6 +236,10 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
   bool _scrollBeganAtStart = false;
   bool _scrollBeganAtEnd = false;
 
+  // Whether the gesture that started the scroll went down inside the drag
+  // region. Decided once per scroll, from its own finger.
+  bool _scrollInRegion = true;
+
   bool _isArmed(ScrollMetrics metrics) =>
       metrics.pixels < (metrics.minScrollExtent + metrics.maxScrollExtent) / 2
           ? _scrollBeganAtStart
@@ -219,7 +250,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
       return false;
     }
 
-    if (notification.depth != 0 || !_arbiter.pointerInRegion) {
+    if (notification.depth != 0) {
       return false;
     }
 
@@ -234,10 +265,14 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           metrics.pixels <= metrics.minScrollExtent + _kEdgeTolerance;
       _scrollBeganAtEnd =
           metrics.pixels >= metrics.maxScrollExtent - _kEdgeTolerance;
+      final startDetails = notification.dragDetails;
+      _scrollInRegion =
+          startDetails == null || _isInDragRegion(startDetails.globalPosition);
       return false;
     }
 
     if (notification is OverscrollNotification) {
+      if (!_scrollInRegion) return false;
       // Overscroll at the start edge reports a negative amount.
       final armed =
           notification.overscroll < 0 ? _scrollBeganAtStart : _scrollBeganAtEnd;
@@ -271,6 +306,8 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
         }
         return false;
       }
+
+      if (!_scrollInRegion) return false;
 
       final isVertical = notification.metrics.axis == Axis.vertical;
       final currentCoord = isVertical ? _arbiter.offset.dy : _arbiter.offset.dx;
@@ -355,14 +392,13 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           Directionality.of(context),
         );
 
-        Widget page = NotificationListener<ScrollNotification>(
+        final page = NotificationListener<ScrollNotification>(
           onNotification: _onScrollNotification,
-          child: GestureDetector(
+          child: RawGestureDetector(
             behavior: widget.hitTestBehavior,
-            dragStartBehavior: widget.dragStartBehavior,
-            onPanUpdate: _handlePanUpdate,
-            onPanEnd: _handlePanEnd,
-            onPanCancel: _handlePanCancel,
+            gestures: <Type, GestureRecognizerFactory>{
+              _RegionPanGestureRecognizer: _panFactory(context),
+            },
             child: RepaintBoundary(
               child: ListenableBuilder(
                 listenable: _arbiter,
@@ -419,12 +455,6 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           ),
         );
 
-        page = Listener(
-          behavior: HitTestBehavior.translucent,
-          onPointerDown: _handlePointerDown,
-          child: page,
-        );
-
         // Assistive technologies get the swipe-to-dismiss action, and the
         // page a label when it is given one.
         return Semantics(
@@ -438,4 +468,20 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
       },
     );
   }
+}
+
+/// A [PanGestureRecognizer] that only accepts pointers, and trackpad gestures,
+/// that start where `isInRegion` says a drag may start.
+class _RegionPanGestureRecognizer extends PanGestureRecognizer {
+  _RegionPanGestureRecognizer({required this.isInRegion});
+
+  final bool Function(Offset globalPosition) isInRegion;
+
+  @override
+  bool isPointerAllowed(PointerEvent event) =>
+      isInRegion(event.position) && super.isPointerAllowed(event);
+
+  @override
+  bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) =>
+      isInRegion(event.position) && super.isPointerPanZoomAllowed(event);
 }

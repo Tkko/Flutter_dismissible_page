@@ -60,8 +60,13 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
   bool _dragBeganAtStart = false;
   bool _dragBeganAtEnd = false;
 
+  // Whether this drag began inside the page's drag region. Decided per drag,
+  // from where its own finger went down, so other fingers do not matter.
+  bool _dragInRegion = true;
+
   @override
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
+    _dragInRegion = _arbiter?.isInDragRegion(details.globalPosition) ?? true;
     _dragBeganAtStart = pixels <= minScrollExtent + _kEdgeTolerance;
     _dragBeganAtEnd = pixels >= maxScrollExtent - _kEdgeTolerance;
     return super.drag(details, dragCancelCallback);
@@ -72,7 +77,7 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
     final arbiter = _arbiter;
     if (arbiter == null ||
         arbiter.direction == DismissiblePageDismissDirection.none ||
-        !arbiter.pointerInRegion) {
+        !_dragInRegion) {
       super.applyUserOffset(delta);
       return;
     }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dismissible_page/dismissible_page.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -314,7 +315,6 @@ void main() {
         await tester.pumpWidget(
           _app(
             DismissiblePage(
-              direction: DismissiblePageDismissDirection.all,
               gesture: DismissiblePageGesture(lockAxis: lock),
               transform: const DismissiblePageTransform(dragSensitivity: 1),
               onDragUpdate: (d) => last = d.offset,
@@ -382,6 +382,201 @@ void main() {
 
     testWidgets('drags that start outside do not', (tester) async {
       expect(await dragFrom(tester, const Offset(50, 400)), 0);
+    });
+
+    testWidgets(
+      'secondary pointer outside drag region while dragging does not reset pointerInRegion',
+      (tester) async {
+        var dy = 0.0;
+        await tester.pumpWidget(
+          _app(
+            DismissiblePage(
+              gesture: const DismissiblePageGesture(
+                dragRegion: DismissiblePageDragRegion.edge(
+                  DismissiblePageSide.up,
+                  100,
+                ),
+              ),
+              onDragUpdate: (d) => dy = d.offset.dy,
+              onDismissed: () {},
+              child: const SizedBox.expand(),
+            ),
+          ),
+        );
+        final top = tester.getTopLeft(find.byType(DismissiblePage));
+        final gesture1 = await tester.startGesture(top + const Offset(50, 50));
+        await gesture1.moveBy(const Offset(0, 40));
+        await tester.pump(const Duration(milliseconds: 100));
+        final firstDy = dy;
+        expect(firstDy, greaterThan(0));
+
+        // A secondary pointer touches outside the region while dragging
+        await tester.sendEventToBinding(
+          PointerDownEvent(
+            pointer: 99,
+            device: 99,
+            position: top + const Offset(50, 400),
+          ),
+        );
+        await tester.sendEventToBinding(
+          PointerUpEvent(
+            pointer: 99,
+            device: 99,
+            position: top + const Offset(50, 400),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 100));
+
+        // Continue dragging with primary gesture
+        await gesture1.moveBy(const Offset(0, 40));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(dy, greaterThan(firstDy));
+
+        await gesture1.up();
+        await tester.pumpAndSettle();
+      },
+    );
+  });
+
+  group('dragRegion with several pointers', () {
+    Future<double> run(
+      WidgetTester tester,
+      Future<void> Function(Offset top) body, {
+      DismissiblePageDragRegion region =
+          const DismissiblePageDragRegion.edge(DismissiblePageSide.up, 100),
+      double scale = 1,
+    }) async {
+      var dy = 0.0;
+      await tester.pumpWidget(
+        _app(
+          DismissiblePage(
+            gesture: DismissiblePageGesture(dragRegion: region),
+            transform: DismissiblePageTransform(minScale: scale),
+            onDragUpdate: (d) => dy = d.offset.dy,
+            onDismissed: () {},
+            child: const SizedBox.expand(),
+          ),
+        ),
+      );
+      await body(tester.getTopLeft(find.byType(DismissiblePage)));
+      return dy;
+    }
+
+    testWidgets('a tap outside does not block a drag that began inside',
+        (tester) async {
+      final dy = await run(tester, (top) async {
+        final a = await tester.startGesture(top + const Offset(50, 50));
+        final b = await tester.startGesture(top + const Offset(50, 400));
+        await b.up();
+        await a.moveBy(const Offset(0, 40));
+        await tester.pump();
+      });
+      expect(dy, greaterThan(0));
+    });
+
+    testWidgets('a tap inside does not let a drag that began outside move it',
+        (tester) async {
+      final dy = await run(tester, (top) async {
+        final a = await tester.startGesture(top + const Offset(50, 400));
+        final b = await tester.startGesture(top + const Offset(50, 50));
+        await b.up();
+        await a.moveBy(const Offset(0, 40));
+        await tester.pump();
+      });
+      expect(dy, 0);
+    });
+
+    for (final inside in [true, false]) {
+      testWidgets(
+          'a trackpad pan starting ${inside ? 'inside' : 'outside'} '
+          'the region ${inside ? 'moves' : 'does not move'} the page',
+          (tester) async {
+        final dy = await run(tester, (top) async {
+          final at = top + Offset(50, inside ? 50 : 400);
+          final pad = TestPointer(3, PointerDeviceKind.trackpad);
+          await tester.sendEventToBinding(pad.panZoomStart(at));
+          await tester.sendEventToBinding(
+            pad.panZoomUpdate(at, pan: const Offset(0, 60)),
+          );
+          await tester.pump();
+        });
+        expect(dy, inside ? greaterThan(0) : 0);
+      });
+    }
+
+    testWidgets('the region is measured on the real page, not its constraints',
+        (tester) async {
+      var dy = 0.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: DismissiblePage(
+              gesture: const DismissiblePageGesture(
+                dragRegion: DismissiblePageDragRegion.edge(
+                  DismissiblePageSide.down,
+                  100,
+                ),
+              ),
+              onDragUpdate: (d) => dy = d.offset.dy,
+              onDismissed: () {},
+              child: const SizedBox(width: 300, height: 300),
+            ),
+          ),
+        ),
+      );
+      // 20 px above the bottom of a 300 px page, in an 800x600 surface.
+      final g = await tester.startGesture(const Offset(50, 280));
+      await g.moveBy(const Offset(0, 40));
+      await tester.pump();
+      expect(dy, greaterThan(0));
+    });
+
+    testWidgets('a displaced page is grabbed where it is seen', (tester) async {
+      // Pull the top strip down and let go, then grab the strip again while
+      // the page is still away from its origin.
+      var dy = 0.0;
+      await tester.pumpWidget(
+        _app(
+          DismissiblePage(
+            gesture: const DismissiblePageGesture(
+              dragRegion: DismissiblePageDragRegion.edge(
+                DismissiblePageSide.up,
+                100,
+              ),
+            ),
+            transform: const DismissiblePageTransform(
+              dragSensitivity: 1,
+              minScale: 1,
+            ),
+            motion: const DismissiblePageMotion(
+              rebound: DismissiblePageRebound.curve(
+                duration: Duration(seconds: 2),
+              ),
+            ),
+            onDragUpdate: (d) => dy = d.offset.dy,
+            onDismissed: () {},
+            child: const SizedBox.expand(),
+          ),
+        ),
+      );
+      final top = tester.getTopLeft(find.byType(DismissiblePage));
+      final first = await tester.startGesture(top + const Offset(50, 50));
+      await first.moveBy(const Offset(0, 150));
+      await tester.pump();
+      await first.up();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      final away = dy;
+      expect(away, greaterThan(100));
+
+      // The strip now sits `away` px lower, and grabbing it there works.
+      final grab = await tester.startGesture(top + Offset(50, away + 50));
+      await grab.moveBy(const Offset(0, 20));
+      await tester.pump();
+      expect(dy, greaterThan(away));
+      await grab.up();
+      await tester.pumpAndSettle();
     });
   });
 

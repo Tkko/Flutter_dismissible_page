@@ -54,13 +54,14 @@ class _DismissibleArbiter extends ChangeNotifier {
   Map<DismissiblePageSide, double> get dismissThresholds =>
       gesture.dismissThresholds;
 
-  /// Whether the pointer that is down began inside
-  /// [DismissiblePageGesture.dragRegion]. A drag that began outside of it
-  /// never moves the page.
-  bool pointerInRegion = true;
+  /// Tells whether a drag starting at a global position lies inside
+  /// [DismissiblePageGesture.dragRegion]. Set by the widget that knows where
+  /// the page is on screen.
+  bool Function(Offset globalPosition)? dragRegionTest;
 
-  Size get layoutSize => _layoutSize;
-  TextDirection get textDirection => _textDirection;
+  /// Whether a drag starting at [globalPosition] may move the page.
+  bool isInDragRegion(Offset globalPosition) =>
+      dragRegionTest?.call(globalPosition) ?? true;
 
   late final AnimationController _animationController;
 

@@ -353,7 +353,6 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: DismissiblePage(
-              direction: DismissiblePageDismissDirection.all,
               onDismissed: () {},
               onDragUpdate: (details) => lastDetails = details,
               child: ListView.builder(

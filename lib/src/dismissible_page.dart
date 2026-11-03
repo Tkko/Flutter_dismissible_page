@@ -94,7 +94,7 @@ class DismissiblePage extends StatelessWidget {
       to: Colors.transparent,
     ),
     this.borderRadius = const DismissiblePageRadius.transition(),
-    this.direction = DismissiblePageDismissDirection.vertical,
+    this.direction = DismissiblePageDismissDirection.all,
     this.gesture = const DismissiblePageGesture(),
     this.transform = const DismissiblePageTransform(),
     this.dragStartBehavior = DragStartBehavior.down,
