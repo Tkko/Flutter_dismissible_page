@@ -95,14 +95,19 @@ class DismissiblePageModel {
     };
   }
 
-  DismissiblePageMotion get motion => DismissiblePageMotion(
+  DismissiblePageMotion get motion => motionWith();
+
+  /// The current motion, optionally forcing [continueOnDismiss]. Screens that
+  /// leave through a Hero turn it off, because the flight is their exit.
+  DismissiblePageMotion motionWith({bool? continueOnDismiss}) =>
+      DismissiblePageMotion(
         rebound: reboundKind == ReboundKind.curve
             ? const DismissiblePageRebound.curve()
             : DismissiblePageRebound.spring(
                 stiffness: stiffness,
                 dampingRatio: dampingRatio,
               ),
-        continueOnDismiss: continueOnDismiss,
+        continueOnDismiss: continueOnDismiss ?? this.continueOnDismiss,
         thresholdHaptics: thresholdHaptics,
         flingVelocity: flingVelocity,
         flingMinDistance: flingMinDistance,

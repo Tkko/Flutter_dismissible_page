@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
+import 'package:dismissible_page_example/demo/models/demo_settings.dart';
+import 'package:dismissible_page_example/demo/models/models.dart';
 import 'package:dismissible_page_example/demo/pages/dismissible_page_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,9 +20,21 @@ const accentColor = Color(0xff00d573);
 
 void main() => runApp(AppView());
 
-class AppView extends StatelessWidget {
+class AppView extends StatefulWidget {
+  @override
+  State<AppView> createState() => _AppViewState();
+}
+
+class _AppViewState extends State<AppView> {
+  // One model for the whole demo, shared through [DemoSettings].
+  final _model = DismissiblePageModel();
+
   @override
   Widget build(BuildContext context) {
+    return DemoSettings(model: _model, child: _buildApp());
+  }
+
+  Widget _buildApp() {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final app = MaterialApp(

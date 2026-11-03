@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:dismissible_page/dismissible_page.dart';
+import 'package:dismissible_page_example/demo/models/demo_settings.dart';
 import 'package:dismissible_page_example/demo/models/models.dart';
 import 'package:dismissible_page_example/demo/pages/motion_lab.dart';
+import 'package:dismissible_page_example/demo/scenarios/real_world.dart';
 import 'package:dismissible_page_example/demo/pages/showcase_gallery.dart';
 import 'package:dismissible_page_example/demo/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +18,7 @@ class DismissiblePageDemo extends StatefulWidget {
 }
 
 class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
-  DismissiblePageModel pageModel = DismissiblePageModel();
+  DismissiblePageModel get pageModel => DemoSettings.of(context);
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,7 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
             Contacts(pageModel: pageModel),
             Stories(pageModel: pageModel),
             MotionLabCard(pageModel: pageModel),
+            const RealWorldScenarios(),
             ShowcaseGallery(pageModel: pageModel),
             // Clears the floating Properties button.
             const SizedBox(height: 100),
@@ -294,36 +297,58 @@ class Stories extends StatelessWidget {
   }
 }
 
+/// A [DismissiblePage] configured from the shared demo settings, so the
+/// Properties sheet and the Motion Lab apply to every screen that uses it.
+///
+/// A screen overrides only what is intrinsic to it: a bottom sheet leaves
+/// downwards and a chat swipes back, whatever the direction chip says.
 class DismissibleDemo extends StatelessWidget {
-  final DismissiblePageModel pageModel;
+  /// Defaults to the demo-wide settings from [DemoSettings].
+  final DismissiblePageModel? pageModel;
   final Widget child;
   final DismissiblePageBackground? background;
+  final DismissiblePageDismissDirection? direction;
+  final DismissiblePageRadius? borderRadius;
+  final double? minScale;
+  final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
+
+  /// Whether a Hero flight is this screen's exit. The page then stays where it
+  /// was released instead of also sliding away.
+  final bool exitsThroughHero;
 
   const DismissibleDemo({
     Key? key,
-    required this.pageModel,
+    this.pageModel,
     required this.child,
     this.background,
+    this.direction,
+    this.borderRadius,
+    this.minScale,
+    this.onDragUpdate,
+    this.exitsThroughHero = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final model = pageModel ?? DemoSettings.of(context);
     return DismissiblePage(
       onDismissed: () => Navigator.of(context).pop(),
-      isFullScreen: pageModel.isFullScreen,
-      borderRadius: pageModel.borderRadius,
-      dragSensitivity: pageModel.dragSensitivity,
-      maxTransformValue: pageModel.maxTransformValue,
-      direction: pageModel.direction,
-      enabled: pageModel.enabled,
-      background: background ?? pageModel.background,
-      dismissThresholds: pageModel.dismissThresholds,
-      dragStartBehavior: pageModel.dragStartBehavior,
-      minScale: pageModel.minScale,
-      hitTestBehavior: pageModel.behavior,
-      reverseDuration: pageModel.reverseDuration,
-      motion: pageModel.motion,
-      // onDragUpdate: (d) => print(d.offset.dy),
+      onDragUpdate: onDragUpdate,
+      isFullScreen: model.isFullScreen,
+      borderRadius: borderRadius ?? model.borderRadius,
+      dragSensitivity: model.dragSensitivity,
+      maxTransformValue: model.maxTransformValue,
+      direction: direction ?? model.direction,
+      enabled: model.enabled,
+      background: background ?? model.background,
+      dismissThresholds: model.dismissThresholds,
+      dragStartBehavior: model.dragStartBehavior,
+      minScale: minScale ?? model.minScale,
+      hitTestBehavior: model.behavior,
+      reverseDuration: model.reverseDuration,
+      motion: exitsThroughHero
+          ? model.motionWith(continueOnDismiss: false)
+          : model.motion,
       child: child,
     );
   }
