@@ -4,10 +4,12 @@
 - Require `child` on `DismissiblePage` and move builder content to `DismissiblePage.builder`.
 - Rename `DismissiblePageDismissDirection.multi` to `DismissiblePageDismissDirection.all`.
 - Rename `overallDragValue` to `progress` in `DismissiblePageDragUpdateDetails` (including `toMap()`).
-- Key `dismissThresholds` by directional destination sides (`DismissiblePageSide.up`, `down`, `start`, `end`) instead of directions. Missing sides default to `0.15`.
+- Key `dismissThresholds` by directional destination sides (`DismissiblePageSide.up`, `down`, `start`, `end`) instead of directions. Missing sides default to `0.18`.
 - Updated minimum SDK constraints to Dart `>=3.0.0 <5.0.0` and Flutter `>=3.10.0`.
 
 ### New Features & Enhancements
+- **`DismissiblePage.dismiss(context, {side})`**: Dismiss from code with the same motion as a swipe. The page winds up slightly, then accelerates off-screen towards `side` (by default the side `direction` dismisses towards) while `onDismissed` runs, so close buttons no longer only fade.
+- **`DismissiblePageMotion`**: New `motion` parameter that tunes released drags. `rebound` picks `DismissiblePageRebound.spring()` (default, seeded with the release velocity), `.bouncy()` or `.curve()` (the previous `reverseDuration` easing). `continueOnDismiss` keeps the page moving off-screen from the finger while `onDismissed` runs, and `thresholdHaptics` fires a light haptic when the dismiss threshold is crossed. `flingVelocity` and `flingMinDistance` set how fast, and from how far, a fling dismisses the page; an inward fling cancels a dismissal.
 - **`DismissiblePageBackground`**: Introduced a structured class with `.color()`, `.widget()`, and `.custom()` factories for animated background rendering and opacity blending.
 - **`DismissiblePageRadius`**: Introduced a dedicated model (`.circular()`, `.all()`, etc.) for managing corner radius transformations during drag interactions.
 - **`onDragCancel` callback**: Added callback invoked when a drag gesture is cancelled or released without triggering a dismissal.

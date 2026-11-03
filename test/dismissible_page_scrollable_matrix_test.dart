@@ -195,7 +195,7 @@ void main() {
 
         await tester.fling(
           find.byType(ListView),
-          Offset(sign * 120, 0),
+          Offset(sign * 160, 0),
           2500,
         );
         await tester.pumpAndSettle();

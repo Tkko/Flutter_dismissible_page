@@ -4,6 +4,8 @@ import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+enum ReboundKind { spring, bouncy, curve, custom }
+
 class DismissiblePageModel {
   static const List<String> naturePhotos = [
     'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80',
@@ -61,6 +63,50 @@ class DismissiblePageModel {
   DragStartBehavior dragStartBehavior = DragStartBehavior.down;
   Duration reverseDuration = const Duration(milliseconds: 200);
   HitTestBehavior behavior = HitTestBehavior.opaque;
+  ReboundKind reboundKind = ReboundKind.spring;
+  double stiffness = 900;
+  double dampingRatio = 1.0;
+  double dismissThreshold = 0.18;
+  double flingVelocity = 1000;
+  double flingMinDistance = 0.1;
+  bool continueOnDismiss = true;
+  bool thresholdHaptics = true;
+
+  /// Picks a rebound, loading the spring numbers its preset stands for.
+  void selectRebound(ReboundKind kind) {
+    reboundKind = kind;
+    switch (kind) {
+      case ReboundKind.spring:
+        stiffness = 900;
+        dampingRatio = 1.0;
+      case ReboundKind.bouncy:
+        stiffness = 900;
+        dampingRatio = 0.65;
+      case ReboundKind.curve || ReboundKind.custom:
+        break;
+    }
+  }
+
+  /// Sets the dismiss distance of every side at once.
+  void setDismissThreshold(double value) {
+    dismissThreshold = value;
+    dismissThresholds = {
+      for (final side in DismissiblePageSide.values) side: value,
+    };
+  }
+
+  DismissiblePageMotion get motion => DismissiblePageMotion(
+        rebound: reboundKind == ReboundKind.curve
+            ? const DismissiblePageRebound.curve()
+            : DismissiblePageRebound.spring(
+                stiffness: stiffness,
+                dampingRatio: dampingRatio,
+              ),
+        continueOnDismiss: continueOnDismiss,
+        thresholdHaptics: thresholdHaptics,
+        flingVelocity: flingVelocity,
+        flingMinDistance: flingMinDistance,
+      );
 }
 
 class StoryModel {

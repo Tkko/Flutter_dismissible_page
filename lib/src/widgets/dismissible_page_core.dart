@@ -1,5 +1,16 @@
 part of '../dismissible_page.dart';
 
+/// Lets descendants reach the page's arbiter for [DismissiblePage.dismiss].
+class _DismissibleScope extends InheritedWidget {
+  const _DismissibleScope({required this.arbiter, required super.child});
+
+  final _DismissibleArbiter arbiter;
+
+  @override
+  bool updateShouldNotify(_DismissibleScope oldWidget) =>
+      arbiter != oldWidget.arbiter;
+}
+
 class _DismissiblePageCore extends StatefulWidget {
   const _DismissiblePageCore({
     required this.contentBuilder,
@@ -15,6 +26,7 @@ class _DismissiblePageCore extends StatefulWidget {
     required this.maxTransformValue,
     required this.dragStartBehavior,
     required this.reverseDuration,
+    required this.motion,
     required this.hitTestBehavior,
     required this.contentPadding,
     this.controller,
@@ -45,6 +57,7 @@ class _DismissiblePageCore extends StatefulWidget {
   final VoidCallback? onDragCancel;
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
   final Duration reverseDuration;
+  final DismissiblePageMotion motion;
   final HitTestBehavior hitTestBehavior;
   final EdgeInsetsGeometry contentPadding;
 
@@ -94,6 +107,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
       maxTransformValue: widget.maxTransformValue,
       dragSensitivity: widget.dragSensitivity,
       reverseDuration: widget.reverseDuration,
+      motion: widget.motion,
     );
     if (oldWidget.enabled && !widget.enabled) {
       // Callbacks must not run mid-build, so settle the page after this frame.
@@ -114,6 +128,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
       maxTransformValue: widget.maxTransformValue,
       dragSensitivity: widget.dragSensitivity,
       reverseDuration: widget.reverseDuration,
+      motion: widget.motion,
       onDismissed: widget.onDismissed,
       onDragStart: widget.onDragStart,
       onDragEnd: widget.onDragEnd,
@@ -135,8 +150,10 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     _arbiter.applyDelta(details.delta);
   }
 
-  double _axisVelocity(Offset pixelsPerSecond) {
-    return switch (widget.direction) {
+  // Pointer velocities are finger speeds, while the page moves at
+  // [dragSensitivity] times the finger; the arbiter works in page pixels.
+  double _axisVelocity(Offset pixelsPerSecond, {bool fromFinger = true}) {
+    final velocity = switch (widget.direction) {
       DismissiblePageDismissDirection.horizontal ||
       DismissiblePageDismissDirection.startToEnd ||
       DismissiblePageDismissDirection.endToStart =>
@@ -147,6 +164,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
             : pixelsPerSecond.dy,
       _ => pixelsPerSecond.dy,
     };
+    return fromFinger ? velocity * widget.dragSensitivity : velocity;
   }
 
   void _handlePanEnd(DragEndDetails details) {
@@ -212,6 +230,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           _arbiter.endDrag(
             velocity: _axisVelocity(
               _releaseTracker.getVelocity().pixelsPerSecond,
+              fromFinger: false,
             ),
           );
         }
@@ -257,6 +276,10 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
 
   @override
   Widget build(BuildContext context) {
+    return _DismissibleScope(arbiter: _arbiter, child: _buildContent(context));
+  }
+
+  Widget _buildContent(BuildContext context) {
     final effectiveController = _effectiveController;
     final contentWithController = RepaintBoundary(
       key: _contentKey,

@@ -174,16 +174,16 @@ void main() {
       );
     });
 
-    testWidgets('missing sides default independently to 15 percent',
+    testWidgets('missing sides default independently to 18 percent',
         (tester) async {
-      for (final distance in [89.0, 90.0]) {
+      for (final distance in [107.0, 108.0]) {
         expect(
           await dragPage(
             tester,
             Offset(0, distance),
             thresholds: const {DismissiblePageSide.up: 0.01},
           ),
-          distance >= 90,
+          distance >= 108,
         );
       }
     });

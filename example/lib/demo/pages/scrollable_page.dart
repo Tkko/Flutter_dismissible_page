@@ -38,6 +38,7 @@ class _ScrollablePageState extends State<ScrollablePage> {
       child: child,
       isFullScreen: false,
       direction: DismissiblePageDismissDirection.all,
+      motion: const DismissiblePageMotion(thresholdHaptics: true),
       onDismissed: () {
         Navigator.of(context).pop();
       },

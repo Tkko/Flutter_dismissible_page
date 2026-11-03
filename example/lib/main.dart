@@ -75,6 +75,10 @@ class SecondPage extends StatelessWidget {
       },
       minScale: .8,
       reverseDuration: const Duration(milliseconds: 250),
+      motion: const DismissiblePageMotion(
+        continueOnDismiss: true,
+        thresholdHaptics: true,
+      ),
       // End of the optional properties
       child: Scaffold(
         body: SingleChildScrollView(

@@ -151,6 +151,7 @@ preventing distance-based dismissal.
     this.maxTransformValue = .4,
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
+    this.motion = const DismissiblePageMotion(),
     super.key,
   })  : _child = child,
         _builder = null;
@@ -201,7 +202,7 @@ preventing distance-based dismissal.
   final DismissiblePageDismissDirection direction;
 
   /// Page displacement thresholds per destination side (0.0 - 1.0).
-  /// Missing sides default to 0.15.
+  /// Missing sides default to 0.18.
   final Map<DismissiblePageSide, double> dismissThresholds;
 
   /// Represents how much responsive dragging the widget will be
@@ -210,8 +211,12 @@ preventing distance-based dismissal.
   /// Determines the way that drag start behavior is handled.
   final DragStartBehavior dragStartBehavior;
 
-  /// The amount of time the widget will spend returning to initial position if widget is not dismissed after drag
+  /// The amount of time the widget will spend returning to initial position if
+  /// widget is not dismissed after drag. Only used with a curve rebound.
   final Duration reverseDuration;
+
+  /// Rebound, dismiss continuation, haptics and fling behavior of released drags.
+  final DismissiblePageMotion motion;
 
   /// How to behave during hit tests.
   ///
@@ -247,12 +252,59 @@ into page displacement.
 RTL. Consequently, `startToEnd` uses the `end` threshold and `endToStart` uses
 the `start` threshold. With `all`, a diagonal drag dismisses when either axis
 reaches its corresponding threshold. Threshold entries never enable directions
-excluded by `direction`. Missing sides use 0.15; values must be between 0 and 1.
-Fast outward flings can dismiss before a distance threshold is reached.
+excluded by `direction`. Missing sides use 0.18; values must be between 0 and 1.
+Fast outward flings can dismiss before a distance threshold is reached, see
+[Motion](#motion).
 
 Thresholds are independent of `maxTransformValue`, which controls only visual
 effect progress. `onDragUpdate` exposes this visual progress as `details.progress`
 (0 to 1), along with offset, scale, radius, and opacity.
+
+## Motion
+
+`motion` tunes how a released drag animates:
+
+```dart
+DismissiblePage(
+  motion: const DismissiblePageMotion(
+    // Spring seeded with the release velocity (the default).
+    rebound: DismissiblePageRebound.spring(stiffness: 900, dampingRatio: 1),
+    // Keep moving off-screen from the finger while onDismissed runs.
+    continueOnDismiss: true,
+    // A light haptic each time the dismiss threshold is crossed.
+    thresholdHaptics: true,
+    // Page pixels per second, and the fraction of the page that must already
+    // have moved, for an outward fling to dismiss. An inward fling cancels.
+    flingVelocity: 1000,
+    flingMinDistance: 0.1,
+  ),
+  onDismissed: () => Navigator.of(context).pop(),
+  child: const SizedBox.expand(),
+)
+```
+
+`DismissiblePageRebound.bouncy()` overshoots the origin slightly, and
+`DismissiblePageRebound.curve()` is the time-based easing that runs for
+`reverseDuration`. `continueOnDismiss` leaves the page off-screen, so
+`onDismissed` is expected to remove it.
+
+### Dismissing from code
+
+`DismissiblePage.dismiss(context)` closes the page with the same motion as a
+swipe: it winds up slightly, then accelerates off-screen towards `side` (by
+default the side `direction` dismisses towards) while `onDismissed` runs.
+
+```dart
+Builder(
+  builder: (context) => IconButton(
+    onPressed: () => DismissiblePage.dismiss(context),
+    icon: const Icon(Icons.close),
+  ),
+)
+```
+
+The context must be inside the page. Use a `Builder` when the button is built by
+the widget that creates the `DismissiblePage`.
 
 ## Transparent routes
 
@@ -285,7 +337,7 @@ These are breaking API changes:
 - Threshold values now measure page displacement rather than visual progress.
   To preserve an old distance threshold, multiply its effective value by the
   old `maxTransformValue`. The old default distance was `0.15 * 0.4 = 0.06`;
-  the new default is `0.15` of the page dimension. Diagonal thresholds are
+  the new default is `0.18` of the page dimension. Diagonal thresholds are
   evaluated independently for each axis.
 
 Styling stays flat: `background`, `borderRadius`, `minScale`, and

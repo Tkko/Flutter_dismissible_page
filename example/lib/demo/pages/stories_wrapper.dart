@@ -84,6 +84,7 @@ class _StoriesWrapperState extends State<StoriesWrapper>
       minScale: widget.pageModel.minScale,
       hitTestBehavior: widget.pageModel.behavior,
       reverseDuration: widget.pageModel.reverseDuration,
+      motion: widget.pageModel.motion,
       child: CubicPageView(
         controller: pageCtrl,
         children: stories.map((story) {

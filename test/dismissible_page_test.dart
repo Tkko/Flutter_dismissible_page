@@ -166,7 +166,7 @@ void main() {
         ),
       );
 
-      await tester.fling(find.text('Fling Target'), const Offset(0, 200), 1000);
+      await tester.fling(find.text('Fling Target'), const Offset(0, 200), 2500);
       await tester.pump();
 
       expect(started, isTrue);
@@ -476,7 +476,7 @@ void main() {
       await tester.fling(
         find.text('Update callback'),
         const Offset(0, 200),
-        1000,
+        2500,
       );
       await tester.pump();
 
@@ -531,8 +531,8 @@ void main() {
 
       await tester.fling(
         find.byType(DismissiblePage),
-        const Offset(60, 0),
-        2000,
+        const Offset(160, 0),
+        2500,
       );
       await tester.pump();
 
@@ -563,7 +563,7 @@ void main() {
         ),
       );
 
-      await tester.fling(find.text('Item 0'), const Offset(0, 51), 1000);
+      await tester.fling(find.text('Item 0'), const Offset(0, 130), 2500);
       await tester.pump();
 
       expect(dismissed, isTrue);

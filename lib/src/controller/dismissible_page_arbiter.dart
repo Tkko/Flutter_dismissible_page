@@ -1,5 +1,13 @@
 part of '../dismissible_page.dart';
 
+/// Winds up by about 1.5% of the travel, then accelerates away. Unlike
+/// [Curves.easeInBack], whose wind-up is roughly 10%, it reads as a nudge
+/// instead of a bounce.
+const Curve _kExitCurve = Cubic(0.55, -0.12, 0.85, 0.45);
+
+/// Which way a released drag is flung relative to the page's offset.
+enum _FlingDirection { outward, inward, none }
+
 /// Manages and coordinates the drag and dismiss state for a [DismissiblePage].
 ///
 /// Follows Single Responsibility Principle (SRP) by isolating state calculations,
@@ -14,6 +22,7 @@ class _DismissibleArbiter extends ChangeNotifier {
     required this.maxTransformValue,
     required this.dragSensitivity,
     required this.reverseDuration,
+    required this.motion,
     required this.onDismissed,
     required TickerProvider vsync,
     this.onDragStart,
@@ -24,10 +33,7 @@ class _DismissibleArbiter extends ChangeNotifier {
           _validThresholds(dismissThresholds),
           'Dismiss thresholds must be between 0.0 and 1.0',
         ) {
-    _animationController = AnimationController(
-      duration: reverseDuration,
-      vsync: vsync,
-    )
+    _animationController = AnimationController.unbounded(vsync: vsync)
       ..addListener(_handleAnimationTick)
       ..addStatusListener(_handleAnimationStatus);
   }
@@ -40,6 +46,7 @@ class _DismissibleArbiter extends ChangeNotifier {
   double maxTransformValue;
   double dragSensitivity;
   Duration reverseDuration;
+  DismissiblePageMotion motion;
 
   VoidCallback onDismissed;
   VoidCallback? onDragStart;
@@ -51,6 +58,9 @@ class _DismissibleArbiter extends ChangeNotifier {
 
   Offset _dragOffset = Offset.zero;
   Offset _animationStartOffset = Offset.zero;
+  Offset _animationTargetOffset = Offset.zero;
+  bool _isPastThreshold = false;
+  bool _isExiting = false;
   DismissiblePageDragUpdateDetails? _details;
   bool _isDragging = false;
   Size _layoutSize = Size.zero;
@@ -82,6 +92,7 @@ class _DismissibleArbiter extends ChangeNotifier {
     required double maxTransformValue,
     required double dragSensitivity,
     required Duration reverseDuration,
+    required DismissiblePageMotion motion,
   }) {
     assert(
       _validThresholds(dismissThresholds),
@@ -94,10 +105,8 @@ class _DismissibleArbiter extends ChangeNotifier {
     this.minScale = minScale;
     this.maxTransformValue = maxTransformValue;
     this.dragSensitivity = dragSensitivity;
-    if (this.reverseDuration != reverseDuration) {
-      this.reverseDuration = reverseDuration;
-      _animationController.duration = reverseDuration;
-    }
+    this.reverseDuration = reverseDuration;
+    this.motion = motion;
     _details = null;
   }
 
@@ -163,6 +172,7 @@ class _DismissibleArbiter extends ChangeNotifier {
   void _publish(Offset newOffset) {
     _dragOffset = newOffset;
     _details = null;
+    _tickThresholdHaptics();
     onDragUpdate?.call(currentDetails);
     notifyListeners();
   }
@@ -178,6 +188,7 @@ class _DismissibleArbiter extends ChangeNotifier {
       _animationController.stop();
     }
     _isDragging = true;
+    _isPastThreshold = _hasReachedDismissThreshold;
     onDragStart?.call();
     notifyListeners();
   }
@@ -263,18 +274,29 @@ class _DismissibleArbiter extends ChangeNotifier {
     _publish(_dragOffset + effectiveDelta);
   }
 
+  /// Ends the drag. [velocity] is the release velocity along the dismiss axis,
+  /// in the same pixels per second as the page [offset].
   void endDrag({double velocity = 0.0}) {
     if (!_isDragging) return;
     _isDragging = false;
 
-    final shouldDismiss = _hasReachedDismissThreshold ||
-        (velocity.abs() > 800 && _isVelocityOutward(velocity));
+    // A hard flick back towards the origin cancels a dismissal even when the
+    // page was released past the distance threshold.
+    final shouldDismiss = switch (_flingDirection(velocity)) {
+      _FlingDirection.outward => true,
+      _FlingDirection.inward => false,
+      _FlingDirection.none => _hasReachedDismissThreshold,
+    };
 
     if (shouldDismiss && isOffsetNonZero) {
       onDragEnd?.call();
+      if (motion.continueOnDismiss) {
+        _isExiting = true;
+        animateOut(velocity);
+      }
       onDismissed();
     } else {
-      if (isOffsetNonZero) animateToZero();
+      if (isOffsetNonZero) animateToZero(velocity);
       onDragEnd?.call();
     }
   }
@@ -284,7 +306,9 @@ class _DismissibleArbiter extends ChangeNotifier {
     final wasDragging = _isDragging;
     _isDragging = false;
     _animationController.stop();
+    _isExiting = false;
     _animationStartOffset = Offset.zero;
+    _animationTargetOffset = Offset.zero;
     setOffset(Offset.zero);
     if (wasDragging) onDragCancel?.call();
   }
@@ -309,23 +333,31 @@ class _DismissibleArbiter extends ChangeNotifier {
                 (dismissThresholds[verticalSide] ?? _kDismissThreshold));
   }
 
-  bool _isVelocityOutward(double velocity) {
-    final isHorizontal = switch (direction) {
-      DismissiblePageDismissDirection.horizontal ||
-      DismissiblePageDismissDirection.startToEnd ||
-      DismissiblePageDismissDirection.endToStart =>
-        true,
-      DismissiblePageDismissDirection.all =>
-        _dragOffset.dx.abs() > _dragOffset.dy.abs(),
-      _ => false,
-    };
-    final coordinate = isHorizontal ? _dragOffset.dx : _dragOffset.dy;
-    final velocityDelta =
-        isHorizontal ? Offset(velocity, 0) : Offset(0, velocity);
+  bool get _isHorizontalAxis => switch (direction) {
+        DismissiblePageDismissDirection.horizontal ||
+        DismissiblePageDismissDirection.startToEnd ||
+        DismissiblePageDismissDirection.endToStart =>
+          true,
+        DismissiblePageDismissDirection.all =>
+          _dragOffset.dx.abs() > _dragOffset.dy.abs(),
+        _ => false,
+      };
 
-    return coordinate != 0 &&
-        coordinate * velocity > 0 &&
-        isDeltaAllowed(velocityDelta);
+  _FlingDirection _flingDirection(double velocity) {
+    if (velocity.abs() <= motion.flingVelocity) return _FlingDirection.none;
+
+    final isHorizontal = _isHorizontalAxis;
+    final coordinate = isHorizontal ? _dragOffset.dx : _dragOffset.dy;
+    if (coordinate == 0) return _FlingDirection.none;
+    if (coordinate * velocity < 0) return _FlingDirection.inward;
+
+    final extent = isHorizontal ? _layoutSize.width : _layoutSize.height;
+    if (extent <= 0 || coordinate.abs() / extent < motion.flingMinDistance) {
+      return _FlingDirection.none;
+    }
+    return isDeltaAllowed(_velocityVector(velocity))
+        ? _FlingDirection.outward
+        : _FlingDirection.none;
   }
 
   void cancelDrag() {
@@ -335,27 +367,139 @@ class _DismissibleArbiter extends ChangeNotifier {
     onDragCancel?.call();
   }
 
-  void animateToZero() {
+  /// Eases the page back to the origin, carrying the release [velocity].
+  void animateToZero([double velocity = 0]) {
+    _animateTo(Offset.zero, _velocityVector(velocity));
+  }
+
+  /// Dismisses the page without a drag: it winds up slightly against the
+  /// exit direction, then accelerates off-screen while [onDismissed] runs.
+  ///
+  /// Leaves from [side], or from the side the configured direction dismisses
+  /// towards. Does nothing while an exit is already running.
+  void dismiss({DismissiblePageSide? side}) {
+    if (_isExiting) return;
+    _isExiting = true;
+    if (_layoutSize.isEmpty) {
+      onDismissed();
+      return;
+    }
+
+    final width = _layoutSize.width;
+    final height = _layoutSize.height;
+    final isLtr = _textDirection == TextDirection.ltr;
+    final target = switch (side ?? _defaultExitSide) {
+      DismissiblePageSide.up => Offset(0, -height),
+      DismissiblePageSide.down => Offset(0, height),
+      DismissiblePageSide.start => Offset(isLtr ? -width : width, 0),
+      DismissiblePageSide.end => Offset(isLtr ? width : -width, 0),
+    };
+    _animateTo(
+      target,
+      Offset.zero,
+      duration: const Duration(milliseconds: 340),
+      curve: _kExitCurve,
+    );
+    onDismissed();
+  }
+
+  DismissiblePageSide get _defaultExitSide => switch (direction) {
+        DismissiblePageDismissDirection.up => DismissiblePageSide.up,
+        DismissiblePageDismissDirection.horizontal ||
+        DismissiblePageDismissDirection.startToEnd =>
+          DismissiblePageSide.end,
+        DismissiblePageDismissDirection.endToStart => DismissiblePageSide.start,
+        _ => DismissiblePageSide.down,
+      };
+
+  /// Carries the page off-screen in the drag direction.
+  void animateOut(double velocity) {
+    final target = _isHorizontalAxis
+        ? Offset(_dragOffset.dx.sign * _layoutSize.width, _dragOffset.dy)
+        : Offset(_dragOffset.dx, _dragOffset.dy.sign * _layoutSize.height);
+    final distance = (target - _dragOffset).distance;
+    final speed = velocity.abs();
+    // easeOutCubic starts at three times the average speed, so this makes the
+    // page leave at the speed it was released at.
+    final milliseconds = speed == 0 ? 260 : 3000 * distance / speed;
+    _animateTo(
+      target,
+      _velocityVector(velocity),
+      duration: Duration(milliseconds: milliseconds.clamp(140, 260).round()),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  Offset _velocityVector(double velocity) =>
+      _isHorizontalAxis ? Offset(velocity, 0) : Offset(0, velocity);
+
+  void _animateTo(
+    Offset target,
+    Offset velocity, {
+    Duration? duration,
+    Curve? curve,
+  }) {
+    final delta = target - _dragOffset;
+    if (delta == Offset.zero) {
+      setOffset(target);
+      return;
+    }
     _animationStartOffset = _dragOffset;
-    _animationController.forward(from: 0);
+    _animationTargetOffset = target;
+    _animationController.value = 0;
+
+    final rebound = motion.rebound;
+    if (duration == null && rebound.isSpring) {
+      // The spring runs on the fraction of the way to the target, so the
+      // velocity is projected onto the line between start and target.
+      final fractionVelocity =
+          (velocity.dx * delta.dx + velocity.dy * delta.dy) /
+              delta.distanceSquared;
+      _animationController.animateWith(
+        SpringSimulation(
+          rebound._spring,
+          0,
+          1,
+          fractionVelocity,
+          // Settle once the remaining motion is below a quarter pixel and 5px/s.
+          tolerance: Tolerance(
+            distance: 0.25 / delta.distance,
+            velocity: 5 / delta.distance,
+          ),
+        ),
+      );
+    } else {
+      _animationController.animateTo(
+        1,
+        duration: duration ?? reverseDuration,
+        curve: curve ?? rebound.curve,
+      );
+    }
   }
 
   void _handleAnimationTick() {
     setOffset(
       Offset.lerp(
         _animationStartOffset,
-        Offset.zero,
-        Curves.easeOutCubic.transform(_animationController.value),
+        _animationTargetOffset,
+        _animationController.value,
       )!,
     );
   }
 
   void _handleAnimationStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      _animationStartOffset = Offset.zero;
-      _animationController.reset();
-      setOffset(Offset.zero);
+      setOffset(_animationTargetOffset);
+      _animationStartOffset = _animationTargetOffset;
     }
+  }
+
+  void _tickThresholdHaptics() {
+    if (!_isDragging || !motion.thresholdHaptics) return;
+    final isPast = _hasReachedDismissThreshold;
+    if (isPast == _isPastThreshold) return;
+    _isPastThreshold = isPast;
+    unawaited(HapticFeedback.lightImpact());
   }
 
   @override

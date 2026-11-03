@@ -48,6 +48,7 @@ class ShowcaseGallery extends StatelessWidget {
         _ShowcaseCard(
           title: '1. Non-Scrollable Widget',
           subtitle: 'Static card/image driven directly by root Pan gestures',
+          heroTag: 'showcase-1',
           icon: Icons.image_outlined,
           color: const Color(0xff5c6bc0),
           onTap: () {
@@ -60,6 +61,7 @@ class ShowcaseGallery extends StatelessWidget {
           title: '2. Standard ListView',
           subtitle:
               'Single-axis list view with edge dismissal and mid-drag lock',
+          heroTag: 'showcase-2',
           icon: Icons.view_agenda_outlined,
           color: const Color(0xff26a69a),
           onTap: () {
@@ -72,6 +74,7 @@ class ShowcaseGallery extends StatelessWidget {
           title: '3. CustomScrollView & Slivers',
           subtitle:
               'Floating SliverAppBar, SliverGrid, and SliverList combined',
+          heroTag: 'showcase-3',
           icon: Icons.layers_outlined,
           color: const Color(0xffef5350),
           onTap: () {
@@ -84,6 +87,7 @@ class ShowcaseGallery extends StatelessWidget {
           title: '4. Horizontal PageView',
           subtitle:
               'Multi-card carousel with page snapping and start/end edge dismiss',
+          heroTag: 'showcase-4',
           icon: Icons.view_carousel_outlined,
           color: const Color(0xffab47bc),
           onTap: () {
@@ -95,6 +99,7 @@ class ShowcaseGallery extends StatelessWidget {
         _ShowcaseCard(
           title: '5. GridView',
           subtitle: '2-column responsive grid view with pull-to-dismiss',
+          heroTag: 'showcase-5',
           icon: Icons.grid_view_outlined,
           color: const Color(0xffff7043),
           onTap: () {
@@ -106,6 +111,7 @@ class ShowcaseGallery extends StatelessWidget {
         _ShowcaseCard(
           title: '6. TabBarView (Multi-Tab)',
           subtitle: 'Nested tabs with independent scroll positions',
+          heroTag: 'showcase-6',
           icon: Icons.tab_outlined,
           color: const Color(0xff42a5f5),
           onTap: () {
@@ -123,6 +129,7 @@ class _ShowcaseCard extends StatelessWidget {
   const _ShowcaseCard({
     required this.title,
     required this.subtitle,
+    required this.heroTag,
     required this.icon,
     required this.color,
     required this.onTap,
@@ -130,66 +137,134 @@ class _ShowcaseCard extends StatelessWidget {
 
   final String title;
   final String subtitle;
+  final String heroTag;
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-      child: Material(
-        color: Colors.white,
+    final card = Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      elevation: 2,
+      shadowColor: Colors.black12,
+      child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        elevation: 2,
-        shadowColor: Colors.black12,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, color: color, size: 24),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              ShowcaseIcon(
+                tag: heroTag,
+                icon: icon,
+                color: color,
+                size: 44,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.black54,
-                        ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.black54,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 14,
-                  color: Colors.black26,
-                ),
-              ],
-            ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: Colors.black26,
+              ),
+            ],
           ),
         ),
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: card,
+    );
+  }
+}
+
+/// The tinted icon tile of a gallery card. It is a [Hero], so it flies from
+/// the card into the opened page and, when that page is dismissed, from
+/// wherever the drag left it back to the card.
+class ShowcaseIcon extends StatelessWidget {
+  const ShowcaseIcon({
+    required this.tag,
+    required this.icon,
+    required this.color,
+    this.size = 40,
+    this.onColoredBackground = false,
+    super.key,
+  });
+
+  final String tag;
+  final IconData icon;
+  final Color color;
+  final double size;
+
+  /// Draws a white tile, for use on a bar that is the same color as [color].
+  final bool onColoredBackground;
+
+  @override
+  Widget build(BuildContext context) {
+    final tile = Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color:
+            onColoredBackground ? Colors.white : color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(size / 4),
+      ),
+      child: Icon(icon, color: color, size: size / 2),
+    );
+    return Hero(tag: tag, child: tile);
+  }
+}
+
+/// App bar leading slot that receives the card's [ShowcaseIcon] hero.
+class ShowcaseLeading extends StatelessWidget {
+  const ShowcaseLeading({
+    required this.tag,
+    required this.icon,
+    required this.color,
+    this.onColoredBackground = false,
+    super.key,
+  });
+
+  final String tag;
+  final IconData icon;
+  final Color color;
+  final bool onColoredBackground;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: ShowcaseIcon(
+        tag: tag,
+        icon: icon,
+        color: color,
+        onColoredBackground: onColoredBackground,
       ),
     );
   }
@@ -227,10 +302,11 @@ class NonScrollableShowcasePage extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.touch_app_rounded,
-                  size: 64,
+                const ShowcaseIcon(
+                  tag: 'showcase-1',
+                  icon: Icons.image_outlined,
                   color: Color(0xff5c6bc0),
+                  size: 88,
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -250,15 +326,18 @@ class NonScrollableShowcasePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close),
-                  label: const Text('Close'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff5c6bc0),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                // A Builder, so the context is below the DismissiblePage.
+                Builder(
+                  builder: (context) => ElevatedButton.icon(
+                    onPressed: () => DismissiblePage.dismiss(context),
+                    icon: const Icon(Icons.close),
+                    label: const Text('Close'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff5c6bc0),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
                 ),
@@ -285,6 +364,11 @@ class ListViewShowcasePage extends StatelessWidget {
       pageModel: pageModel,
       child: Scaffold(
         appBar: AppBar(
+          leading: const ShowcaseLeading(
+            tag: 'showcase-2',
+            icon: Icons.view_agenda_outlined,
+            color: Color(0xff26a69a),
+          ),
           title: Text(
             'ListView Showcase',
             style:
@@ -338,6 +422,12 @@ class SliversShowcasePage extends StatelessWidget {
             SliverAppBar(
               expandedHeight: 180,
               pinned: true,
+              leading: const ShowcaseLeading(
+                tag: 'showcase-3',
+                icon: Icons.layers_outlined,
+                color: Color(0xffef5350),
+                onColoredBackground: true,
+              ),
               backgroundColor: const Color(0xffef5350),
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(
@@ -449,6 +539,11 @@ class _PageViewShowcasePageState extends State<PageViewShowcasePage> {
       pageModel: widget.pageModel,
       child: Scaffold(
         appBar: AppBar(
+          leading: const ShowcaseLeading(
+            tag: 'showcase-4',
+            icon: Icons.view_carousel_outlined,
+            color: Color(0xffab47bc),
+          ),
           title: Text(
             'PageView Showcase (Page ${_currentPage + 1}/3)',
             style:
@@ -525,6 +620,11 @@ class GridViewShowcasePage extends StatelessWidget {
       pageModel: pageModel,
       child: Scaffold(
         appBar: AppBar(
+          leading: const ShowcaseLeading(
+            tag: 'showcase-5',
+            icon: Icons.grid_view_outlined,
+            color: Color(0xffff7043),
+          ),
           title: Text(
             'GridView Showcase',
             style:
@@ -586,6 +686,11 @@ class TabBarViewShowcasePage extends StatelessWidget {
         length: 2,
         child: Scaffold(
           appBar: AppBar(
+            leading: const ShowcaseLeading(
+              tag: 'showcase-6',
+              icon: Icons.tab_outlined,
+              color: Color(0xff42a5f5),
+            ),
             title: Text(
               'TabBarView Showcase',
               style: GoogleFonts.poppins(

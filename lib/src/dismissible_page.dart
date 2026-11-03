@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
+import 'package:flutter/services.dart';
 
 part 'controller/dismissible_page_arbiter.dart';
 
@@ -16,6 +19,8 @@ part 'models/dismissible_page_dismiss_direction.dart';
 
 part 'models/dismissible_page_drag_update_details.dart';
 
+part 'models/dismissible_page_motion.dart';
+
 part 'models/dismissible_page_radius.dart';
 
 part 'models/dismissible_page_side.dart';
@@ -24,7 +29,7 @@ part 'routing/dismissible_routes.dart';
 
 part 'widgets/dismissible_page_core.dart';
 
-const double _kDismissThreshold = 0.15;
+const double _kDismissThreshold = 0.18;
 
 /// Flutter widget that allows you to dismiss page in any direction,
 /// coordinating seamlessly with inner scrollables ([ListView], [CustomScrollView], [PageView], etc.).
@@ -52,6 +57,7 @@ class DismissiblePage extends StatelessWidget {
     this.dragStartBehavior = DragStartBehavior.down,
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
+    this.motion = const DismissiblePageMotion(),
     super.key,
   })  : assert(dragSensitivity > 0, 'dragSensitivity must be greater than 0'),
         assert(
@@ -92,6 +98,7 @@ class DismissiblePage extends StatelessWidget {
     this.dragStartBehavior = DragStartBehavior.down,
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.reverseDuration = const Duration(milliseconds: 200),
+    this.motion = const DismissiblePageMotion(),
     super.key,
   })  : assert(dragSensitivity > 0, 'dragSensitivity must be greater than 0'),
         assert(
@@ -154,7 +161,7 @@ class DismissiblePage extends StatelessWidget {
   /// Page displacement thresholds (0.0 to 1.0) per destination side.
   ///
   /// Up/down use a fraction of page height; start/end use page width.
-  /// Start/end follow [Directionality]. Missing sides default to 0.15.
+  /// Start/end follow [Directionality]. Missing sides default to 0.18.
   /// With [DismissiblePageDismissDirection.all], either axis can dismiss.
   /// These thresholds are independent of [maxTransformValue].
   /// A fast outward fling can dismiss before reaching a distance threshold.
@@ -173,10 +180,33 @@ class DismissiblePage extends StatelessWidget {
   final double maxTransformValue;
 
   /// Duration to animate back to original position when not dismissed.
+  ///
+  /// Only used when [DismissiblePageMotion.rebound] is a
+  /// [DismissiblePageRebound.curve]; springs settle on their own.
   final Duration reverseDuration;
+
+  /// Rebound, dismiss continuation, haptics and fling behavior of released
+  /// drags.
+  final DismissiblePageMotion motion;
 
   /// How to behave during hit tests.
   final HitTestBehavior hitTestBehavior;
+
+  /// Dismisses the closest [DismissiblePage] above [context] from code.
+  ///
+  /// The page winds up slightly, then accelerates off-screen towards [side]
+  /// while [DismissiblePage.onDismissed] runs, so a close button leaves like a
+  /// swipe does instead of only fading. [side] defaults to the side the page's
+  /// [DismissiblePage.direction] dismisses towards. Returns false when
+  /// [context] is not below a [DismissiblePage], so call it from a context
+  /// built inside the page (for example with a [Builder]), not from the widget
+  /// that creates the page.
+  static bool dismiss(BuildContext context, {DismissiblePageSide? side}) {
+    final scope = context.getInheritedWidgetOfExactType<_DismissibleScope>();
+    if (scope == null) return false;
+    scope.arbiter.dismiss(side: side);
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -215,6 +245,7 @@ class DismissiblePage extends StatelessWidget {
       onDragCancel: onDragCancel,
       onDragUpdate: onDragUpdate,
       reverseDuration: reverseDuration,
+      motion: motion,
       hitTestBehavior: hitTestBehavior,
       contentPadding: contentPadding,
       contentBuilder: buildContent,
