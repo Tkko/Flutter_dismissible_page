@@ -56,12 +56,53 @@ class DismissiblePageRebound {
   int get hashCode => Object.hash(isSpring, curve, stiffness, dampingRatio);
 }
 
+/// How the page leaves the screen when it is dismissed.
+///
+/// It applies when the page slides away itself, that is when
+/// [DismissiblePageMotion.continueOnDismiss] is on, and to
+/// [DismissiblePage.dismiss].
+@immutable
+class DismissiblePageExit {
+  /// Carries the release velocity: a fast release keeps its speed and eases
+  /// out, a slow one accelerates away from rest. [DismissiblePage.dismiss],
+  /// which has no velocity, winds up slightly and then accelerates away.
+  const DismissiblePageExit.momentum()
+      : curve = null,
+        duration = null;
+
+  /// Always leaves along [curve] over [duration], whatever the release speed.
+  ///
+  /// A curve that dips below zero at first, such as [Curves.easeInBack],
+  /// winds up against the exit direction before leaving.
+  const DismissiblePageExit.curve(
+    Curve this.curve, {
+    this.duration = const Duration(milliseconds: 300),
+  });
+
+  /// The exit curve, or null for [DismissiblePageExit.momentum].
+  final Curve? curve;
+
+  /// How long the exit takes, or null for [DismissiblePageExit.momentum].
+  final Duration? duration;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DismissiblePageExit &&
+          curve == other.curve &&
+          duration == other.duration;
+
+  @override
+  int get hashCode => Object.hash(curve, duration);
+}
+
 /// Tunes how [DismissiblePage] animates a released drag.
 @immutable
 class DismissiblePageMotion {
   ///
   const DismissiblePageMotion({
     this.rebound = const DismissiblePageRebound.spring(),
+    this.exit = const DismissiblePageExit.momentum(),
     this.continueOnDismiss = false,
     this.thresholdHaptics = false,
     this.flingVelocity = 1000,
@@ -76,6 +117,9 @@ class DismissiblePageMotion {
 
   /// How the page returns to its origin when a drag ends without dismissing.
   final DismissiblePageRebound rebound;
+
+  /// How the page leaves the screen when it is dismissed.
+  final DismissiblePageExit exit;
 
   /// Whether the page keeps moving off-screen in the drag direction, carrying
   /// the release velocity, while [DismissiblePage.onDismissed] runs.
@@ -115,6 +159,7 @@ class DismissiblePageMotion {
       identical(this, other) ||
       other is DismissiblePageMotion &&
           rebound == other.rebound &&
+          exit == other.exit &&
           continueOnDismiss == other.continueOnDismiss &&
           thresholdHaptics == other.thresholdHaptics &&
           flingVelocity == other.flingVelocity &&
@@ -124,6 +169,7 @@ class DismissiblePageMotion {
   @override
   int get hashCode => Object.hash(
         rebound,
+        exit,
         continueOnDismiss,
         thresholdHaptics,
         flingVelocity,

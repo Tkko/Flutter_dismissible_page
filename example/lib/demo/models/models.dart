@@ -6,6 +6,55 @@ import 'package:flutter/material.dart';
 
 enum ReboundKind { spring, bouncy, curve, custom }
 
+/// The exit animations the Motion Lab offers.
+enum ExitKind {
+  momentum('Momentum', 'DismissiblePageExit.momentum()'),
+  ease(
+    'Ease',
+    'DismissiblePageExit.curve(\n'
+        '        Curves.easeInOutCubic,\n'
+        '        duration: Duration(milliseconds: 320),\n'
+        '      )',
+  ),
+  windUp(
+    'Wind-up',
+    'DismissiblePageExit.curve(\n'
+        '        Curves.easeInBack,\n'
+        '        duration: Duration(milliseconds: 360),\n'
+        '      )',
+  ),
+  snap(
+    'Snap',
+    'DismissiblePageExit.curve(\n'
+        '        Curves.easeIn,\n'
+        '        duration: Duration(milliseconds: 180),\n'
+        '      )',
+  );
+
+  const ExitKind(this.label, this.code);
+
+  final String label;
+
+  /// The same exit as Dart source, for the Motion Lab's "Copy as code".
+  final String code;
+
+  DismissiblePageExit get exit => switch (this) {
+        ExitKind.momentum => const DismissiblePageExit.momentum(),
+        ExitKind.ease => const DismissiblePageExit.curve(
+            Curves.easeInOutCubic,
+            duration: Duration(milliseconds: 320),
+          ),
+        ExitKind.windUp => const DismissiblePageExit.curve(
+            Curves.easeInBack,
+            duration: Duration(milliseconds: 360),
+          ),
+        ExitKind.snap => const DismissiblePageExit.curve(
+            Curves.easeIn,
+            duration: Duration(milliseconds: 180),
+          ),
+      };
+}
+
 class DismissiblePageModel {
   static const List<String> naturePhotos = [
     'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80',
@@ -64,6 +113,7 @@ class DismissiblePageModel {
   Duration reverseDuration = const Duration(milliseconds: 200);
   HitTestBehavior behavior = HitTestBehavior.opaque;
   ReboundKind reboundKind = ReboundKind.spring;
+  ExitKind exitKind = ExitKind.momentum;
   double stiffness = 900;
   double dampingRatio = 1.0;
   double dismissThreshold = 0.18;
@@ -108,6 +158,7 @@ class DismissiblePageModel {
                 stiffness: stiffness,
                 dampingRatio: dampingRatio,
               ),
+        exit: exitKind.exit,
         continueOnDismiss: continueOnDismiss ?? this.continueOnDismiss,
         thresholdHaptics: thresholdHaptics,
         flingVelocity: flingVelocity,

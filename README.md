@@ -269,8 +269,11 @@ DismissiblePage(
   motion: const DismissiblePageMotion(
     // Spring seeded with the release velocity (the default).
     rebound: DismissiblePageRebound.spring(stiffness: 900, dampingRatio: 1),
-    // Keep moving off-screen from the finger while onDismissed runs.
+    // Keep moving off-screen from the finger while onDismissed runs...
     continueOnDismiss: true,
+    // ...carrying the release velocity (default), or along a curve of your
+    // own: DismissiblePageExit.curve(Curves.easeInOutCubic, duration: ...).
+    exit: DismissiblePageExit.momentum(),
     // A light haptic each time the dismiss threshold is crossed.
     thresholdHaptics: true,
     // Page pixels per second, and the fraction of the page that must already
@@ -289,7 +292,9 @@ DismissiblePage(
 
 `DismissiblePageRebound.bouncy()` overshoots the origin slightly, and
 `DismissiblePageRebound.curve()` is the time-based easing that runs for
-`reverseDuration`. `continueOnDismiss` leaves the page off-screen, so
+`reverseDuration`. `exit` applies to a swipe that slides away
+(`continueOnDismiss`) and to `DismissiblePage.dismiss`: `.momentum()` keeps the
+release speed, `.curve(curve, duration)` always leaves the same way. `continueOnDismiss` leaves the page off-screen, so
 `onDismissed` is expected to remove it.
 
 ### Dismissing from code

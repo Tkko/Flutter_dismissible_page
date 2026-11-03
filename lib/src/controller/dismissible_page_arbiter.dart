@@ -410,11 +410,12 @@ class _DismissibleArbiter extends ChangeNotifier {
       DismissiblePageSide.start => Offset(isLtr ? -width : width, 0),
       DismissiblePageSide.end => Offset(isLtr ? width : -width, 0),
     };
+    final exit = motion.exit;
     _animateTo(
       target,
       Offset.zero,
-      duration: const Duration(milliseconds: 340),
-      curve: _kExitCurve,
+      duration: exit.duration ?? const Duration(milliseconds: 340),
+      curve: exit.curve ?? _kExitCurve,
     );
     onDismissed();
   }
@@ -435,6 +436,17 @@ class _DismissibleArbiter extends ChangeNotifier {
         : Offset(_dragOffset.dx, _dragOffset.dy.sign * _layoutSize.height);
     final distance = (target - _dragOffset).distance;
     final speed = velocity.abs();
+
+    final exit = motion.exit;
+    if (exit.curve != null) {
+      _animateTo(
+        target,
+        Offset.zero,
+        duration: exit.duration,
+        curve: exit.curve,
+      );
+      return;
+    }
 
     if (speed < _kMomentumVelocity) {
       // Released slowly, so there is no momentum to carry. Easing out would

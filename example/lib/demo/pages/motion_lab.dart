@@ -127,6 +127,7 @@ class _MotionLabPageState extends State<MotionLabPage> {
         '  },\n'
         '  motion: DismissiblePageMotion(\n'
         '    rebound: $rebound,\n'
+        '    exit: ${model.exitKind.code},\n'
         '    continueOnDismiss: ${model.continueOnDismiss},\n'
         '    thresholdHaptics: ${model.thresholdHaptics},\n'
         '    flingVelocity: ${model.flingVelocity.round()},\n'
@@ -242,6 +243,28 @@ class _MotionLabPageState extends State<MotionLabPage> {
                         isSelected: !isSpring,
                         title: 'Old curve',
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Exit animation',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white70,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final kind in ExitKind.values)
+                        AppChip(
+                          onSelected: () =>
+                              _update(() => model.exitKind = kind),
+                          isSelected: model.exitKind == kind,
+                          title: kind.label,
+                        ),
                     ],
                   ),
                   const SizedBox(height: 8),

@@ -420,6 +420,76 @@ void main() {
     });
   });
 
+  group('exit', () {
+    const linear200 = DismissiblePageExit.curve(
+      Curves.linear,
+      duration: Duration(milliseconds: 200),
+    );
+
+    testWidgets(
+        'a curve exit leaves along its curve and duration after a '
+        'swipe', (tester) async {
+      final offsets = await _dragAndRelease(
+        tester,
+        motion: const DismissiblePageMotion(
+          continueOnDismiss: true,
+          exit: linear200,
+        ),
+        drag: 500,
+      );
+      final atRelease = offsets.last;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Linear over 200ms: halfway through, half the 250px that were left.
+      final travelled = (offsets.last - atRelease) / (600 - atRelease);
+      expect(travelled, closeTo(0.5, 0.1));
+
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(offsets.last, 600);
+    });
+
+    testWidgets('dismiss() uses the exit curve and duration', (tester) async {
+      final offsets = <double>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DismissiblePage(
+            motion: const DismissiblePageMotion(exit: linear200),
+            onDismissed: () {},
+            onDragUpdate: (details) => offsets.add(details.offset.dy),
+            child: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => DismissiblePage.dismiss(context),
+                child: const Text('close'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('close'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      // Linear over 200ms: halfway through, half of the 600px page height.
+      expect(offsets.last, closeTo(300, 60));
+
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(offsets.last, 600);
+    });
+
+    test('exits compare by value', () {
+      expect(
+        const DismissiblePageExit.momentum(),
+        const DismissiblePageExit.momentum(),
+      );
+      expect(linear200, isNot(const DismissiblePageExit.momentum()));
+      expect(
+        const DismissiblePageMotion(exit: linear200),
+        isNot(const DismissiblePageMotion()),
+      );
+    });
+  });
+
   group('thresholdHaptics', () {
     testWidgets('fires when the threshold is crossed in either direction',
         (tester) async {
