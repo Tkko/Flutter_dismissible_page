@@ -336,16 +336,13 @@ class DismissibleDemo extends StatelessWidget {
       onDragUpdate: onDragUpdate,
       isFullScreen: model.isFullScreen,
       borderRadius: borderRadius ?? model.borderRadius,
-      dragSensitivity: model.dragSensitivity,
-      maxTransformValue: model.maxTransformValue,
+      transform: model.transformWith(minScale: minScale),
       direction: direction ?? model.direction,
       enabled: model.enabled,
       background: background ?? model.background,
-      dismissThresholds: model.dismissThresholds,
+      gesture: model.gesture,
       dragStartBehavior: model.dragStartBehavior,
-      minScale: minScale ?? model.minScale,
       hitTestBehavior: model.behavior,
-      reverseDuration: model.reverseDuration,
       motion: exitsThroughHero
           ? model.motionWith(continueOnDismiss: false)
           : model.motion,

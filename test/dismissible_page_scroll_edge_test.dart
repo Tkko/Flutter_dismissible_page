@@ -20,7 +20,7 @@ Widget _app({
         controller: controller,
         enabled: enabled,
         direction: direction,
-        dragSensitivity: dragSensitivity,
+        transform: DismissiblePageTransform(dragSensitivity: dragSensitivity),
         onDismissed: onDismissed ?? () {},
         onDragStart: onDragStart,
         onDragEnd: onDragEnd,

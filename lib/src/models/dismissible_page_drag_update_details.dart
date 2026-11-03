@@ -33,10 +33,16 @@ class DismissiblePageDragUpdateDetails {
       identical(this, other) ||
       other is DismissiblePageDragUpdateDetails &&
           runtimeType == other.runtimeType &&
-          offset == other.offset;
+          progress == other.progress &&
+          radius == other.radius &&
+          opacity == other.opacity &&
+          scale == other.scale &&
+          offset == other.offset &&
+          willDismiss == other.willDismiss;
 
   @override
-  int get hashCode => offset.hashCode;
+  int get hashCode =>
+      Object.hash(progress, radius, opacity, scale, offset, willDismiss);
 
   Map<String, dynamic> toMap() => <String, dynamic>{
         'progress': progress,

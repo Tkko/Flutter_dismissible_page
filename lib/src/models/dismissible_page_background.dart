@@ -1,5 +1,11 @@
 part of '../dismissible_page.dart';
 
+/// Eases a drag [progress] along [curve], clamped to 0.0 to 1.0.
+///
+/// Shared by [DismissiblePageBackground] and [DismissiblePageRadius].
+double _easedProgress(Curve curve, double progress) =>
+    curve.transform(progress.clamp(0.0, 1.0));
+
 /// Configures the background scrim rendered behind a [DismissiblePage].
 @immutable
 class DismissiblePageBackground {
@@ -9,7 +15,8 @@ class DismissiblePageBackground {
     required Color to,
     this.curve = Curves.linear,
   })  : startColor = from,
-        endColor = to;
+        endColor = to,
+        _resolver = null;
 
   /// Fades out [color] from [startOpacity] to [endOpacity].
   ///
@@ -21,27 +28,46 @@ class DismissiblePageBackground {
     double endOpacity = 0.0,
     this.curve = Curves.linear,
   })  : startColor = color.withValues(alpha: startOpacity),
-        endColor = color.withValues(alpha: endOpacity);
+        endColor = color.withValues(alpha: endOpacity),
+        _resolver = null;
 
   /// Keeps a constant [color] throughout the drag gesture.
   const DismissiblePageBackground.solid(Color color)
       : startColor = color,
         endColor = null,
-        curve = Curves.linear;
+        curve = Curves.linear,
+        _resolver = null;
 
   /// No background color (fully transparent, skips background painting).
   const DismissiblePageBackground.none()
       : startColor = null,
         endColor = null,
+        curve = Curves.linear,
+        _resolver = null;
+
+  /// Computes the color from the drag progress (0.0 to 1.0) with `resolver`,
+  /// for transitions the other constructors cannot express, such as a
+  /// multi-stop gradient of colors. Return null for no background.
+  const DismissiblePageBackground.custom(
+    Color? Function(double progress) this._resolver,
+  )   : startColor = null,
+        endColor = null,
         curve = Curves.linear;
 
+  final Color? Function(double progress)? _resolver;
+
   /// Whether this background configuration defines no background painting.
-  bool get isNone => startColor == null && endColor == null;
+  bool get isNone =>
+      startColor == null && endColor == null && _resolver == null;
 
   /// The color at the start of the drag gesture (progress = 0.0).
+  ///
+  /// Null for [DismissiblePageBackground.custom].
   final Color? startColor;
 
   /// The color at maximum drag (progress = 1.0).
+  ///
+  /// Null for [DismissiblePageBackground.custom].
   final Color? endColor;
 
   /// The easing curve applied to color interpolation.
@@ -51,11 +77,12 @@ class DismissiblePageBackground {
   ///
   /// Returns `null` if no background should be rendered (e.g. [DismissiblePageBackground.none]).
   Color? resolveColor(double progress) {
+    final resolver = _resolver;
+    if (resolver != null) return resolver(progress.clamp(0.0, 1.0));
     if (startColor == null) return null;
     if (endColor == null) return startColor;
 
-    final transformed = curve.transform(progress.clamp(0.0, 1.0));
-    return Color.lerp(startColor, endColor, transformed);
+    return Color.lerp(startColor, endColor, _easedProgress(curve, progress));
   }
 
   @override
@@ -65,8 +92,9 @@ class DismissiblePageBackground {
           runtimeType == other.runtimeType &&
           startColor == other.startColor &&
           endColor == other.endColor &&
-          curve == other.curve;
+          curve == other.curve &&
+          _resolver == other._resolver;
 
   @override
-  int get hashCode => Object.hash(startColor, endColor, curve);
+  int get hashCode => Object.hash(startColor, endColor, curve, _resolver);
 }

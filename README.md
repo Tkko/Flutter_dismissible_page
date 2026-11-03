@@ -136,6 +136,9 @@ preventing distance-based dismissal.
     this.onDragEnd,
     this.onDragCancel,
     this.onDragUpdate,
+    this.onDragEvent,
+    this.onWillDismiss,
+    this.onDismissStart,
     this.isFullScreen = true,
     this.enabled = true,
     this.background = const DismissiblePageBackground.transition(
@@ -144,14 +147,12 @@ preventing distance-based dismissal.
     ),
     this.borderRadius = const DismissiblePageRadius.transition(),
     this.direction = DismissiblePageDismissDirection.vertical,
-    this.dismissThresholds = const <DismissiblePageSide, double>{},
+    this.gesture = const DismissiblePageGesture(),
+    this.transform = const DismissiblePageTransform(),
     this.dragStartBehavior = DragStartBehavior.down,
-    this.dragSensitivity = 0.7,
-    this.minScale = .85,
-    this.maxTransformValue = .4,
     this.hitTestBehavior = HitTestBehavior.opaque,
-    this.reverseDuration = const Duration(milliseconds: 200),
     this.motion = const DismissiblePageMotion(),
+    this.semanticLabel,
     super.key,
   })  : _child = child,
         _builder = null;
@@ -177,6 +178,15 @@ preventing distance-based dismissal.
   /// Called when the widget has been dragged with progress, offset, radius, scale and opacity details.
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
 
+  /// One callback for the whole drag lifecycle (start, update, end, cancel).
+  final ValueChanged<DismissiblePageEvent>? onDragEvent;
+
+  /// Asks whether the page may be dismissed (sync or async). False keeps it.
+  final FutureOr<bool> Function()? onWillDismiss;
+
+  /// Called when the page starts leaving, right before [onDismissed].
+  final VoidCallback? onDismissStart;
+
   /// If true widget will ignore device padding
   /// [MediaQuery.of(context).padding]
   final bool isFullScreen;
@@ -190,33 +200,23 @@ preventing distance-based dismissal.
   /// Configuration for the corner radius applied to the content during drag.
   final DismissiblePageRadius borderRadius;
 
-  /// The minimum amount of scale widget can have while dragging
-  /// Note that scale decreases as user drags
-  final double minScale;
+  /// Sensitivity, minimum scale and extent of the visual effects.
+  final DismissiblePageTransform transform;
 
-  /// Fraction of page dimension at which visual effects reach their final values.
-  /// Does not cap translation or affect dismissal thresholds.
-  final double maxTransformValue;
+  /// Thresholds, fling speeds, axis lock and the region a drag may start in.
+  final DismissiblePageGesture gesture;
 
   /// The direction in which the widget can be dismissed.
   final DismissiblePageDismissDirection direction;
 
-  /// Page displacement thresholds per destination side (0.0 - 1.0).
-  /// Missing sides default to 0.18.
-  final Map<DismissiblePageSide, double> dismissThresholds;
-
-  /// Represents how much responsive dragging the widget will be
-  final double dragSensitivity;
-
   /// Determines the way that drag start behavior is handled.
   final DragStartBehavior dragStartBehavior;
 
-  /// The amount of time the widget will spend returning to initial position if
-  /// widget is not dismissed after drag. Only used with a curve rebound.
-  final Duration reverseDuration;
-
-  /// Rebound, dismiss continuation, haptics and fling behavior of released drags.
+  /// Rebound, exit, dismiss continuation and haptics of released drags.
   final DismissiblePageMotion motion;
+
+  /// A label announced by assistive technologies for the page.
+  final String? semanticLabel;
 
   /// How to behave during hit tests.
   ///
@@ -226,18 +226,20 @@ preventing distance-based dismissal.
 
 ## Directional dismissal thresholds
 
-`direction` determines which gestures are allowed. `dismissThresholds` determines
+`direction` determines which gestures are allowed. `gesture.dismissThresholds` determines
 the required page displacement toward each destination side:
 
 ```dart
 DismissiblePage(
   direction: DismissiblePageDismissDirection.all,
-  dismissThresholds: const {
-    DismissiblePageSide.up: 0.10,
-    DismissiblePageSide.down: 0.20,
-    DismissiblePageSide.start: 0.30,
-    DismissiblePageSide.end: 0.40,
-  },
+  gesture: const DismissiblePageGesture(
+    dismissThresholds: {
+      DismissiblePageSide.up: 0.10,
+      DismissiblePageSide.down: 0.20,
+      DismissiblePageSide.start: 0.30,
+      DismissiblePageSide.end: 0.40,
+    },
+  ),
   onDismissed: () => Navigator.of(context).pop(),
   child: const SizedBox.expand(),
 )
@@ -245,7 +247,7 @@ DismissiblePage(
 
 Up/down values are fractions of page height; start/end values are fractions of
 page width. For a 600 px tall page, `down: 0.20` requires 120 px of downward page
-displacement. `dragSensitivity` still determines how finger movement translates
+displacement. `transform.dragSensitivity` still determines how finger movement translates
 into page displacement.
 
 `start` means left in LTR and right in RTL; `end` means right in LTR and left in
@@ -256,9 +258,45 @@ excluded by `direction`. Missing sides use 0.18; values must be between 0 and 1.
 Fast outward flings can dismiss before a distance threshold is reached, see
 [Motion](#motion).
 
-Thresholds are independent of `maxTransformValue`, which controls only visual
+Thresholds are independent of `transform.maxTransformValue`, which controls only visual
 effect progress. `onDragUpdate` exposes this visual progress as `details.progress`
 (0 to 1), along with offset, scale, radius, and opacity.
+
+## Gesture
+
+`gesture` decides what counts as a dismissing drag:
+
+```dart
+DismissiblePage(
+  direction: DismissiblePageDismissDirection.all,
+  gesture: const DismissiblePageGesture(
+    // Page pixels per second, and the fraction of the page that must already
+    // have moved, for an outward fling to dismiss before the threshold.
+    flingVelocity: 1000,
+    flingMinDistance: 0.1,
+    // How little speed back towards the origin cancels a release that is past
+    // the threshold. Much lower than flingVelocity: changing your mind needs a
+    // hint, dismissing needs intent.
+    cancelVelocity: 300,
+    // With `all`, stick to the axis the drag started along.
+    lockAxis: true,
+    // Only start a drag within the top 80 px, like a sheet's grab handle.
+    dragRegion: DismissiblePageDragRegion.edge(DismissiblePageSide.up, 80),
+  ),
+  onDismissed: () => Navigator.of(context).pop(),
+  child: const SizedBox.expand(),
+)
+```
+
+`dragRegion` limits both the page's own drag and the pull of a scrollable resting
+at its edge; the scrollable keeps scrolling normally outside of it. Use
+`DismissiblePageDragRegion.custom((position, size) => ...)` for any other shape.
+
+## Transform
+
+`transform` shapes how a drag translates into movement and visual effects:
+`dragSensitivity` (finger to page movement), `minScale` (scale at maximum drag)
+and `maxTransformValue` (the fraction of the page at which effects finish).
 
 ## Motion
 
@@ -276,14 +314,6 @@ DismissiblePage(
     exit: DismissiblePageExit.momentum(),
     // A light haptic each time the dismiss threshold is crossed.
     thresholdHaptics: true,
-    // Page pixels per second, and the fraction of the page that must already
-    // have moved, for an outward fling to dismiss before the threshold.
-    flingVelocity: 1000,
-    flingMinDistance: 0.1,
-    // How little speed back towards the origin cancels a release that is past
-    // the threshold. Much lower than flingVelocity: changing your mind needs a
-    // hint, dismissing needs intent.
-    cancelVelocity: 300,
   ),
   onDismissed: () => Navigator.of(context).pop(),
   child: const SizedBox.expand(),
@@ -291,11 +321,58 @@ DismissiblePage(
 ```
 
 `DismissiblePageRebound.bouncy()` overshoots the origin slightly, and
-`DismissiblePageRebound.curve()` is the time-based easing that runs for
-`reverseDuration`. `exit` applies to a swipe that slides away
+`DismissiblePageRebound.curve(curve:, duration:)` is the time-based easing.
+`DismissiblePageRebound` and `DismissiblePageExit` are sealed, so a `switch`
+over them is exhaustive. `exit` applies to a swipe that slides away
 (`continueOnDismiss`) and to `DismissiblePage.dismiss`: `.momentum()` keeps the
 release speed, `.curve(curve, duration)` always leaves the same way. `continueOnDismiss` leaves the page off-screen, so
 `onDismissed` is expected to remove it.
+
+### Confirming a dismissal
+
+`onWillDismiss` is asked before a release or `DismissiblePage.dismiss` dismisses
+the page. Return `false` (or a future completing with `false`) to keep it. While
+a future is pending the page is held where it is and ignores further drags.
+
+```dart
+DismissiblePage(
+  onWillDismiss: () async => await confirmDiscardChanges(context) ?? false,
+  onDismissStart: () => debugPrint('leaving'),
+  onDismissed: () => Navigator.of(context).pop(),
+  child: const SizedBox.expand(),
+)
+```
+
+`onDismissStart` fires right before `onDismissed`, after the confirmation.
+
+### Following the page
+
+`DismissiblePage.of(context)` (or `maybeOf`) returns a handle with `isDragging`,
+`isDismissing`, `progress`, `offset` and `dismiss()`. It is a `Listenable`, so a
+`ListenableBuilder` can follow the drag without wiring `onDragUpdate`:
+
+```dart
+ListenableBuilder(
+  listenable: DismissiblePage.of(context),
+  builder: (context, _) =>
+      LinearProgressIndicator(value: DismissiblePage.of(context).progress),
+)
+```
+
+`onDragEvent` reports the same lifecycle as `onDragStart`, `onDragUpdate`,
+`onDragEnd` and `onDragCancel` through one callback over the sealed
+`DismissiblePageEvent`.
+
+### Custom backgrounds and radii
+
+`DismissiblePageBackground.custom((progress) => color)` and
+`DismissiblePageRadius.custom((progress) => radius)` compute the value from the
+drag progress (0 to 1) for transitions the presets cannot express.
+
+### Accessibility
+
+Screen readers can dismiss the page with their dismiss gesture unless
+`direction` is `none`. Set `semanticLabel` to announce the page.
 
 ### Dismissing from code
 
@@ -346,6 +423,10 @@ Navigator.of(context).push(
 );
 ```
 
+`TransparentRoute` and `pushTransparentRoute` also take `barrierDismissible`
+(default true), `opaque` (default false) and a `transitionBuilder` (a fade by
+default).
+
 `onDismissed` remains explicit; `DismissiblePage` does not pop a route itself.
 
 ## Migration
@@ -367,5 +448,16 @@ These are breaking API changes:
   the new default is `0.18` of the page dimension. Diagonal thresholds are
   evaluated independently for each axis.
 
-Styling stays flat: `background`, `borderRadius`, `minScale`, and
-`maxTransformValue` remain widget arguments.
+- `dragSensitivity`, `minScale` and `maxTransformValue` moved into
+  `transform: DismissiblePageTransform(...)`.
+- `dismissThresholds`, `flingVelocity`, `flingMinDistance` and `cancelVelocity`
+  moved into `gesture: DismissiblePageGesture(...)`.
+- `reverseDuration` is now `DismissiblePageRebound.curve(duration: ...)`.
+- `DismissiblePageRebound` and `DismissiblePageExit` are sealed classes. Test
+  variants with `is DismissiblePageSpringRebound` and so on instead of
+  `isSpring`.
+- `DismissiblePageDragUpdateDetails` compares all of its fields, not only
+  `offset`.
+- `GlobalKeyExtension.globalPaintBounds` was removed.
+
+`background` and `borderRadius` remain widget arguments.

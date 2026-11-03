@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -21,11 +22,19 @@ part 'models/dismissible_page_dismiss_direction.dart';
 
 part 'models/dismissible_page_drag_update_details.dart';
 
+part 'models/dismissible_page_event.dart';
+
+part 'models/dismissible_page_gesture.dart';
+
+part 'models/dismissible_page_handle.dart';
+
 part 'models/dismissible_page_motion.dart';
 
 part 'models/dismissible_page_radius.dart';
 
 part 'models/dismissible_page_side.dart';
+
+part 'models/dismissible_page_transform.dart';
 
 part 'routing/dismissible_routes.dart';
 
@@ -42,6 +51,9 @@ class DismissiblePage extends StatelessWidget {
     this.onDragEnd,
     this.onDragCancel,
     this.onDragUpdate,
+    this.onDragEvent,
+    this.onWillDismiss,
+    this.onDismissStart,
     this.isFullScreen = true,
     this.enabled = true,
     this.background = const DismissiblePageBackground.transition(
@@ -49,26 +61,15 @@ class DismissiblePage extends StatelessWidget {
       to: Colors.transparent,
     ),
     this.borderRadius = const DismissiblePageRadius.transition(),
-    this.direction = DismissiblePageDismissDirection.vertical,
-    this.dismissThresholds = const <DismissiblePageSide, double>{},
-    this.dragSensitivity = 0.7,
-    this.minScale = 0.85,
-    this.maxTransformValue = 0.4,
+    this.direction = DismissiblePageDismissDirection.all,
+    this.gesture = const DismissiblePageGesture(),
+    this.transform = const DismissiblePageTransform(),
     this.dragStartBehavior = DragStartBehavior.down,
     this.hitTestBehavior = HitTestBehavior.opaque,
-    this.reverseDuration = const Duration(milliseconds: 200),
     this.motion = const DismissiblePageMotion(),
+    this.semanticLabel,
     super.key,
-  })  : assert(dragSensitivity > 0, 'dragSensitivity must be greater than 0'),
-        assert(
-          minScale >= 0 && minScale <= 1,
-          'minScale must be between 0.0 and 1.0',
-        ),
-        assert(
-          maxTransformValue >= 0 && maxTransformValue <= 1,
-          'maxTransformValue must be between 0.0 and 1.0',
-        ),
-        _child = child,
+  })  : _child = child,
         _builder = null;
 
   /// Builds content with a controller for explicit scroll coordination.
@@ -83,6 +84,9 @@ class DismissiblePage extends StatelessWidget {
     this.onDragEnd,
     this.onDragCancel,
     this.onDragUpdate,
+    this.onDragEvent,
+    this.onWillDismiss,
+    this.onDismissStart,
     this.isFullScreen = true,
     this.enabled = true,
     this.background = const DismissiblePageBackground.transition(
@@ -91,25 +95,14 @@ class DismissiblePage extends StatelessWidget {
     ),
     this.borderRadius = const DismissiblePageRadius.transition(),
     this.direction = DismissiblePageDismissDirection.vertical,
-    this.dismissThresholds = const <DismissiblePageSide, double>{},
-    this.dragSensitivity = 0.7,
-    this.minScale = 0.85,
-    this.maxTransformValue = 0.4,
+    this.gesture = const DismissiblePageGesture(),
+    this.transform = const DismissiblePageTransform(),
     this.dragStartBehavior = DragStartBehavior.down,
     this.hitTestBehavior = HitTestBehavior.opaque,
-    this.reverseDuration = const Duration(milliseconds: 200),
     this.motion = const DismissiblePageMotion(),
+    this.semanticLabel,
     super.key,
-  })  : assert(dragSensitivity > 0, 'dragSensitivity must be greater than 0'),
-        assert(
-          minScale >= 0 && minScale <= 1,
-          'minScale must be between 0.0 and 1.0',
-        ),
-        assert(
-          maxTransformValue >= 0 && maxTransformValue <= 1,
-          'maxTransformValue must be between 0.0 and 1.0',
-        ),
-        _child = null,
+  })  : _child = null,
         _builder = builder;
 
   /// An optional [DismissiblePageScrollController] for coordinating scrollables.
@@ -143,6 +136,27 @@ class DismissiblePage extends StatelessWidget {
   /// Called during dragging with progress, offset, radius, scale and opacity details.
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
 
+  /// Called for every drag lifecycle event: start, update, end and cancel.
+  ///
+  /// It reports the same moments as [onDragStart], [onDragUpdate], [onDragEnd]
+  /// and [onDragCancel] through one callback that can be handled with an
+  /// exhaustive `switch` over [DismissiblePageEvent].
+  final ValueChanged<DismissiblePageEvent>? onDragEvent;
+
+  /// Asks whether the page may be dismissed, before it leaves.
+  ///
+  /// Called when a released drag, or [DismissiblePage.dismiss], would dismiss
+  /// the page. Returning false (or a future completing with false) keeps the
+  /// page, which settles back to its origin. While a future is pending the
+  /// page is held where it is and ignores further drags, so a "discard
+  /// changes?" dialog can be shown. [onDismissed] only runs when the answer is
+  /// true.
+  final FutureOr<bool> Function()? onWillDismiss;
+
+  /// Called when the page starts leaving, after [onWillDismiss] allowed it
+  /// and right before [onDismissed].
+  final VoidCallback? onDismissStart;
+
   /// If true, padding from [MediaQuery.paddingOf] is ignored.
   final bool isFullScreen;
 
@@ -158,39 +172,47 @@ class DismissiblePage extends StatelessWidget {
   /// The direction in which the page can be dismissed.
   final DismissiblePageDismissDirection direction;
 
-  /// Page displacement thresholds (0.0 to 1.0) per destination side.
-  ///
-  /// Up/down use a fraction of page height; start/end use page width.
-  /// Start/end follow [Directionality]. Missing sides default to 0.18.
-  /// With [DismissiblePageDismissDirection.all], either axis can dismiss.
-  /// These thresholds are independent of [maxTransformValue].
-  /// A fast outward fling can dismiss before reaching a distance threshold.
-  final Map<DismissiblePageSide, double> dismissThresholds;
+  /// What counts as a dismissing drag: thresholds, fling speeds, axis lock
+  /// and where a drag may start.
+  final DismissiblePageGesture gesture;
 
-  /// Multiplier applied to drag movements.
-  final double dragSensitivity;
+  /// How a drag translates into movement and visual effects: sensitivity,
+  /// minimum scale and the extent of the effects.
+  final DismissiblePageTransform transform;
 
-  /// The scale of the widget at maximum drag.
-  final double minScale;
-
-  /// Fraction of page dimension at which visual effects reach their final values.
-  ///
-  /// Does not limit translation or affect [dismissThresholds].
-  /// When zero, effects reach their final values at any nonzero offset.
-  final double maxTransformValue;
-
-  /// Duration to animate back to original position when not dismissed.
-  ///
-  /// Only used when [DismissiblePageMotion.rebound] is a
-  /// [DismissiblePageRebound.curve]; springs settle on their own.
-  final Duration reverseDuration;
-
-  /// Rebound, dismiss continuation, haptics and fling behavior of released
-  /// drags.
+  /// Rebound, exit, dismiss continuation and haptics of released drags.
   final DismissiblePageMotion motion;
+
+  /// A label announced by assistive technologies for the page.
+  ///
+  /// Whatever the label, a screen reader can dismiss the page with its
+  /// dismiss gesture unless [direction] is
+  /// [DismissiblePageDismissDirection.none].
+  final String? semanticLabel;
 
   /// How to behave during hit tests.
   final HitTestBehavior hitTestBehavior;
+
+  /// The state and controls of the closest [DismissiblePage] above [context].
+  ///
+  /// Throws when [context] is not below a [DismissiblePage]; see [maybeOf].
+  static DismissiblePageHandle of(BuildContext context) {
+    final handle = maybeOf(context);
+    assert(
+      handle != null,
+      'DismissiblePage.of() called with a context that does not contain a '
+      'DismissiblePage. Call it from a context built inside the page (for '
+      'example with a Builder), not from the widget that creates it.',
+    );
+    return handle!;
+  }
+
+  /// Like [of], but returns null when [context] is not below a
+  /// [DismissiblePage].
+  static DismissiblePageHandle? maybeOf(BuildContext context) {
+    final scope = context.getInheritedWidgetOfExactType<_DismissibleScope>();
+    return scope == null ? null : DismissiblePageHandle._(scope.arbiter);
+  }
 
   /// Dismisses the closest [DismissiblePage] above [context] from code.
   ///
@@ -211,7 +233,8 @@ class DismissiblePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(
-      dismissThresholds.values.every((value) => value >= 0 && value <= 1),
+      gesture.dismissThresholds.values
+          .every((value) => value >= 0 && value <= 1),
       'Dismiss thresholds must be between 0.0 and 1.0',
     );
     final contentPadding =
@@ -235,16 +258,17 @@ class DismissiblePage extends StatelessWidget {
       background: background,
       borderRadius: borderRadius,
       direction: direction,
-      dismissThresholds: dismissThresholds,
-      dragSensitivity: dragSensitivity,
-      minScale: minScale,
-      maxTransformValue: maxTransformValue,
+      gesture: gesture,
+      transform: transform,
       dragStartBehavior: dragStartBehavior,
       onDragStart: onDragStart,
       onDragEnd: onDragEnd,
       onDragCancel: onDragCancel,
       onDragUpdate: onDragUpdate,
-      reverseDuration: reverseDuration,
+      onDragEvent: onDragEvent,
+      onWillDismiss: onWillDismiss,
+      onDismissStart: onDismissStart,
+      semanticLabel: semanticLabel,
       motion: motion,
       hitTestBehavior: hitTestBehavior,
       contentPadding: contentPadding,

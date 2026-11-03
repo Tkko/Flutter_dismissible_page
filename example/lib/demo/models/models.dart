@@ -152,7 +152,7 @@ class DismissiblePageModel {
   DismissiblePageMotion motionWith({bool? continueOnDismiss}) =>
       DismissiblePageMotion(
         rebound: reboundKind == ReboundKind.curve
-            ? const DismissiblePageRebound.curve()
+            ? DismissiblePageRebound.curve(duration: reverseDuration)
             : DismissiblePageRebound.spring(
                 stiffness: stiffness,
                 dampingRatio: dampingRatio,
@@ -160,9 +160,21 @@ class DismissiblePageModel {
         exit: exitKind.exit,
         continueOnDismiss: continueOnDismiss ?? this.continueOnDismiss,
         thresholdHaptics: thresholdHaptics,
+      );
+
+  DismissiblePageGesture get gesture => DismissiblePageGesture(
+        dismissThresholds: dismissThresholds,
         flingVelocity: flingVelocity,
         cancelVelocity: cancelVelocity,
         flingMinDistance: flingMinDistance,
+      );
+
+  /// The current transform, optionally overriding [minScale].
+  DismissiblePageTransform transformWith({double? minScale}) =>
+      DismissiblePageTransform(
+        dragSensitivity: dragSensitivity,
+        maxTransformValue: maxTransformValue,
+        minScale: minScale ?? this.minScale,
       );
 }
 

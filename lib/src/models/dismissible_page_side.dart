@@ -1,6 +1,6 @@
 part of '../dismissible_page.dart';
 
-/// Destination sides used by [DismissiblePage.dismissThresholds].
+/// Destination sides used by [DismissiblePageGesture.dismissThresholds].
 enum DismissiblePageSide {
   /// The top edge.
   up,

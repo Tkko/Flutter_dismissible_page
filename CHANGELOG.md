@@ -6,8 +6,22 @@
 - Rename `overallDragValue` to `progress` in `DismissiblePageDragUpdateDetails` (including `toMap()`).
 - Key `dismissThresholds` by directional destination sides (`DismissiblePageSide.up`, `down`, `start`, `end`) instead of directions. Missing sides default to `0.18`.
 - Updated minimum SDK constraints to Dart `>=3.0.0 <5.0.0` and Flutter `>=3.10.0`.
+- Group `dragSensitivity`, `minScale` and `maxTransformValue` into `transform: DismissiblePageTransform`, and `dismissThresholds`, `flingVelocity`, `flingMinDistance` and `cancelVelocity` into `gesture: DismissiblePageGesture`. Their range checks live in these classes.
+- Remove `reverseDuration`; use `DismissiblePageRebound.curve(duration: ...)`.
+- `DismissiblePageRebound` and `DismissiblePageExit` are sealed classes with `DismissiblePageCurveRebound`, `DismissiblePageSpringRebound`, `DismissiblePageMomentumExit` and `DismissiblePageCurveExit` variants, replacing `isSpring` and nullable curve/duration fields.
+- `DismissiblePageDragUpdateDetails` now compares and hashes all of its fields instead of only `offset`.
+- Remove `GlobalKeyExtension.globalPaintBounds`.
 
 ### New Features & Enhancements
+- **`DismissiblePage.of(context)` / `maybeOf`**: A `DismissiblePageHandle` with `isDragging`, `isDismissing`, `progress`, `offset` and `dismiss()`. It is a `Listenable`, so UI can follow the drag.
+- **`onWillDismiss`**: Confirm or veto a dismissal, synchronously or with a future that holds the page while it is pending. Applies to released drags and `DismissiblePage.dismiss`.
+- **`onDismissStart`**: Called right before `onDismissed`, after the confirmation.
+- **`onDragEvent`**: One callback over the sealed `DismissiblePageEvent` for the whole drag lifecycle.
+- **`DismissiblePageGesture.lockAxis`**: With `DismissiblePageDismissDirection.all`, a drag sticks to the axis it started along.
+- **`DismissiblePageGesture.dragRegion`**: Limit where a drag may start (`.edge`, `.custom`), for example a top strip only.
+- **Accessibility**: Screen readers get a dismiss action, and `semanticLabel` names the page.
+- **`TransparentRoute` options**: `barrierDismissible`, `opaque` and `transitionBuilder` (also on `pushTransparentRoute`).
+- **`DismissiblePageBackground.custom` / `DismissiblePageRadius.custom`**: Compute the value from the drag progress.
 - **Safer scroll hand-off**: A pull on a scrollable only dismisses the page when the gesture began at that edge. Scrolling quickly to the top and carrying on is a scroll, not a dismissal, and a new pull from the top dismisses as before.
 - **`DismissiblePageDragUpdateDetails.willDismiss`**: True while letting go would dismiss by distance, for "release to close" hints.
 - **`DismissiblePage.dismiss(context, {side})`**: Dismiss from code with the same motion as a swipe. The page winds up slightly, then accelerates off-screen towards `side` (by default the side `direction` dismisses towards) while `onDismissed` runs, so close buttons no longer only fade.

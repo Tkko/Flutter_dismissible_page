@@ -2,34 +2,67 @@ part of '../dismissible_page.dart';
 
 /// How the page returns to its origin when a drag ends without dismissing.
 @immutable
-class DismissiblePageRebound {
+sealed class DismissiblePageRebound {
+  const DismissiblePageRebound();
+
   /// A time-based rebound that ignores release velocity and runs for
-  /// [DismissiblePage.reverseDuration].
-  const DismissiblePageRebound.curve({this.curve = Curves.easeOutCubic})
-      : isSpring = false,
-        stiffness = 0,
-        dampingRatio = 0;
+  /// [DismissiblePageCurveRebound.duration] along
+  /// [DismissiblePageCurveRebound.curve].
+  const factory DismissiblePageRebound.curve({
+    Curve curve,
+    Duration duration,
+  }) = DismissiblePageCurveRebound;
 
   /// A physics-based rebound that starts from the release velocity.
   ///
-  /// A [dampingRatio] of 1 settles without overshoot, lower values overshoot
+  /// A damping ratio of 1 settles without overshoot, lower values overshoot
   /// the origin and oscillate before settling.
-  const DismissiblePageRebound.spring({
+  const factory DismissiblePageRebound.spring({
+    double stiffness,
+    double dampingRatio,
+  }) = DismissiblePageSpringRebound;
+
+  /// A spring that overshoots the origin slightly before settling.
+  const factory DismissiblePageRebound.bouncy() =
+      DismissiblePageSpringRebound.bouncy;
+}
+
+/// A [DismissiblePageRebound] that eases back along a [curve].
+class DismissiblePageCurveRebound extends DismissiblePageRebound {
+  /// Creates a time-based rebound.
+  const DismissiblePageCurveRebound({
+    this.curve = Curves.easeOutCubic,
+    this.duration = const Duration(milliseconds: 200),
+  });
+
+  /// The easing curve of the rebound.
+  final Curve curve;
+
+  /// How long the rebound takes.
+  final Duration duration;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DismissiblePageCurveRebound &&
+          curve == other.curve &&
+          duration == other.duration;
+
+  @override
+  int get hashCode => Object.hash(curve, duration);
+}
+
+/// A [DismissiblePageRebound] driven by a spring simulation.
+class DismissiblePageSpringRebound extends DismissiblePageRebound {
+  /// Creates a spring rebound.
+  const DismissiblePageSpringRebound({
     this.stiffness = 900,
     this.dampingRatio = 1.0,
   })  : assert(stiffness > 0, 'stiffness must be greater than 0'),
-        assert(dampingRatio > 0, 'dampingRatio must be greater than 0'),
-        isSpring = true,
-        curve = Curves.linear;
+        assert(dampingRatio > 0, 'dampingRatio must be greater than 0');
 
   /// A spring that overshoots the origin slightly before settling.
-  const DismissiblePageRebound.bouncy() : this.spring(dampingRatio: 0.65);
-
-  /// Whether the rebound is driven by a spring simulation.
-  final bool isSpring;
-
-  /// The easing curve of a [DismissiblePageRebound.curve] rebound.
-  final Curve curve;
+  const DismissiblePageSpringRebound.bouncy() : this(dampingRatio: 0.65);
 
   /// Spring stiffness, for a mass of 1.
   final double stiffness;
@@ -46,14 +79,12 @@ class DismissiblePageRebound {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DismissiblePageRebound &&
-          isSpring == other.isSpring &&
-          curve == other.curve &&
+      other is DismissiblePageSpringRebound &&
           stiffness == other.stiffness &&
           dampingRatio == other.dampingRatio;
 
   @override
-  int get hashCode => Object.hash(isSpring, curve, stiffness, dampingRatio);
+  int get hashCode => Object.hash(stiffness, dampingRatio);
 }
 
 /// How the page leaves the screen when it is dismissed.
@@ -62,33 +93,55 @@ class DismissiblePageRebound {
 /// [DismissiblePageMotion.continueOnDismiss] is on, and to
 /// [DismissiblePage.dismiss].
 @immutable
-class DismissiblePageExit {
+sealed class DismissiblePageExit {
+  const DismissiblePageExit();
+
   /// Carries the release velocity: a fast release keeps its speed and eases
   /// out, a slow one accelerates away from rest. [DismissiblePage.dismiss],
   /// which has no velocity, winds up slightly and then accelerates away.
-  const DismissiblePageExit.momentum()
-      : curve = null,
-        duration = null;
+  const factory DismissiblePageExit.momentum() = DismissiblePageMomentumExit;
 
   /// Always leaves along [curve] over [duration], whatever the release speed.
   ///
   /// A curve that dips below zero at first, such as [Curves.easeInBack],
   /// winds up against the exit direction before leaving.
-  const DismissiblePageExit.curve(
-    Curve this.curve, {
+  const factory DismissiblePageExit.curve(
+    Curve curve, {
+    Duration duration,
+  }) = DismissiblePageCurveExit;
+}
+
+/// A [DismissiblePageExit] that carries the release velocity.
+class DismissiblePageMomentumExit extends DismissiblePageExit {
+  /// Creates a momentum exit.
+  const DismissiblePageMomentumExit();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is DismissiblePageMomentumExit;
+
+  @override
+  int get hashCode => (DismissiblePageMomentumExit).hashCode;
+}
+
+/// A [DismissiblePageExit] along a fixed curve and duration.
+class DismissiblePageCurveExit extends DismissiblePageExit {
+  /// Creates an exit along [curve] over [duration].
+  const DismissiblePageCurveExit(
+    this.curve, {
     this.duration = const Duration(milliseconds: 300),
   });
 
-  /// The exit curve, or null for [DismissiblePageExit.momentum].
-  final Curve? curve;
+  /// The exit curve.
+  final Curve curve;
 
-  /// How long the exit takes, or null for [DismissiblePageExit.momentum].
-  final Duration? duration;
+  /// How long the exit takes.
+  final Duration duration;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DismissiblePageExit &&
+      other is DismissiblePageCurveExit &&
           curve == other.curve &&
           duration == other.duration;
 
@@ -97,6 +150,9 @@ class DismissiblePageExit {
 }
 
 /// Tunes how [DismissiblePage] animates a released drag.
+///
+/// What counts as a dismissal (thresholds, fling speeds) is configured by
+/// [DismissiblePageGesture].
 @immutable
 class DismissiblePageMotion {
   ///
@@ -105,15 +161,7 @@ class DismissiblePageMotion {
     this.exit = const DismissiblePageExit.momentum(),
     this.continueOnDismiss = false,
     this.thresholdHaptics = false,
-    this.flingVelocity = 1000,
-    this.flingMinDistance = 0.1,
-    this.cancelVelocity = 300,
-  })  : assert(flingVelocity > 0, 'flingVelocity must be greater than 0'),
-        assert(cancelVelocity >= 0, 'cancelVelocity must not be negative'),
-        assert(
-          flingMinDistance >= 0 && flingMinDistance <= 1,
-          'flingMinDistance must be between 0.0 and 1.0',
-        );
+  });
 
   /// How the page returns to its origin when a drag ends without dismissing.
   final DismissiblePageRebound rebound;
@@ -132,28 +180,6 @@ class DismissiblePageMotion {
   /// threshold in either direction.
   final bool thresholdHaptics;
 
-  /// Release speed, in page pixels per second, above which an outward drag is
-  /// a fling that dismisses the page before it reaches its dismiss threshold.
-  ///
-  /// Page pixels are [DismissiblePage.dragSensitivity] times finger pixels.
-  /// Use [double.infinity] to dismiss by distance only.
-  final double flingVelocity;
-
-  /// Fraction of the page dimension the page must have moved before an
-  /// outward fling can dismiss it, so a flick from a near-resting page does
-  /// not.
-  final double flingMinDistance;
-
-  /// Release speed, in page pixels per second, above which a drag back towards
-  /// the origin cancels the dismissal, even when the page is past its
-  /// threshold.
-  ///
-  /// It is much lower than [flingVelocity] on purpose: changing your mind
-  /// needs only a hint, while dismissing needs clear intent, so a page that is
-  /// drifting back is never dismissed by accident. Use 0 to cancel on any
-  /// inward movement, or [double.infinity] to never cancel.
-  final double cancelVelocity;
-
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -161,10 +187,7 @@ class DismissiblePageMotion {
           rebound == other.rebound &&
           exit == other.exit &&
           continueOnDismiss == other.continueOnDismiss &&
-          thresholdHaptics == other.thresholdHaptics &&
-          flingVelocity == other.flingVelocity &&
-          flingMinDistance == other.flingMinDistance &&
-          cancelVelocity == other.cancelVelocity;
+          thresholdHaptics == other.thresholdHaptics;
 
   @override
   int get hashCode => Object.hash(
@@ -172,8 +195,5 @@ class DismissiblePageMotion {
         exit,
         continueOnDismiss,
         thresholdHaptics,
-        flingVelocity,
-        flingMinDistance,
-        cancelVelocity,
       );
 }

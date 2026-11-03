@@ -14,7 +14,9 @@ Future<List<double>> _dragAndRelease(
     MaterialApp(
       home: DismissiblePage(
         motion: motion,
-        dismissThresholds: const {DismissiblePageSide.down: 0.5},
+        gesture: const DismissiblePageGesture(
+          dismissThresholds: {DismissiblePageSide.down: 0.5},
+        ),
         onDismissed: onDismissed ?? () {},
         onDragUpdate: (details) => offsets.add(details.offset.dy),
         child: const SizedBox.expand(),
@@ -36,6 +38,7 @@ Future<bool> _flick(
   required double flickPx,
   required double flickSpeed,
   DismissiblePageMotion motion = const DismissiblePageMotion(),
+  DismissiblePageGesture pageGesture = const DismissiblePageGesture(),
   Duration? dragStep,
 }) async {
   var dismissed = false;
@@ -43,6 +46,7 @@ Future<bool> _flick(
     MaterialApp(
       home: DismissiblePage(
         motion: motion,
+        gesture: pageGesture,
         onDismissed: () => dismissed = true,
         child: const SizedBox.expand(),
       ),
@@ -177,7 +181,7 @@ void main() {
           dragPx: 100,
           flickPx: 30,
           flickSpeed: 700,
-          motion: const DismissiblePageMotion(flingVelocity: 300),
+          pageGesture: const DismissiblePageGesture(flingVelocity: 300),
         ),
         isTrue,
       );
@@ -191,7 +195,7 @@ void main() {
           dragPx: 100,
           flickPx: 30,
           flickSpeed: 4000,
-          motion: const DismissiblePageMotion(
+          pageGesture: const DismissiblePageGesture(
             flingVelocity: double.infinity,
           ),
         ),
@@ -242,7 +246,7 @@ void main() {
           dragPx: 300,
           flickPx: -60,
           flickSpeed: 600,
-          motion: const DismissiblePageMotion(
+          pageGesture: const DismissiblePageGesture(
             cancelVelocity: double.infinity,
           ),
         ),
@@ -395,7 +399,9 @@ void main() {
         MaterialApp(
           home: DismissiblePage(
             // 0.5 of 600px, so 300px of page movement.
-            dismissThresholds: const {DismissiblePageSide.down: 0.5},
+            gesture: const DismissiblePageGesture(
+              dismissThresholds: {DismissiblePageSide.down: 0.5},
+            ),
             onDismissed: () {},
             onDragUpdate: (details) => flags.add(details.willDismiss),
             child: const SizedBox.expand(),
@@ -506,7 +512,9 @@ void main() {
         MaterialApp(
           home: DismissiblePage(
             motion: const DismissiblePageMotion(thresholdHaptics: true),
-            dismissThresholds: const {DismissiblePageSide.down: 0.1},
+            gesture: const DismissiblePageGesture(
+              dismissThresholds: {DismissiblePageSide.down: 0.1},
+            ),
             onDismissed: () {},
             child: const SizedBox.expand(),
           ),

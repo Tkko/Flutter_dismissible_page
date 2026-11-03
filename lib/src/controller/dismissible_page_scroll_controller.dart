@@ -71,7 +71,8 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
   void applyUserOffset(double delta) {
     final arbiter = _arbiter;
     if (arbiter == null ||
-        arbiter.direction == DismissiblePageDismissDirection.none) {
+        arbiter.direction == DismissiblePageDismissDirection.none ||
+        !arbiter.pointerInRegion) {
       super.applyUserOffset(delta);
       return;
     }

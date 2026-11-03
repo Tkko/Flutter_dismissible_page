@@ -502,7 +502,11 @@ void main() {
                 height: 450,
                 child: DismissiblePage(
                   onDismissed: () {},
-                  reverseDuration: const Duration(milliseconds: 250),
+                  motion: const DismissiblePageMotion(
+                    rebound: DismissiblePageRebound.curve(
+                      duration: Duration(milliseconds: 250),
+                    ),
+                  ),
                   child: Container(
                     color: Colors.blueAccent,
                     child: const Center(

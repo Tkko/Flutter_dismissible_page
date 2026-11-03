@@ -9,13 +9,10 @@ enum _FlingDirection { outward, inward, none }
 class _DismissibleArbiter extends ChangeNotifier {
   _DismissibleArbiter({
     required this.direction,
-    required this.dismissThresholds,
+    required this.gesture,
     required this.background,
     required this.borderRadius,
-    required this.minScale,
-    required this.maxTransformValue,
-    required this.dragSensitivity,
-    required this.reverseDuration,
+    required this.transform,
     required this.motion,
     required this.onDismissed,
     required TickerProvider vsync,
@@ -23,8 +20,11 @@ class _DismissibleArbiter extends ChangeNotifier {
     this.onDragEnd,
     this.onDragCancel,
     this.onDragUpdate,
+    this.onDragEvent,
+    this.onWillDismiss,
+    this.onDismissStart,
   }) : assert(
-          _validThresholds(dismissThresholds),
+          _validThresholds(gesture.dismissThresholds),
           'Dismiss thresholds must be between 0.0 and 1.0',
         ) {
     _animationController = AnimationController.unbounded(vsync: vsync)
@@ -33,13 +33,10 @@ class _DismissibleArbiter extends ChangeNotifier {
   }
 
   DismissiblePageDismissDirection direction;
-  Map<DismissiblePageSide, double> dismissThresholds;
+  DismissiblePageGesture gesture;
   DismissiblePageBackground background;
   DismissiblePageRadius borderRadius;
-  double minScale;
-  double maxTransformValue;
-  double dragSensitivity;
-  Duration reverseDuration;
+  DismissiblePageTransform transform;
   DismissiblePageMotion motion;
 
   VoidCallback onDismissed;
@@ -47,6 +44,23 @@ class _DismissibleArbiter extends ChangeNotifier {
   VoidCallback? onDragEnd;
   VoidCallback? onDragCancel;
   ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
+  ValueChanged<DismissiblePageEvent>? onDragEvent;
+  FutureOr<bool> Function()? onWillDismiss;
+  VoidCallback? onDismissStart;
+
+  double get minScale => transform.minScale;
+  double get maxTransformValue => transform.maxTransformValue;
+  double get dragSensitivity => transform.dragSensitivity;
+  Map<DismissiblePageSide, double> get dismissThresholds =>
+      gesture.dismissThresholds;
+
+  /// Whether the pointer that is down began inside
+  /// [DismissiblePageGesture.dragRegion]. A drag that began outside of it
+  /// never moves the page.
+  bool pointerInRegion = true;
+
+  Size get layoutSize => _layoutSize;
+  TextDirection get textDirection => _textDirection;
 
   late final AnimationController _animationController;
 
@@ -55,12 +69,21 @@ class _DismissibleArbiter extends ChangeNotifier {
   Offset _animationTargetOffset = Offset.zero;
   bool _isPastThreshold = false;
   bool _isExiting = false;
+  bool _isDisposed = false;
+  // Counts confirmations asked of [onWillDismiss], so that an answer to a
+  // question that has since been abandoned is ignored.
+  int _confirmation = 0;
+  bool _isConfirming = false;
+  Axis? _lockedAxis;
   DismissiblePageDragUpdateDetails? _details;
   bool _isDragging = false;
   Size _layoutSize = Size.zero;
   TextDirection _textDirection = TextDirection.ltr;
 
   bool get isDragging => _isDragging;
+
+  /// Whether the page is leaving the screen.
+  bool get isDismissing => _isExiting;
   bool get isAnimating => _animationController.isAnimating;
   bool get isOffsetNonZero => _dragOffset != Offset.zero;
   Offset get offset => _dragOffset;
@@ -79,27 +102,21 @@ class _DismissibleArbiter extends ChangeNotifier {
   /// survives rebuilds of the owning widget.
   void updateConfig({
     required DismissiblePageDismissDirection direction,
-    required Map<DismissiblePageSide, double> dismissThresholds,
+    required DismissiblePageGesture gesture,
     required DismissiblePageBackground background,
     required DismissiblePageRadius borderRadius,
-    required double minScale,
-    required double maxTransformValue,
-    required double dragSensitivity,
-    required Duration reverseDuration,
+    required DismissiblePageTransform transform,
     required DismissiblePageMotion motion,
   }) {
     assert(
-      _validThresholds(dismissThresholds),
+      _validThresholds(gesture.dismissThresholds),
       'Dismiss thresholds must be between 0.0 and 1.0',
     );
     this.direction = direction;
-    this.dismissThresholds = dismissThresholds;
+    this.gesture = gesture;
     this.background = background;
     this.borderRadius = borderRadius;
-    this.minScale = minScale;
-    this.maxTransformValue = maxTransformValue;
-    this.dragSensitivity = dragSensitivity;
-    this.reverseDuration = reverseDuration;
+    this.transform = transform;
     this.motion = motion;
     _details = null;
   }
@@ -110,12 +127,33 @@ class _DismissibleArbiter extends ChangeNotifier {
     VoidCallback? onDragEnd,
     VoidCallback? onDragCancel,
     ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate,
+    ValueChanged<DismissiblePageEvent>? onDragEvent,
+    FutureOr<bool> Function()? onWillDismiss,
+    VoidCallback? onDismissStart,
   }) {
     this.onDismissed = onDismissed;
     this.onDragStart = onDragStart;
     this.onDragEnd = onDragEnd;
     this.onDragCancel = onDragCancel;
     this.onDragUpdate = onDragUpdate;
+    this.onDragEvent = onDragEvent;
+    this.onWillDismiss = onWillDismiss;
+    this.onDismissStart = onDismissStart;
+  }
+
+  void _fireDragStart() {
+    onDragStart?.call();
+    onDragEvent?.call(const DismissiblePageDragStartEvent());
+  }
+
+  void _fireDragEnd() {
+    onDragEnd?.call();
+    onDragEvent?.call(const DismissiblePageDragEndEvent());
+  }
+
+  void _fireDragCancel() {
+    onDragCancel?.call();
+    onDragEvent?.call(const DismissiblePageDragCancelEvent());
   }
 
   double get progress {
@@ -169,6 +207,7 @@ class _DismissibleArbiter extends ChangeNotifier {
     _details = null;
     _tickThresholdHaptics();
     onDragUpdate?.call(currentDetails);
+    onDragEvent?.call(DismissiblePageDragUpdateEvent(currentDetails));
     notifyListeners();
   }
 
@@ -178,13 +217,13 @@ class _DismissibleArbiter extends ChangeNotifier {
   }
 
   void startDrag() {
-    if (_isDragging) return;
+    if (_isDragging || _isConfirming) return;
     if (_animationController.isAnimating) {
       _animationController.stop();
     }
     _isDragging = true;
     _isPastThreshold = _hasReachedDismissThreshold;
-    onDragStart?.call();
+    _fireDragStart();
     notifyListeners();
   }
 
@@ -231,6 +270,7 @@ class _DismissibleArbiter extends ChangeNotifier {
 
   /// Applies a drag delta constrained to allowed axes.
   void applyDelta(Offset delta) {
+    if (_isConfirming) return;
     var effectiveDelta = delta * dragSensitivity;
 
     switch (direction) {
@@ -257,7 +297,14 @@ class _DismissibleArbiter extends ChangeNotifier {
         effectiveDelta =
             Offset(sign * nextX >= 0 ? effectiveDelta.dx : -_dragOffset.dx, 0);
       case DismissiblePageDismissDirection.all:
-        break;
+        if (gesture.lockAxis && effectiveDelta != Offset.zero) {
+          _lockedAxis ??= effectiveDelta.dx.abs() > effectiveDelta.dy.abs()
+              ? Axis.horizontal
+              : Axis.vertical;
+          effectiveDelta = _lockedAxis == Axis.horizontal
+              ? Offset(effectiveDelta.dx, 0)
+              : Offset(0, effectiveDelta.dy);
+        }
       case DismissiblePageDismissDirection.none:
         return;
     }
@@ -274,6 +321,7 @@ class _DismissibleArbiter extends ChangeNotifier {
   void endDrag({double velocity = 0.0}) {
     if (!_isDragging) return;
     _isDragging = false;
+    _lockedAxis = null;
 
     final shouldDismiss = switch (_flingDirection(velocity)) {
       _FlingDirection.outward => true,
@@ -282,28 +330,83 @@ class _DismissibleArbiter extends ChangeNotifier {
     };
 
     if (shouldDismiss && isOffsetNonZero) {
-      onDragEnd?.call();
-      if (motion.continueOnDismiss) {
-        _isExiting = true;
-        animateOut(velocity);
-      }
-      onDismissed();
+      _fireDragEnd();
+      _confirmDismiss(
+        onConfirmed: (resumedVelocity) {
+          onDismissStart?.call();
+          if (motion.continueOnDismiss) {
+            _isExiting = true;
+            animateOut(resumedVelocity);
+          }
+          onDismissed();
+        },
+        onDenied: (resumedVelocity) {
+          if (isOffsetNonZero) animateToZero(resumedVelocity);
+        },
+        velocity: velocity,
+      );
     } else {
       if (isOffsetNonZero) animateToZero(velocity);
-      onDragEnd?.call();
+      _fireDragEnd();
     }
+  }
+
+  /// Asks [onWillDismiss] whether a dismissal may go ahead.
+  ///
+  /// A synchronous answer is acted on at once, with the release [velocity].
+  /// A pending one holds the page where it is, ignoring new drags, and the
+  /// continuation resumes from rest. An answer that arrives after the
+  /// question was abandoned (the page was reset or disposed) is dropped.
+  void _confirmDismiss({
+    required void Function(double velocity) onConfirmed,
+    required void Function(double velocity) onDenied,
+    double velocity = 0,
+  }) {
+    final callback = onWillDismiss;
+    if (callback == null) {
+      onConfirmed(velocity);
+      return;
+    }
+    final answer = callback();
+    if (answer is bool) {
+      answer ? onConfirmed(velocity) : onDenied(velocity);
+      return;
+    }
+
+    final id = ++_confirmation;
+    _isConfirming = true;
+    bool isCurrent() => !_isDisposed && id == _confirmation;
+    unawaited(
+      answer.then(
+        (allowed) {
+          if (!isCurrent()) return;
+          _isConfirming = false;
+          allowed ? onConfirmed(0) : onDenied(0);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          if (isCurrent()) {
+            _isConfirming = false;
+            onDenied(0);
+          }
+          Error.throwWithStackTrace(error, stackTrace);
+        },
+      ),
+    );
   }
 
   /// Abandons any drag or rebound immediately and returns to the origin.
   void reset() {
     final wasDragging = _isDragging;
     _isDragging = false;
+    _lockedAxis = null;
+    _confirmation++;
+    _isConfirming = false;
     _animationController.stop();
     _isExiting = false;
     _animationStartOffset = Offset.zero;
     _animationTargetOffset = Offset.zero;
     setOffset(Offset.zero);
-    if (wasDragging) onDragCancel?.call();
+    if (wasDragging) _fireDragCancel();
   }
 
   bool get _hasReachedDismissThreshold {
@@ -349,14 +452,14 @@ class _DismissibleArbiter extends ChangeNotifier {
 
     final speed = velocity.abs();
     if (coordinate * velocity < 0) {
-      return speed > motion.cancelVelocity
+      return speed > gesture.cancelVelocity
           ? _FlingDirection.inward
           : _FlingDirection.none;
     }
-    if (speed <= motion.flingVelocity) return _FlingDirection.none;
+    if (speed <= gesture.flingVelocity) return _FlingDirection.none;
 
     final extent = isHorizontal ? _layoutSize.width : _layoutSize.height;
-    if (extent <= 0 || coordinate.abs() / extent < motion.flingMinDistance) {
+    if (extent <= 0 || coordinate.abs() / extent < gesture.flingMinDistance) {
       return _FlingDirection.none;
     }
     return isDeltaAllowed(_velocityVector(velocity))
@@ -367,8 +470,9 @@ class _DismissibleArbiter extends ChangeNotifier {
   void cancelDrag() {
     if (!_isDragging) return;
     _isDragging = false;
+    _lockedAxis = null;
     if (isOffsetNonZero) animateToZero();
-    onDragCancel?.call();
+    _fireDragCancel();
   }
 
   void animateToZero([double velocity = 0]) {
@@ -381,8 +485,18 @@ class _DismissibleArbiter extends ChangeNotifier {
   /// Leaves from [side], or from the side the configured direction dismisses
   /// towards. Does nothing while an exit is already running.
   void dismiss({DismissiblePageSide? side}) {
-    if (_isExiting) return;
+    if (_isExiting || _isConfirming) return;
+    _confirmDismiss(
+      onConfirmed: (_) => _dismissNow(side),
+      onDenied: (_) {
+        if (isOffsetNonZero) animateToZero();
+      },
+    );
+  }
+
+  void _dismissNow(DismissiblePageSide? side) {
     _isExiting = true;
+    onDismissStart?.call();
     if (_layoutSize.isEmpty) {
       onDismissed();
       return;
@@ -401,8 +515,9 @@ class _DismissibleArbiter extends ChangeNotifier {
     _animateTo(
       target,
       Offset.zero,
-      duration: exit.duration ?? _kDismissDuration,
-      curve: exit.curve ?? _kExitCurve,
+      duration:
+          exit is DismissiblePageCurveExit ? exit.duration : _kDismissDuration,
+      curve: exit is DismissiblePageCurveExit ? exit.curve : _kExitCurve,
     );
     onDismissed();
   }
@@ -424,7 +539,7 @@ class _DismissibleArbiter extends ChangeNotifier {
     final speed = velocity.abs();
 
     final exit = motion.exit;
-    if (exit.curve != null) {
+    if (exit is DismissiblePageCurveExit) {
       _animateTo(
         target,
         Offset.zero,
@@ -481,7 +596,7 @@ class _DismissibleArbiter extends ChangeNotifier {
     _animationController.value = 0;
 
     final rebound = motion.rebound;
-    if (duration == null && rebound.isSpring) {
+    if (duration == null && rebound is DismissiblePageSpringRebound) {
       // The spring runs on the fraction of the way to the target, so the
       // velocity is projected onto the line between start and target.
       final fractionVelocity =
@@ -502,8 +617,14 @@ class _DismissibleArbiter extends ChangeNotifier {
     } else {
       _animationController.animateTo(
         1,
-        duration: duration ?? reverseDuration,
-        curve: curve ?? rebound.curve,
+        duration: duration ??
+            (rebound is DismissiblePageCurveRebound
+                ? rebound.duration
+                : _kDismissDuration),
+        curve: curve ??
+            (rebound is DismissiblePageCurveRebound
+                ? rebound.curve
+                : Curves.linear),
       );
     }
   }
@@ -535,6 +656,7 @@ class _DismissibleArbiter extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _animationController.dispose();
     super.dispose();
   }

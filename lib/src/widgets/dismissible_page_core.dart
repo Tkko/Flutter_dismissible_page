@@ -20,20 +20,21 @@ class _DismissiblePageCore extends StatefulWidget {
     required this.background,
     required this.borderRadius,
     required this.direction,
-    required this.dismissThresholds,
-    required this.dragSensitivity,
-    required this.minScale,
-    required this.maxTransformValue,
+    required this.gesture,
+    required this.transform,
     required this.dragStartBehavior,
-    required this.reverseDuration,
     required this.motion,
     required this.hitTestBehavior,
     required this.contentPadding,
     this.controller,
+    this.semanticLabel,
     this.onDragStart,
     this.onDragEnd,
     this.onDragCancel,
     this.onDragUpdate,
+    this.onDragEvent,
+    this.onWillDismiss,
+    this.onDismissStart,
   });
 
   final Widget Function(
@@ -47,16 +48,17 @@ class _DismissiblePageCore extends StatefulWidget {
   final DismissiblePageBackground background;
   final DismissiblePageRadius borderRadius;
   final DismissiblePageDismissDirection direction;
-  final Map<DismissiblePageSide, double> dismissThresholds;
-  final double dragSensitivity;
-  final double minScale;
-  final double maxTransformValue;
+  final DismissiblePageGesture gesture;
+  final DismissiblePageTransform transform;
+  final String? semanticLabel;
   final DragStartBehavior dragStartBehavior;
   final VoidCallback? onDragStart;
   final VoidCallback? onDragEnd;
   final VoidCallback? onDragCancel;
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
-  final Duration reverseDuration;
+  final ValueChanged<DismissiblePageEvent>? onDragEvent;
+  final FutureOr<bool> Function()? onWillDismiss;
+  final VoidCallback? onDismissStart;
   final DismissiblePageMotion motion;
   final HitTestBehavior hitTestBehavior;
   final EdgeInsetsGeometry contentPadding;
@@ -94,19 +96,19 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
       onDragEnd: widget.onDragEnd,
       onDragCancel: widget.onDragCancel,
       onDragUpdate: widget.onDragUpdate,
+      onDragEvent: widget.onDragEvent,
+      onWillDismiss: widget.onWillDismiss,
+      onDismissStart: widget.onDismissStart,
     );
     if (widget.controller != oldWidget.controller) {
       (oldWidget.controller ?? _internalController)?._arbiter = null;
     }
     _arbiter.updateConfig(
       direction: widget.direction,
-      dismissThresholds: widget.dismissThresholds,
+      gesture: widget.gesture,
       background: widget.background,
       borderRadius: widget.borderRadius,
-      minScale: widget.minScale,
-      maxTransformValue: widget.maxTransformValue,
-      dragSensitivity: widget.dragSensitivity,
-      reverseDuration: widget.reverseDuration,
+      transform: widget.transform,
       motion: widget.motion,
     );
     if (oldWidget.enabled && !widget.enabled) {
@@ -121,19 +123,19 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
   void _initArbiter() {
     _arbiter = _DismissibleArbiter(
       direction: widget.direction,
-      dismissThresholds: widget.dismissThresholds,
+      gesture: widget.gesture,
       background: widget.background,
       borderRadius: widget.borderRadius,
-      minScale: widget.minScale,
-      maxTransformValue: widget.maxTransformValue,
-      dragSensitivity: widget.dragSensitivity,
-      reverseDuration: widget.reverseDuration,
+      transform: widget.transform,
       motion: widget.motion,
       onDismissed: widget.onDismissed,
       onDragStart: widget.onDragStart,
       onDragEnd: widget.onDragEnd,
       onDragCancel: widget.onDragCancel,
       onDragUpdate: widget.onDragUpdate,
+      onDragEvent: widget.onDragEvent,
+      onWillDismiss: widget.onWillDismiss,
+      onDismissStart: widget.onDismissStart,
       vsync: this,
     );
   }
@@ -146,7 +148,16 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     super.dispose();
   }
 
+  void _handlePointerDown(PointerDownEvent event) {
+    _arbiter.pointerInRegion = widget.gesture.dragRegion.contains(
+      event.localPosition,
+      _arbiter.layoutSize,
+      _arbiter.textDirection,
+    );
+  }
+
   void _handlePanUpdate(DragUpdateDetails details) {
+    if (!_arbiter.pointerInRegion) return;
     _arbiter.applyDelta(details.delta);
   }
 
@@ -164,7 +175,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
             : pixelsPerSecond.dy,
       _ => pixelsPerSecond.dy,
     };
-    return fromFinger ? velocity * widget.dragSensitivity : velocity;
+    return fromFinger ? velocity * widget.transform.dragSensitivity : velocity;
   }
 
   void _handlePanEnd(DragEndDetails details) {
@@ -208,7 +219,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
       return false;
     }
 
-    if (notification.depth != 0) {
+    if (notification.depth != 0 || !_arbiter.pointerInRegion) {
       return false;
     }
 
@@ -344,7 +355,7 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           Directionality.of(context),
         );
 
-        return NotificationListener<ScrollNotification>(
+        Widget page = NotificationListener<ScrollNotification>(
           onNotification: _onScrollNotification,
           child: GestureDetector(
             behavior: widget.hitTestBehavior,
@@ -406,6 +417,23 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
               ),
             ),
           ),
+        );
+
+        page = Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: _handlePointerDown,
+          child: page,
+        );
+
+        // Assistive technologies get the swipe-to-dismiss action, and the
+        // page a label when it is given one.
+        return Semantics(
+          container: true,
+          label: widget.semanticLabel,
+          onDismiss: widget.direction == DismissiblePageDismissDirection.none
+              ? null
+              : _arbiter.dismiss,
+          child: page,
         );
       },
     );

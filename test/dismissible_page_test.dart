@@ -95,8 +95,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: DismissiblePage(
-            maxTransformValue: 0,
-            minScale: 0.5,
+            transform: const DismissiblePageTransform(
+              maxTransformValue: 0,
+              minScale: 0.5,
+            ),
             onDismissed: () {},
             onDragUpdate: (value) => details = value,
             child: const SizedBox.expand(),
@@ -381,7 +383,9 @@ void main() {
             return MaterialApp(
               home: Scaffold(
                 body: DismissiblePage(
-                  dragSensitivity: sensitivity,
+                  transform: DismissiblePageTransform(
+                    dragSensitivity: sensitivity,
+                  ),
                   onDismissed: () {},
                   child: ElevatedButton(
                     onPressed: () => setState(() => sensitivity = 1.0),
@@ -414,7 +418,7 @@ void main() {
             rebuild = setState;
             return MaterialApp(
               home: DismissiblePage(
-                dismissThresholds: thresholds,
+                gesture: DismissiblePageGesture(dismissThresholds: thresholds),
                 onDismissed: () {},
                 onDragUpdate: (value) => details = value,
                 child: const SizedBox.expand(),

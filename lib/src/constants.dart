@@ -3,8 +3,9 @@ part of 'dismissible_page.dart';
 // Every tuning constant of the library lives here, so the feel of a dismissal
 // can be read and adjusted in one place.
 //
-// The defaults of public parameters (for example `reverseDuration` or the
-// fields of `DismissiblePageMotion`) stay inline in their signatures instead,
+// The defaults of public parameters (for example the fields of
+// `DismissiblePageMotion` or `DismissiblePageGesture`) stay inline in their
+// signatures instead,
 // so that the generated documentation shows their values.
 
 /// The fraction of the page a drag must cover to dismiss it, for sides that
