@@ -328,6 +328,24 @@ over them is exhaustive. `exit` applies to a swipe that slides away
 release speed, `.curve(curve, duration)` always leaves the same way. `continueOnDismiss` leaves the page off-screen, so
 `onDismissed` is expected to remove it.
 
+### Haptics
+
+`thresholdHaptics: true` plays a light impact (`HapticFeedback.lightImpact`) each
+time a drag crosses the dismiss threshold, in either direction.
+
+**Android** needs the vibrate permission, otherwise the haptic may not play on
+some devices. Add it to `android/app/src/main/AndroidManifest.xml`, outside the
+`<application>` element:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <application ...>
+```
+
+**iOS** needs no configuration. On web and desktop the call is a no-op, and
+devices without a haptic engine, or with system haptics turned off, stay silent.
+
 ### Confirming a dismissal
 
 `onWillDismiss` is asked before a release or `DismissiblePage.dismiss` dismisses

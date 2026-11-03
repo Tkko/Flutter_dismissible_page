@@ -178,6 +178,10 @@ class DismissiblePageMotion {
 
   /// Whether a light impact haptic fires each time a drag crosses the dismiss
   /// threshold in either direction.
+  ///
+  /// On Android, declare `android.permission.VIBRATE` in the app's
+  /// `AndroidManifest.xml`, otherwise the haptic may not play on some devices.
+  /// iOS needs no configuration.
   final bool thresholdHaptics;
 
   @override

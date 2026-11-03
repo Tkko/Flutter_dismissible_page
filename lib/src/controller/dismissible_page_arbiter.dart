@@ -652,7 +652,7 @@ class _DismissibleArbiter extends ChangeNotifier {
     final isPast = _hasReachedDismissThreshold;
     if (isPast == _isPastThreshold) return;
     _isPastThreshold = isPast;
-    unawaited(HapticFeedback.lightImpact());
+    unawaited(HapticFeedback.mediumImpact());
   }
 
   @override
