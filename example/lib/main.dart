@@ -63,18 +63,25 @@ class SecondPage extends StatelessWidget {
       isFullScreen: false,
       enabled: true,
       borderRadius: const DismissiblePageRadius.fixed(10),
-      dragSensitivity: 1.0,
-      maxTransformValue: .8,
+      transform: const DismissiblePageTransform(
+        dragSensitivity: 1.0,
+        maxTransformValue: .8,
+        minScale: .8,
+      ),
       direction: DismissiblePageDismissDirection.all,
       background: const DismissiblePageBackground.solid(Colors.black),
-      dismissThresholds: const {
-        DismissiblePageSide.up: .2,
-        DismissiblePageSide.down: .2,
-        DismissiblePageSide.start: .3,
-        DismissiblePageSide.end: .3,
-      },
-      minScale: .8,
-      reverseDuration: const Duration(milliseconds: 250),
+      gesture: const DismissiblePageGesture(
+        dismissThresholds: {
+          DismissiblePageSide.up: .2,
+          DismissiblePageSide.down: .2,
+          DismissiblePageSide.start: .3,
+          DismissiblePageSide.end: .3,
+        },
+      ),
+      motion: const DismissiblePageMotion(
+        continueOnDismiss: true,
+        thresholdHaptics: true,
+      ),
       // End of the optional properties
       child: Scaffold(
         body: SingleChildScrollView(

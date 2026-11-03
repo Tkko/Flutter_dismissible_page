@@ -95,8 +95,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: DismissiblePage(
-            maxTransformValue: 0,
-            minScale: 0.5,
+            transform: const DismissiblePageTransform(
+              maxTransformValue: 0,
+              minScale: 0.5,
+            ),
             onDismissed: () {},
             onDragUpdate: (value) => details = value,
             child: const SizedBox.expand(),
@@ -166,7 +168,7 @@ void main() {
         ),
       );
 
-      await tester.fling(find.text('Fling Target'), const Offset(0, 200), 1000);
+      await tester.fling(find.text('Fling Target'), const Offset(0, 200), 2500);
       await tester.pump();
 
       expect(started, isTrue);
@@ -351,7 +353,6 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: DismissiblePage(
-              direction: DismissiblePageDismissDirection.all,
               onDismissed: () {},
               onDragUpdate: (details) => lastDetails = details,
               child: ListView.builder(
@@ -381,7 +382,9 @@ void main() {
             return MaterialApp(
               home: Scaffold(
                 body: DismissiblePage(
-                  dragSensitivity: sensitivity,
+                  transform: DismissiblePageTransform(
+                    dragSensitivity: sensitivity,
+                  ),
                   onDismissed: () {},
                   child: ElevatedButton(
                     onPressed: () => setState(() => sensitivity = 1.0),
@@ -414,7 +417,7 @@ void main() {
             rebuild = setState;
             return MaterialApp(
               home: DismissiblePage(
-                dismissThresholds: thresholds,
+                gesture: DismissiblePageGesture(dismissThresholds: thresholds),
                 onDismissed: () {},
                 onDragUpdate: (value) => details = value,
                 child: const SizedBox.expand(),
@@ -476,7 +479,7 @@ void main() {
       await tester.fling(
         find.text('Update callback'),
         const Offset(0, 200),
-        1000,
+        2500,
       );
       await tester.pump();
 
@@ -531,8 +534,8 @@ void main() {
 
       await tester.fling(
         find.byType(DismissiblePage),
-        const Offset(60, 0),
-        2000,
+        const Offset(160, 0),
+        2500,
       );
       await tester.pump();
 
@@ -563,7 +566,7 @@ void main() {
         ),
       );
 
-      await tester.fling(find.text('Item 0'), const Offset(0, 51), 1000);
+      await tester.fling(find.text('Item 0'), const Offset(0, 130), 2500);
       await tester.pump();
 
       expect(dismissed, isTrue);

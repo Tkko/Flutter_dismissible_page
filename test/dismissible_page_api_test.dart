@@ -25,9 +25,11 @@ Future<bool> dragPage(
             child: DismissiblePage(
               key: UniqueKey(),
               direction: direction,
-              dismissThresholds: thresholds,
-              maxTransformValue: maxTransformValue,
-              dragSensitivity: sensitivity,
+              gesture: DismissiblePageGesture(dismissThresholds: thresholds),
+              transform: DismissiblePageTransform(
+                maxTransformValue: maxTransformValue,
+                dragSensitivity: sensitivity,
+              ),
               onDismissed: () => dismissed = true,
               onDragUpdate: (value) => details = value,
               child: const SizedBox.expand(),
@@ -174,16 +176,16 @@ void main() {
       );
     });
 
-    testWidgets('missing sides default independently to 15 percent',
+    testWidgets('missing sides default independently to 18 percent',
         (tester) async {
-      for (final distance in [89.0, 90.0]) {
+      for (final distance in [107.0, 108.0]) {
         expect(
           await dragPage(
             tester,
             Offset(0, distance),
             thresholds: const {DismissiblePageSide.up: 0.01},
           ),
-          distance >= 90,
+          distance >= 108,
         );
       }
     });
@@ -252,7 +254,9 @@ void main() {
         MaterialApp(
           home: DismissiblePage(
             onDismissed: () {},
-            dismissThresholds: const {DismissiblePageSide.down: 1.5},
+            gesture: const DismissiblePageGesture(
+              dismissThresholds: {DismissiblePageSide.down: 1.5},
+            ),
             child: const SizedBox(),
           ),
         ),
@@ -263,7 +267,9 @@ void main() {
         MaterialApp(
           home: DismissiblePage.builder(
             onDismissed: () {},
-            dismissThresholds: const {DismissiblePageSide.up: -0.1},
+            gesture: const DismissiblePageGesture(
+              dismissThresholds: {DismissiblePageSide.up: -0.1},
+            ),
             builder: (_, __) => const SizedBox(),
           ),
         ),
@@ -275,7 +281,7 @@ void main() {
       expect(
         () => DismissiblePage(
           onDismissed: () {},
-          minScale: -0.1,
+          transform: DismissiblePageTransform(minScale: -0.1),
           child: const SizedBox(),
         ),
         throwsAssertionError,
@@ -283,7 +289,7 @@ void main() {
       expect(
         () => DismissiblePage(
           onDismissed: () {},
-          minScale: 1.1,
+          transform: DismissiblePageTransform(minScale: 1.1),
           child: const SizedBox(),
         ),
         throwsAssertionError,
@@ -291,7 +297,7 @@ void main() {
       expect(
         () => DismissiblePage(
           onDismissed: () {},
-          maxTransformValue: -0.1,
+          transform: DismissiblePageTransform(maxTransformValue: -0.1),
           child: const SizedBox(),
         ),
         throwsAssertionError,
@@ -299,7 +305,7 @@ void main() {
       expect(
         () => DismissiblePage(
           onDismissed: () {},
-          maxTransformValue: 1.1,
+          transform: DismissiblePageTransform(maxTransformValue: 1.1),
           child: const SizedBox(),
         ),
         throwsAssertionError,
@@ -307,7 +313,7 @@ void main() {
       expect(
         () => DismissiblePage(
           onDismissed: () {},
-          dragSensitivity: 0,
+          transform: DismissiblePageTransform(dragSensitivity: 0),
           child: const SizedBox(),
         ),
         throwsAssertionError,
@@ -315,7 +321,7 @@ void main() {
       expect(
         () => DismissiblePage.builder(
           onDismissed: () {},
-          minScale: -0.5,
+          transform: DismissiblePageTransform(minScale: -0.5),
           builder: (_, __) => const SizedBox(),
         ),
         throwsAssertionError,
@@ -323,7 +329,7 @@ void main() {
       expect(
         () => DismissiblePage.builder(
           onDismissed: () {},
-          maxTransformValue: 2,
+          transform: DismissiblePageTransform(maxTransformValue: 2),
           builder: (_, __) => const SizedBox(),
         ),
         throwsAssertionError,
@@ -331,7 +337,7 @@ void main() {
       expect(
         () => DismissiblePage.builder(
           onDismissed: () {},
-          dragSensitivity: -1,
+          transform: DismissiblePageTransform(dragSensitivity: -1),
           builder: (_, __) => const SizedBox(),
         ),
         throwsAssertionError,
@@ -389,22 +395,26 @@ void main() {
           final page = coordinated
               ? DismissiblePage.builder(
                   direction: DismissiblePageDismissDirection.startToEnd,
-                  dragSensitivity: 1,
-                  dismissThresholds: const {
-                    DismissiblePageSide.end: 0.1,
-                    DismissiblePageSide.start: 1,
-                  },
+                  transform: const DismissiblePageTransform(dragSensitivity: 1),
+                  gesture: const DismissiblePageGesture(
+                    dismissThresholds: {
+                      DismissiblePageSide.end: 0.1,
+                      DismissiblePageSide.start: 1,
+                    },
+                  ),
                   onDismissed: () => dismissed = true,
                   onDragUpdate: (value) => details = value,
                   builder: (_, controller) => list(controller),
                 )
               : DismissiblePage(
                   direction: DismissiblePageDismissDirection.startToEnd,
-                  dragSensitivity: 1,
-                  dismissThresholds: const {
-                    DismissiblePageSide.end: 0.1,
-                    DismissiblePageSide.start: 1,
-                  },
+                  transform: const DismissiblePageTransform(dragSensitivity: 1),
+                  gesture: const DismissiblePageGesture(
+                    dismissThresholds: {
+                      DismissiblePageSide.end: 0.1,
+                      DismissiblePageSide.start: 1,
+                    },
+                  ),
                   onDismissed: () => dismissed = true,
                   onDragUpdate: (value) => details = value,
                   child: list(fallbackController),

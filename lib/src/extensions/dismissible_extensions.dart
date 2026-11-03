@@ -1,7 +1,5 @@
 part of '../dismissible_page.dart';
 
-const _transitionDuration = Duration(milliseconds: 250);
-
 /// BuildContext Helper methods
 extension DismissibleContextExt on BuildContext {
   /// Navigates to desired page with transparent transition background
@@ -11,6 +9,9 @@ extension DismissibleContextExt on BuildContext {
     Duration transitionDuration = _transitionDuration,
     Duration reverseTransitionDuration = _transitionDuration,
     bool rootNavigator = false,
+    bool barrierDismissible = true,
+    bool opaque = false,
+    TransparentRouteTransitionsBuilder transitionBuilder = _fadeTransition,
   }) {
     return Navigator.of(this, rootNavigator: rootNavigator).push(
       TransparentRoute<T>(
@@ -18,22 +19,10 @@ extension DismissibleContextExt on BuildContext {
         backgroundColor: backgroundColor,
         transitionDuration: transitionDuration,
         reverseTransitionDuration: reverseTransitionDuration,
+        barrierDismissible: barrierDismissible,
+        opaque: opaque,
+        transitionBuilder: transitionBuilder,
       ),
     );
-  }
-}
-
-/// GlobalKey Helper methods
-extension GlobalKeyExtension on GlobalKey {
-  ///
-  Rect? get globalPaintBounds {
-    final renderObject = currentContext?.findRenderObject();
-    final translation = renderObject?.getTransformTo(null).getTranslation();
-    if (translation != null && renderObject?.paintBounds != null) {
-      final offset = Offset(translation.x, translation.y);
-      return renderObject!.paintBounds.shift(offset);
-    } else {
-      return null;
-    }
   }
 }

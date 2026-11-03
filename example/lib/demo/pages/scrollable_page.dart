@@ -1,4 +1,4 @@
-import 'package:dismissible_page/dismissible_page.dart';
+import 'package:dismissible_page_example/demo/pages/dismissible_page_demo.dart';
 import 'package:dismissible_page_example/demo/models/models.dart';
 import 'package:flutter/material.dart';
 
@@ -34,13 +34,9 @@ class _ScrollablePageState extends State<ScrollablePage> {
       ),
     );
 
-    return DismissiblePage(
+    return DismissibleDemo(
+      exitsThroughHero: true,
       child: child,
-      isFullScreen: false,
-      direction: DismissiblePageDismissDirection.all,
-      onDismissed: () {
-        Navigator.of(context).pop();
-      },
     );
   }
 }

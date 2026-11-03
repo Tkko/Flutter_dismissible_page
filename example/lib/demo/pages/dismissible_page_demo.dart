@@ -1,6 +1,9 @@
 import 'dart:math';
 import 'package:dismissible_page/dismissible_page.dart';
+import 'package:dismissible_page_example/demo/models/demo_settings.dart';
 import 'package:dismissible_page_example/demo/models/models.dart';
+import 'package:dismissible_page_example/demo/pages/motion_lab.dart';
+import 'package:dismissible_page_example/demo/scenarios/real_world.dart';
 import 'package:dismissible_page_example/demo/pages/showcase_gallery.dart';
 import 'package:dismissible_page_example/demo/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +18,7 @@ class DismissiblePageDemo extends StatefulWidget {
 }
 
 class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
-  DismissiblePageModel pageModel = DismissiblePageModel();
+  DismissiblePageModel get pageModel => DemoSettings.of(context);
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +31,13 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: max(20, MediaQuery.of(context).padding.top)),
-            ShowcaseGallery(pageModel: pageModel),
-            const SizedBox(height: 20),
             Contacts(pageModel: pageModel),
             Stories(pageModel: pageModel),
-            LargeImages(pageModel: pageModel),
+            MotionLabCard(pageModel: pageModel),
+            const RealWorldScenarios(),
+            ShowcaseGallery(pageModel: pageModel),
+            // Clears the floating Properties button.
+            const SizedBox(height: 100),
           ],
         ),
       ),
@@ -105,7 +110,37 @@ class _PropertiesState extends State<Properties> {
                         isSelected: pageModel.enabled,
                         title: 'enabled',
                       ),
+                      AppChip(
+                        onSelected: () => setState(() => pageModel
+                            .continueOnDismiss = !pageModel.continueOnDismiss),
+                        isSelected: pageModel.continueOnDismiss,
+                        title: 'continueOnDismiss',
+                      ),
+                      AppChip(
+                        onSelected: () => setState(() => pageModel
+                            .thresholdHaptics = !pageModel.thresholdHaptics),
+                        isSelected: pageModel.thresholdHaptics,
+                        title: 'thresholdHaptics',
+                      ),
                     ]),
+                    SizedBox(height: 20),
+                    Title('Rebound'),
+                    SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: ReboundKind.values
+                          .where((item) => item != ReboundKind.custom)
+                          .map((item) {
+                        return AppChip(
+                          onSelected: () {
+                            setState(() => pageModel.selectRebound(item));
+                          },
+                          isSelected: item == pageModel.reboundKind,
+                          title: item.name,
+                        );
+                      }).toList(),
+                    ),
                     SizedBox(height: 20),
                     Title('Dismiss Direction'),
                     SizedBox(height: 10),
@@ -145,7 +180,7 @@ class _PropertiesState extends State<Properties> {
                     ),
                     SizedBox(height: 30),
                     DurationSlider(
-                      title: 'Reverse Animation Duration',
+                      title: 'Reverse Animation Duration (curve only)',
                       duration: pageModel.reverseDuration,
                       onChanged: (value) {
                         setState(() => pageModel.reverseDuration = value);
@@ -219,35 +254,6 @@ class Contacts extends StatelessWidget {
   }
 }
 
-class LargeImages extends StatelessWidget {
-  final DismissiblePageModel pageModel;
-
-  const LargeImages({Key? key, required this.pageModel}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Title('Scrollable'),
-          ...images.asMap().entries.map((entry) {
-            return LargeImageItem(
-              imagePath: entry.value,
-              pageModel: pageModel,
-              scrollPhysics: entry.key.isOdd
-                  ? ClampingScrollPhysics()
-                  : BouncingScrollPhysics(),
-            );
-          }),
-          SizedBox(height: 100),
-        ],
-      ),
-    );
-  }
-}
-
 class Stories extends StatelessWidget {
   final DismissiblePageModel pageModel;
 
@@ -291,35 +297,55 @@ class Stories extends StatelessWidget {
   }
 }
 
+/// A [DismissiblePage] configured from the shared demo settings, so the
+/// Properties sheet and the Motion Lab apply to every screen that uses it.
+///
+/// A screen overrides only what is intrinsic to it: a bottom sheet leaves
+/// downwards and a chat swipes back, whatever the direction chip says.
 class DismissibleDemo extends StatelessWidget {
-  final DismissiblePageModel pageModel;
+  /// Defaults to the demo-wide settings from [DemoSettings].
+  final DismissiblePageModel? pageModel;
   final Widget child;
   final DismissiblePageBackground? background;
+  final DismissiblePageDismissDirection? direction;
+  final DismissiblePageRadius? borderRadius;
+  final double? minScale;
+  final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
+
+  /// Whether a Hero flight is this screen's exit. The page then stays where it
+  /// was released instead of also sliding away.
+  final bool exitsThroughHero;
 
   const DismissibleDemo({
     Key? key,
-    required this.pageModel,
+    this.pageModel,
     required this.child,
     this.background,
+    this.direction,
+    this.borderRadius,
+    this.minScale,
+    this.onDragUpdate,
+    this.exitsThroughHero = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final model = pageModel ?? DemoSettings.of(context);
     return DismissiblePage(
       onDismissed: () => Navigator.of(context).pop(),
-      isFullScreen: pageModel.isFullScreen,
-      borderRadius: pageModel.borderRadius,
-      dragSensitivity: pageModel.dragSensitivity,
-      maxTransformValue: pageModel.maxTransformValue,
-      direction: pageModel.direction,
-      enabled: pageModel.enabled,
-      background: background ?? pageModel.background,
-      dismissThresholds: pageModel.dismissThresholds,
-      dragStartBehavior: pageModel.dragStartBehavior,
-      minScale: pageModel.minScale,
-      hitTestBehavior: pageModel.behavior,
-      reverseDuration: pageModel.reverseDuration,
-      // onDragUpdate: (d) => print(d.offset.dy),
+      onDragUpdate: onDragUpdate,
+      isFullScreen: model.isFullScreen,
+      borderRadius: borderRadius ?? model.borderRadius,
+      transform: model.transformWith(minScale: minScale),
+      direction: direction ?? model.direction,
+      enabled: model.enabled,
+      background: background ?? model.background,
+      gesture: model.gesture,
+      dragStartBehavior: model.dragStartBehavior,
+      hitTestBehavior: model.behavior,
+      motion: exitsThroughHero
+          ? model.motionWith(continueOnDismiss: false)
+          : model.motion,
       child: child,
     );
   }
@@ -373,132 +399,6 @@ class AppChip extends StatelessWidget {
             color: isSelected ? Colors.white : Colors.black,
             fontSize: fontSize,
             fontWeight: fontWeight,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-const home1ImagePath = 'assets/images/home_1.png';
-const home2ImagePath = 'assets/images/home_2.png';
-const images = [home1ImagePath, home2ImagePath];
-
-class LargeImageItem extends StatelessWidget {
-  LargeImageItem({
-    required this.imagePath,
-    required this.pageModel,
-    required this.scrollPhysics,
-  });
-
-  final DismissiblePageModel pageModel;
-  final String imagePath;
-  final ScrollPhysics scrollPhysics;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Use extension method to use [TransparentRoute]
-        // This will push page without route background
-        context.pushTransparentRoute(
-          LargeImageDetailsPage(
-            imagePath: imagePath,
-            pageModel: pageModel,
-            scrollPhysics: scrollPhysics,
-          ),
-        );
-      },
-      behavior: HitTestBehavior.translucent,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                Hero(
-                  tag: imagePath,
-                  child: FractionallySizedBox(
-                    widthFactor: 1,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        imagePath,
-                        fit: BoxFit.cover,
-                        height: 300,
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: Icon(
-                    Icons.favorite_border,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 5),
-            Text(
-              scrollPhysics is BouncingScrollPhysics
-                  ? 'iOS (BouncingScrollPhysics)'
-                  : 'Android (ClampingScrollPhysics)',
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class LargeImageDetailsPage extends StatelessWidget {
-  const LargeImageDetailsPage({
-    required this.imagePath,
-    required this.pageModel,
-    required this.scrollPhysics,
-  });
-
-  final DismissiblePageModel pageModel;
-  final ScrollPhysics scrollPhysics;
-  final String imagePath;
-
-  @override
-  Widget build(BuildContext context) {
-    return DismissibleDemo(
-      pageModel: pageModel,
-      child: Scaffold(
-        body: SingleChildScrollView(
-          physics: scrollPhysics,
-          child: Column(
-            children: [
-              Hero(
-                tag: imagePath,
-                child: Image.asset(imagePath, fit: BoxFit.cover),
-              ),
-              ...List.generate(40, (index) => index + 1).map((index) {
-                return SizedBox(
-                  height: 50,
-                  width: 300,
-                  child: ListTile(
-                    title: Text(
-                      'Item $index',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ],
           ),
         ),
       ),

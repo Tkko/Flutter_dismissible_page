@@ -1,4 +1,4 @@
-import 'package:dismissible_page/dismissible_page.dart';
+import 'package:dismissible_page_example/demo/pages/dismissible_page_demo.dart';
 import 'package:dismissible_page_example/demo/models/models.dart';
 import 'package:dismissible_page_example/demo/pages/story_page.dart';
 import 'package:dismissible_page_example/demo/widgets/cubic_page_view.dart';
@@ -70,20 +70,11 @@ class _StoriesWrapperState extends State<StoriesWrapper>
 
   @override
   Widget build(BuildContext context) {
-    return DismissiblePage(
-      onDismissed: () => Navigator.of(context).pop(),
-      isFullScreen: widget.pageModel.isFullScreen,
-      borderRadius: widget.pageModel.borderRadius,
-      dragSensitivity: widget.pageModel.dragSensitivity,
-      maxTransformValue: widget.pageModel.maxTransformValue,
-      direction: widget.pageModel.direction,
-      enabled: widget.pageModel.enabled,
-      background: widget.pageModel.background,
-      dismissThresholds: widget.pageModel.dismissThresholds,
-      dragStartBehavior: widget.pageModel.dragStartBehavior,
-      minScale: widget.pageModel.minScale,
-      hitTestBehavior: widget.pageModel.behavior,
-      reverseDuration: widget.pageModel.reverseDuration,
+    return DismissibleDemo(
+      pageModel: widget.pageModel,
+      // The story's Hero flight is the exit, so the page must not slide away
+      // too.
+      exitsThroughHero: true,
       child: CubicPageView(
         controller: pageCtrl,
         children: stories.map((story) {

@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <application
         android:label="dismissible_page_example"
         android:name="${applicationName}"
