@@ -1,32 +1,40 @@
-## 2.0.0-beta.1
+## 2.0.0-beta.2
 
 ### Breaking Changes
-- Require `child` on `DismissiblePage` and move builder content to `DismissiblePage.builder`.
-- Rename `DismissiblePageDismissDirection.multi` to `DismissiblePageDismissDirection.all`.
-- Rename `overallDragValue` to `progress` in `DismissiblePageDragUpdateDetails` (including `toMap()`).
-- Key `dismissThresholds` by directional destination sides (`DismissiblePageSide.up`, `down`, `start`, `end`) instead of directions. Missing sides default to `0.18`.
-- Updated minimum SDK constraints to Dart `>=3.0.0 <5.0.0` and Flutter `>=3.10.0`.
-- Group `dragSensitivity`, `minScale` and `maxTransformValue` into `transform: DismissiblePageTransform`, and `dismissThresholds`, `flingVelocity`, `flingMinDistance` and `cancelVelocity` into `gesture: DismissiblePageGesture`. Their range checks live in these classes.
+- `DismissiblePage.direction` now defaults to `DismissiblePageDismissDirection.all` (was `vertical`). Pass `direction: DismissiblePageDismissDirection.vertical` to keep the previous behavior.
+- Missing `dismissThresholds` sides default to `0.18` of the page dimension (was `0.15`).
+- Group `dragSensitivity`, `minScale` and `maxTransformValue` into `transform: DismissiblePageTransform`, and `dismissThresholds` into `gesture: DismissiblePageGesture`. The range checks live in these classes.
 - Remove `reverseDuration`; use `DismissiblePageRebound.curve(duration: ...)`.
-- `DismissiblePageRebound` and `DismissiblePageExit` are sealed classes with `DismissiblePageCurveRebound`, `DismissiblePageSpringRebound`, `DismissiblePageMomentumExit` and `DismissiblePageCurveExit` variants, replacing `isSpring` and nullable curve/duration fields.
-- `DismissiblePageDragUpdateDetails` now compares and hashes all of its fields instead of only `offset`.
 - Remove `GlobalKeyExtension.globalPaintBounds`.
+- `DismissiblePageDragUpdateDetails` now compares and hashes all of its fields instead of only `offset`.
 
 ### New Features & Enhancements
 - **`DismissiblePage.of(context)` / `maybeOf`**: A `DismissiblePageHandle` with `isDragging`, `isDismissing`, `progress`, `offset` and `dismiss()`. It is a `Listenable`, so UI can follow the drag.
 - **`onWillDismiss`**: Confirm or veto a dismissal, synchronously or with a future that holds the page while it is pending. Applies to released drags and `DismissiblePage.dismiss`.
 - **`onDismissStart`**: Called right before `onDismissed`, after the confirmation.
 - **`onDragEvent`**: One callback over the sealed `DismissiblePageEvent` for the whole drag lifecycle.
+- **`DismissiblePageGesture`**: Decides what counts as a dismissing drag: `dismissThresholds`, `flingVelocity` and `flingMinDistance` (how fast, and from how far, a fling dismisses the page), and `cancelVelocity` (default 300, how little speed back towards the origin cancels a release that is past the threshold, so cancelling needs only a hint while dismissing needs intent).
 - **`DismissiblePageGesture.lockAxis`**: With `DismissiblePageDismissDirection.all`, a drag sticks to the axis it started along.
-- **`DismissiblePageGesture.dragRegion`**: Limit where a drag may start (`.edge`, `.custom`), for example a top strip only.
+- **`DismissiblePageGesture.dragRegion`**: Limit where a drag may start (`.edge`, `.custom`), for example a top strip only. Each finger is judged on its own, trackpad gestures included, and a page that is displaced by a drag or rebound is hit where it is seen.
+- **`DismissiblePageMotion`**: New `motion` parameter that tunes released drags. `rebound` picks `DismissiblePageRebound.spring()` (default, seeded with the release velocity), `.bouncy()` or `.curve(curve:, duration:)`. `continueOnDismiss` keeps the page moving off-screen from the finger while `onDismissed` runs, and `thresholdHaptics` fires a light haptic when the dismiss threshold is crossed (Android needs the `VIBRATE` permission in its manifest, see the README).
+- **`DismissiblePageExit`**: `motion.exit` chooses how the page leaves the screen: `.momentum()` (default) carries the release velocity, and `.curve(curve, duration)` always leaves along that curve and duration. It applies to a swipe exit (with `continueOnDismiss`) and to `DismissiblePage.dismiss`. `DismissiblePageRebound` and `DismissiblePageExit` are sealed classes, so a `switch` over their variants is exhaustive.
+- **`DismissiblePage.dismiss(context, {side})`**: Dismiss from code with the same motion as a swipe. The page winds up slightly, then accelerates off-screen towards `side` (by default the side `direction` dismisses towards) while `onDismissed` runs, so close buttons no longer only fade.
+- **`DismissiblePageDragUpdateDetails.willDismiss`**: True while letting go would dismiss by distance, for "release to close" hints.
+- **Safer scroll hand-off**: A pull on a scrollable only dismisses the page when the gesture began at that edge. Scrolling quickly to the top and carrying on is a scroll, not a dismissal, and a new pull from the top dismisses as before.
 - **Accessibility**: Screen readers get a dismiss action, and `semanticLabel` names the page.
 - **`TransparentRoute` options**: `barrierDismissible`, `opaque` and `transitionBuilder` (also on `pushTransparentRoute`).
 - **`DismissiblePageBackground.custom` / `DismissiblePageRadius.custom`**: Compute the value from the drag progress.
-- **Safer scroll hand-off**: A pull on a scrollable only dismisses the page when the gesture began at that edge. Scrolling quickly to the top and carrying on is a scroll, not a dismissal, and a new pull from the top dismisses as before.
-- **`DismissiblePageDragUpdateDetails.willDismiss`**: True while letting go would dismiss by distance, for "release to close" hints.
-- **`DismissiblePage.dismiss(context, {side})`**: Dismiss from code with the same motion as a swipe. The page winds up slightly, then accelerates off-screen towards `side` (by default the side `direction` dismisses towards) while `onDismissed` runs, so close buttons no longer only fade.
-- **`DismissiblePageExit`**: `motion.exit` chooses how the page leaves the screen: `.momentum()` (default) carries the release velocity, and `.curve(curve, duration)` always leaves along that curve and duration. It applies to a swipe exit (with `continueOnDismiss`) and to `DismissiblePage.dismiss`.
-- **`DismissiblePageMotion`**: New `motion` parameter that tunes released drags. `rebound` picks `DismissiblePageRebound.spring()` (default, seeded with the release velocity), `.bouncy()` or `.curve()` (the previous `reverseDuration` easing). `continueOnDismiss` keeps the page moving off-screen from the finger while `onDismissed` runs, and `thresholdHaptics` fires a light haptic when the dismiss threshold is crossed (Android needs the `VIBRATE` permission in its manifest, see the README). `flingVelocity` and `flingMinDistance` set how fast, and from how far, a fling dismisses the page. `cancelVelocity` (default 300) is how little speed back towards the origin it takes to cancel a release that is past the threshold, so cancelling needs only a hint while dismissing needs intent.
+
+## 2.0.0-beta.1
+
+### Breaking Changes
+- Require `child` on `DismissiblePage` and move builder content to `DismissiblePage.builder`.
+- Rename `DismissiblePageDismissDirection.multi` to `DismissiblePageDismissDirection.all`.
+- Rename `overallDragValue` to `progress` in `DismissiblePageDragUpdateDetails` (including `toMap()`).
+- Key `dismissThresholds` by directional destination sides (`DismissiblePageSide.up`, `down`, `start`, `end`) instead of directions. Missing sides default to `0.15`.
+- Updated minimum SDK constraints to Dart `>=3.0.0 <5.0.0` and Flutter `>=3.10.0`.
+
+### New Features & Enhancements
 - **`DismissiblePageBackground`**: Introduced a structured class with `.color()`, `.widget()`, and `.custom()` factories for animated background rendering and opacity blending.
 - **`DismissiblePageRadius`**: Introduced a dedicated model (`.circular()`, `.all()`, etc.) for managing corner radius transformations during drag interactions.
 - **`onDragCancel` callback**: Added callback invoked when a drag gesture is cancelled or released without triggering a dismissal.
