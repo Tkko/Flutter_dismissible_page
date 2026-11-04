@@ -111,9 +111,20 @@ void main() {
         (progress) => Color.lerp(Colors.red, Colors.blue, progress),
       );
       expect(background.isNone, isFalse);
-      expect(background.resolveColor(0)!.toARGB32(), Colors.red.toARGB32());
-      expect(background.resolveColor(1)!.toARGB32(), Colors.blue.toARGB32());
-      expect(background.resolveColor(2)!.toARGB32(), Colors.blue.toARGB32());
+      // ignore: deprecated_member_use Need to use .value for Flutter 3.27.0
+      int colorToInt(Color c) => c.value;
+      expect(
+        colorToInt(background.resolveColor(0)!),
+        colorToInt(Colors.red),
+      );
+      expect(
+        colorToInt(background.resolveColor(1)!),
+        colorToInt(Colors.blue),
+      );
+      expect(
+        colorToInt(background.resolveColor(2)!),
+        colorToInt(Colors.blue),
+      );
 
       final radius = DismissiblePageRadius.custom((progress) => progress * 20);
       expect(radius.isNone, isFalse);

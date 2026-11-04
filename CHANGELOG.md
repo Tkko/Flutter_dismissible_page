@@ -1,3 +1,6 @@
+## 2.0.0-beta.3
+- Updated minimum SDK constraints to Flutter `>=3.27.0` and Dart `^3.6.0` to match Flutter's modernized `Color` APIs (`Color.withValues()`, `Color.a`).
+
 ## 2.0.0-beta.2
 
 ### Breaking Changes

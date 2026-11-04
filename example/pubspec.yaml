@@ -18,7 +18,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.6.0
+  flutter: ">=3.27.0"
 
 dependencies:
   flutter:
@@ -27,8 +28,8 @@ dependencies:
     path: ../
   #    git:
   #      url: https://github.com/Tkko/Flutter_dismissible_page
-  url_launcher: ^6.3.3
-  google_fonts:
+  url_launcher: ^6.3.2
+  google_fonts: ^6.3.0
 
 
 dev_dependencies:

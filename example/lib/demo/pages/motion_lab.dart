@@ -495,7 +495,7 @@ class _LabSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: EdgeInsets.zero,
-      activeThumbColor: accentColor,
+      thumbColor: WidgetStatePropertyAll(accentColor),
       value: value,
       onChanged: onChanged,
       title: Text(

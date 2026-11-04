@@ -245,7 +245,7 @@ class DismissiblePage extends StatelessWidget {
       DismissiblePageScrollController controller,
     ) {
       if (_builder != null) {
-        return _builder!(context, controller);
+        return _builder.call(context, controller);
       }
       return child!;
     }
