@@ -274,8 +274,10 @@ void main() {
   testWidgets('now playing closes with its chevron', (tester) async {
     await pumpApp(tester, const MusicHomePage());
 
-    await tester.tap(find.byIcon(Icons.pause_rounded).first,
-        warnIfMissed: false);
+    await tester.tap(
+      find.byIcon(Icons.pause_rounded).first,
+      warnIfMissed: false,
+    );
     await tester.pump();
     await tester.tap(find.text('Midnight Drive').last);
     await tester.pumpAndSettle();

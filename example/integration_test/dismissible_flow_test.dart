@@ -119,7 +119,10 @@ void main() {
 
       // 4. Now drag down at top: dismisses page!
       await tester.fling(
-          find.text('Scroll Item 0'), const Offset(0, 450), 1000);
+        find.text('Scroll Item 0'),
+        const Offset(0, 450),
+        1000,
+      );
       await tester.pumpAndSettle();
 
       // Route popped

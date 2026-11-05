@@ -8,7 +8,8 @@ class StoriesWrapper extends StatefulWidget {
   final int parentIndex;
   final DismissiblePageModel pageModel;
 
-  StoriesWrapper({
+  const StoriesWrapper({
+    super.key,
     required this.parentIndex,
     required this.pageModel,
   });
@@ -50,14 +51,14 @@ class _StoriesWrapperState extends State<StoriesWrapper>
 
   void next() {
     pageCtrl.nextPage(
-      duration: Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 200),
       curve: Curves.easeIn,
     );
   }
 
   void previous() {
     pageCtrl.previousPage(
-      duration: Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 200),
       curve: Curves.easeIn,
     );
   }

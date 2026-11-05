@@ -15,11 +15,14 @@ Future<void> main() => integrationDriver(
         var totalMissedRasterBudgets = 0;
 
         stdout.writeln(
-            '\n===========================================================================================================================');
+          '\n===========================================================================================================================',
+        );
         stdout.writeln(
-            '                                             E2E PERFORMANCE BENCHMARK REPORT                                              ');
+          '                                             E2E PERFORMANCE BENCHMARK REPORT                                              ',
+        );
         stdout.writeln(
-            '===========================================================================================================================');
+          '===========================================================================================================================',
+        );
         stdout.writeln(
           sprintfHeader(
             'Scenario',
@@ -32,7 +35,8 @@ Future<void> main() => integrationDriver(
           ),
         );
         stdout.writeln(
-            '---------------------------------------------------------------------------------------------------------------------------');
+          '---------------------------------------------------------------------------------------------------------------------------',
+        );
 
         for (final entry in data.entries) {
           if (entry.value is! Map<String, dynamic>) continue;
@@ -142,7 +146,8 @@ Future<void> main() => integrationDriver(
         }
 
         stdout.writeln(
-            '===========================================================================================================================\n');
+          '===========================================================================================================================\n',
+        );
 
         // Write consolidated report to build/performance_summary.json
         final outputDir = Directory('build');
@@ -164,11 +169,13 @@ Future<void> main() => integrationDriver(
         final hasFailed = summaryList.any((s) => s['status'] == 'FAIL [Jank]');
         if (hasFailed || totalMissedBuildBudgets > 0) {
           stderr.writeln(
-              'WARNING: Frame performance dropped below the acceptable budget.');
+            'WARNING: Frame performance dropped below the acceptable budget.',
+          );
           exitCode = 1;
         } else {
           stdout.writeln(
-              'SUCCESS: All scenarios stayed within the 60fps/120fps performance budget.');
+            'SUCCESS: All scenarios stayed within the 60fps/120fps performance budget.',
+          );
         }
       },
     );

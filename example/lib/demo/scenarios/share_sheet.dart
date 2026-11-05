@@ -33,7 +33,7 @@ class ArticlePage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () => context.pushTransparentRoute(
-              ShareSheetPage(title: 'Why motion matters'),
+              const ShareSheetPage(title: 'Why motion matters'),
             ),
             icon: const Icon(Icons.ios_share_rounded),
           ),
