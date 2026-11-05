@@ -2,11 +2,11 @@ name: Performance Benchmarks
 
 on:
   pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'LICENSE'
   workflow_dispatch:
 
 permissions:
@@ -36,8 +36,6 @@ jobs:
 
       - name: Set up Flutter
         uses: ./.github/workflow-actions/.github/actions/setup-flutter
-        with:
-          flutter-version: '3.47.8'
 
       - name: Install Example Dependencies
         run: cd example && flutter pub get
@@ -68,7 +66,7 @@ jobs:
               build_budget = s.get('build_budget', '< 4.00ms')
               raster_target = s.get('raster_target', '< 8.33ms (120fps)')
               print(f\"| **{s['scenario']}** | {s['avg_build_ms']:.2f} ms | {s['worst_build_ms']:.2f} ms | {s['worst_raster_ms']:.2f} ms | {build_budget} | {raster_target} | {status} |\")
-          " >> $GITHUB_STEP_SUMMARY
+          " >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload Performance Artifact
