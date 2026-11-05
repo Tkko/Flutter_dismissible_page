@@ -12,13 +12,16 @@
 
 [Live demo](https://tkko.github.io/Flutter_dismissible_page) · [Install](#install) · [Usage](#usage) · [Properties](#properties) · [Migration](#migration) · [pub.dev](https://pub.dev/packages/dismissible_page) · [Changelog](CHANGELOG.md)
 
+<a href="https://ko-fi.com/flutterman"><img height="40" src="https://user-images.githubusercontent.com/26390946/161375565-e7d64410-bbcf-4a28-896b-7514e106478e.png" alt="Support on Ko-fi"></a>
+<a href="https://www.buymeacoffee.com/fman"><img height="40" src="https://user-images.githubusercontent.com/26390946/161375563-69c634fd-89d2-45ac-addd-931b03996b34.png" alt="Buy Me a Coffee"></a>
+
 </div>
 
 <br>
 
 | [Live demo](https://tkko.github.io/Flutter_dismissible_page) | Multi direction | Vertical |
 | :---: | :---: | :---: |
-| <a href="https://tkko.github.io/Flutter_dismissible_page"><img width="260" src="https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png" alt="Live demo"/></a> | <img width="260" src="https://user-images.githubusercontent.com/26390946/161377483-78e5dbaf-678f-4381-a393-52af8180bbcb.gif" alt="Multi direction"/> | <img width="260" src="https://user-images.githubusercontent.com/26390946/156391449-a9235d05-bc87-4f51-8a5d-50c44fd0c582.gif" alt="Vertical"/> |
+| <a href="https://tkko.github.io/Flutter_dismissible_page"><img height="400" src="https://user-images.githubusercontent.com/26390946/156333539-29aefaf2-5f42-4414-8d8c-1ecbae40c377.png" alt="Live demo"/></a> | <img height="400" src="https://user-images.githubusercontent.com/26390946/161377483-78e5dbaf-678f-4381-a393-52af8180bbcb.gif" alt="Multi direction"/> | <img height="400" src="https://user-images.githubusercontent.com/26390946/156391449-a9235d05-bc87-4f51-8a5d-50c44fd0c582.gif" alt="Vertical"/> |
 
 ## Features
 
@@ -378,7 +381,7 @@ PRs are welcome. Target `main`: CI and performance benchmarks run for pull reque
 
 <div align="center">
 
-Made by [Tornike](https://www.linkedin.com/in/thornike/) · [Discord](https://rebrand.ly/qwc3s0d) · [Ko-fi](https://ko-fi.com/flutterman) · [Buy Me a Coffee](https://www.buymeacoffee.com/fman) · [MIT License](LICENSE)
+Made by [Tornike](https://www.linkedin.com/in/thornike/) · [Discord](https://rebrand.ly/qwc3s0d) · [MIT License](LICENSE)
 
 If this package helps you, a ⭐ on GitHub means a lot.
 
