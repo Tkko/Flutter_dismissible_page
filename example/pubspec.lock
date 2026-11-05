@@ -49,13 +49,21 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.8"
+  cupertino_ui:
+    dependency: transitive
+    description:
+      name: cupertino_ui
+      sha256: "369e39a1c5c030a6212589c3da1809920b1c2cfade7b02aade7695bfa4b88c3a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.6"
   dismissible_page:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "2.0.0-beta.4"
+    version: "2.0.0-beta.5"
   fake_async:
     dependency: transitive
     description:
@@ -98,6 +106,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
+  flutter_localizations:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -117,10 +130,10 @@ packages:
     dependency: "direct main"
     description:
       name: google_fonts
-      sha256: df9763500dadba0155373e9cb44e202ce21bd9ed5de6bdbd05c5854e86839cb8
+      sha256: fdbbfbbb1a62f376ab29fa9627561d389751fb984da0b630ce3326e272911c8a
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.0"
+    version: "9.0.0"
   http:
     dependency: transitive
     description:
@@ -142,6 +155,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "1ca20c894b1717686a2319b8548763d812bc0aabdac580420a44c5178c57a867"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.20.3"
   leak_tracker:
     dependency: transitive
     description:
@@ -190,6 +211,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  material_ui:
+    dependency: transitive
+    description:
+      name: material_ui
+      sha256: a30f5d0625b6b83770f53ca3f7aafd6fd9d147cb3853f54a70668541046fe5d6
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.10.0"
   meta:
     dependency: transitive
     description:
