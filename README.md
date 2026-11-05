@@ -356,7 +356,7 @@ Screen readers can dismiss the page with their dismiss gesture unless `direction
 <summary><b>Breaking API changes</b></summary>
 
 - Use `DismissiblePage(child: ...)` or `DismissiblePage.builder(builder: ...)`. Content is required and can't be specified both ways.
-- Rename `DismissiblePageDismissDirection.multi` to `.all`.
+- Rename `DismissiblePageDismissDirection.multi` to `.all`. `direction` now defaults to `all` (it was `vertical`), so pass `direction: DismissiblePageDismissDirection.vertical` to keep the old behavior.
 - Rename `overallDragValue` to `progress`, including constructor arguments and the key returned by `DismissiblePageDragUpdateDetails.toMap()`.
 - Replace direction keys in `dismissThresholds` with `DismissiblePageSide` keys. Expand a vertical threshold into up/down entries, horizontal into start/end, and multi into all four sides. Map `startToEnd` to `end` and `endToStart` to `start`.
 - Threshold values now measure page displacement rather than visual progress. To preserve an old distance threshold, multiply its effective value by the old `maxTransformValue`. The old default distance was `0.15 * 0.4 = 0.06`, the new default is `0.18` of the page dimension. Diagonal thresholds are evaluated independently for each axis.
