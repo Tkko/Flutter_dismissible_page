@@ -2,7 +2,7 @@ import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MaterialApp(home: SimpleExample()));
+  runApp(const MaterialApp(home: SimpleExample()));
 }
 
 /// This is a basic usage of DismissiblePage
@@ -10,7 +10,7 @@ void main() {
 class SimpleExample extends StatelessWidget {
   static const imagePath = 'assets/images/home_1.png';
 
-  const SimpleExample({Key? key}) : super(key: key);
+  const SimpleExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class SimpleExample extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('Simple Example'),
+        title: const Text('Simple Example'),
         titleTextStyle: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -33,7 +33,7 @@ class SimpleExample extends StatelessWidget {
               // Use extension method to use [TransparentRoute]
               // This will push page without route background
               context.pushTransparentRoute(
-                SecondPage(imagePath: imagePath),
+                const SecondPage(imagePath: imagePath),
               );
             },
             child: Hero(
@@ -53,7 +53,7 @@ class SimpleExample extends StatelessWidget {
 class SecondPage extends StatelessWidget {
   final String imagePath;
 
-  const SecondPage({required this.imagePath});
+  const SecondPage({super.key, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +96,10 @@ class SecondPage extends StatelessWidget {
                 return ListTile(
                   title: Text(
                     'Item $index',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 );
               }),

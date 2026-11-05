@@ -11,7 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DismissiblePageDemo extends StatefulWidget {
-  const DismissiblePageDemo({Key? key}) : super(key: key);
+  const DismissiblePageDemo({super.key});
 
   @override
   _DismissiblePageDemoState createState() => _DismissiblePageDemoState();
@@ -54,7 +54,7 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
         isSelected: true,
         fontSize: 18,
         fontWeight: FontWeight.w600,
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         title: 'Properties',
       ),
     );
@@ -64,7 +64,7 @@ class _DismissiblePageDemoState extends State<DismissiblePageDemo> {
 class Properties extends StatefulWidget {
   final _DismissiblePageDemoState parent;
 
-  const Properties({required this.parent, Key? key}) : super(key: key);
+  const Properties({required this.parent, super.key});
 
   @override
   State<Properties> createState() => _PropertiesState();
@@ -89,43 +89,55 @@ class _PropertiesState extends State<Properties> {
           child: GestureDetector(
             onTap: () {},
             child: Material(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(8)),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 10),
-                    Title('Bool Parameters'),
-                    Wrap(spacing: 10, runSpacing: 10, children: [
-                      AppChip(
-                        onSelected: () => setState(() =>
-                            pageModel.isFullScreen = !pageModel.isFullScreen),
-                        isSelected: pageModel.isFullScreen,
-                        title: 'isFullscreen',
-                      ),
-                      AppChip(
-                        onSelected: () => setState(
-                            () => pageModel.enabled = !pageModel.enabled),
-                        isSelected: pageModel.enabled,
-                        title: 'enabled',
-                      ),
-                      AppChip(
-                        onSelected: () => setState(() => pageModel
-                            .continueOnDismiss = !pageModel.continueOnDismiss),
-                        isSelected: pageModel.continueOnDismiss,
-                        title: 'continueOnDismiss',
-                      ),
-                      AppChip(
-                        onSelected: () => setState(() => pageModel
-                            .thresholdHaptics = !pageModel.thresholdHaptics),
-                        isSelected: pageModel.thresholdHaptics,
-                        title: 'thresholdHaptics',
-                      ),
-                    ]),
-                    SizedBox(height: 20),
-                    Title('Rebound'),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
+                    const Title('Bool Parameters'),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        AppChip(
+                          onSelected: () => setState(
+                            () => pageModel.isFullScreen =
+                                !pageModel.isFullScreen,
+                          ),
+                          isSelected: pageModel.isFullScreen,
+                          title: 'isFullscreen',
+                        ),
+                        AppChip(
+                          onSelected: () => setState(
+                            () => pageModel.enabled = !pageModel.enabled,
+                          ),
+                          isSelected: pageModel.enabled,
+                          title: 'enabled',
+                        ),
+                        AppChip(
+                          onSelected: () => setState(
+                            () => pageModel.continueOnDismiss =
+                                !pageModel.continueOnDismiss,
+                          ),
+                          isSelected: pageModel.continueOnDismiss,
+                          title: 'continueOnDismiss',
+                        ),
+                        AppChip(
+                          onSelected: () => setState(
+                            () => pageModel.thresholdHaptics =
+                                !pageModel.thresholdHaptics,
+                          ),
+                          isSelected: pageModel.thresholdHaptics,
+                          title: 'thresholdHaptics',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Title('Rebound'),
+                    const SizedBox(height: 10),
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
@@ -141,9 +153,9 @@ class _PropertiesState extends State<Properties> {
                         );
                       }).toList(),
                     ),
-                    SizedBox(height: 20),
-                    Title('Dismiss Direction'),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 20),
+                    const Title('Dismiss Direction'),
+                    const SizedBox(height: 10),
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
@@ -161,7 +173,7 @@ class _PropertiesState extends State<Properties> {
                         );
                       }).toList(),
                     ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     DurationSlider(
                       title: 'Transition Duration',
                       duration: pageModel.transitionDuration,
@@ -169,16 +181,17 @@ class _PropertiesState extends State<Properties> {
                         setState(() => pageModel.transitionDuration = value);
                       },
                     ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     DurationSlider(
                       title: 'Reverse Transition Duration',
                       duration: pageModel.reverseTransitionDuration,
                       onChanged: (value) {
                         setState(
-                            () => pageModel.reverseTransitionDuration = value);
+                          () => pageModel.reverseTransitionDuration = value,
+                        );
                       },
                     ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     DurationSlider(
                       title: 'Reverse Animation Duration (curve only)',
                       duration: pageModel.reverseDuration,
@@ -186,7 +199,7 @@ class _PropertiesState extends State<Properties> {
                         setState(() => pageModel.reverseDuration = value);
                       },
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -200,6 +213,7 @@ class _PropertiesState extends State<Properties> {
 
 class Contacts extends StatelessWidget {
   const Contacts({
+    super.key,
     required this.pageModel,
   });
 
@@ -247,7 +261,7 @@ class Contacts extends StatelessWidget {
               }).toList(),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -257,7 +271,7 @@ class Contacts extends StatelessWidget {
 class Stories extends StatelessWidget {
   final DismissiblePageModel pageModel;
 
-  const Stories({required this.pageModel, Key? key}) : super(key: key);
+  const Stories({required this.pageModel, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -274,7 +288,7 @@ class Stories extends StatelessWidget {
           return SizedBox(
             height: itemHeight,
             child: ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               scrollDirection: Axis.horizontal,
               itemBuilder: (_, int index) {
                 final item = pageModel.stories.elementAt(index);
@@ -287,7 +301,7 @@ class Stories extends StatelessWidget {
                   ),
                 );
               },
-              separatorBuilder: (_, int i) => SizedBox(width: 10),
+              separatorBuilder: (_, int i) => const SizedBox(width: 10),
               itemCount: pageModel.stories.length,
             ),
           );
@@ -317,7 +331,7 @@ class DismissibleDemo extends StatelessWidget {
   final bool exitsThroughHero;
 
   const DismissibleDemo({
-    Key? key,
+    super.key,
     this.pageModel,
     required this.child,
     this.background,
@@ -326,7 +340,7 @@ class DismissibleDemo extends StatelessWidget {
     this.minScale,
     this.onDragUpdate,
     this.exitsThroughHero = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -354,7 +368,7 @@ class DismissibleDemo extends StatelessWidget {
 class Title extends StatelessWidget {
   final String text;
 
-  Title(this.text);
+  const Title(this.text, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -376,7 +390,8 @@ class AppChip extends StatelessWidget {
   final FontWeight fontWeight;
   final EdgeInsetsGeometry? padding;
 
-  AppChip({
+  const AppChip({
+    super.key,
     required this.onSelected,
     required this.isSelected,
     required this.title,

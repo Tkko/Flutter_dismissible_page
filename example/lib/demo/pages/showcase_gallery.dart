@@ -694,7 +694,9 @@ class TabBarViewShowcasePage extends StatelessWidget {
             title: Text(
               'TabBarView Showcase',
               style: GoogleFonts.poppins(
-                  fontSize: 18, fontWeight: FontWeight.w600),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             bottom: const TabBar(
               tabs: [

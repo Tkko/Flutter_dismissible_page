@@ -7,7 +7,8 @@ class CubicPageView extends StatefulWidget {
   final PageController controller;
   final List<Widget> children;
 
-  CubicPageView({
+  const CubicPageView({
+    super.key,
     required this.controller,
     required this.children,
   });
@@ -38,7 +39,7 @@ class _CubicPageViewState extends State<CubicPageView> {
       controller: _controller,
       itemCount: children.length,
       dragStartBehavior: DragStartBehavior.start,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (_, position) {
         Alignment? al;
         if (position == currentPageValue.floor()) al = Alignment.centerRight;

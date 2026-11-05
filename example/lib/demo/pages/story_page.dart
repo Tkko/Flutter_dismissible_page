@@ -8,6 +8,7 @@ class StoryPage extends StatelessWidget {
   final VoidCallback previousGroup;
 
   const StoryPage({
+    super.key,
     required this.story,
     required this.nextGroup,
     required this.previousGroup,
@@ -15,7 +16,7 @@ class StoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void _onTap(TapUpDetails details) async {
+    void onTap(TapUpDetails details) async {
       final dx = details.globalPosition.dx;
       final width = MediaQuery.of(context).size.width;
       if (dx < width / 2) return previousGroup();
@@ -23,7 +24,7 @@ class StoryPage extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTapUp: _onTap,
+      onTapUp: onTap,
       child: StoryImage(story, isFullScreen: true),
     );
   }

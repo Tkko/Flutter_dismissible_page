@@ -18,9 +18,11 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 
 const accentColor = Color(0xff00d573);
 
-void main() => runApp(AppView());
+void main() => runApp(const AppView());
 
 class AppView extends StatefulWidget {
+  const AppView({super.key});
+
   @override
   State<AppView> createState() => _AppViewState();
 }
@@ -41,8 +43,8 @@ class _AppViewState extends State<AppView> {
           theme: ThemeData(
             primaryColor: accentColor,
             scaffoldBackgroundColor: Colors.white,
-            appBarTheme: AppBarTheme(backgroundColor: Colors.white),
-            chipTheme: ChipThemeData(selectedColor: accentColor),
+            appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
+            chipTheme: const ChipThemeData(selectedColor: accentColor),
             sliderTheme: SliderThemeData(
               activeTrackColor: accentColor,
               activeTickMarkColor: accentColor,
@@ -52,7 +54,7 @@ class _AppViewState extends State<AppView> {
           ),
           home: ScrollConfiguration(
             behavior: MyCustomScrollBehavior(),
-            child: DismissiblePageDemo(),
+            child: const DismissiblePageDemo(),
           ),
         );
 
@@ -80,7 +82,7 @@ class _AppViewState extends State<AppView> {
                   child: Container(
                     width: 500,
                     height: min(1100, constraints.maxHeight.abs()),
-                    margin: EdgeInsets.all(20),
+                    margin: const EdgeInsets.all(20),
                     clipBehavior: Clip.antiAlias,
                     foregroundDecoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),

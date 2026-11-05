@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class ScrollablePage extends StatefulWidget {
   final StoryModel story;
 
-  ScrollablePage(this.story);
+  const ScrollablePage(this.story, {super.key});
 
   @override
   State<ScrollablePage> createState() => _ScrollablePageState();

@@ -15,7 +15,10 @@ final demoPhotos = <DemoPhoto>[
   DemoPhoto(DismissiblePageModel.naturePhotos[1], 'Golden valley', 'Yosemite'),
   DemoPhoto(DismissiblePageModel.foodPhotos[1], 'Fresh salad', 'Tbilisi'),
   DemoPhoto(
-      DismissiblePageModel.naturePhotos[2], 'Forest path', 'Black Forest'),
+    DismissiblePageModel.naturePhotos[2],
+    'Forest path',
+    'Black Forest',
+  ),
   DemoPhoto(DismissiblePageModel.foodPhotos[2], 'Spiced bowl', 'Marrakesh'),
   DemoPhoto(DismissiblePageModel.naturePhotos[3], 'Misty ridge', 'Lofoten'),
   DemoPhoto(DismissiblePageModel.foodPhotos[3], 'Ramen night', 'Osaka'),
@@ -70,16 +73,41 @@ class DemoTrack {
 }
 
 const demoTracks = <DemoTrack>[
-  DemoTrack('Midnight Drive', 'Neon Harbor', Color(0xff7b5cff),
-      Color(0xff1b1245), Icons.nightlight_round),
-  DemoTrack('Golden Hour', 'Sunday Atlas', Color(0xffff9a5c), Color(0xff5c1f2e),
-      Icons.wb_twilight),
-  DemoTrack('Glass Rooms', 'Violet Static', Color(0xff2ec4b6),
-      Color(0xff0b2a35), Icons.blur_on),
-  DemoTrack('Paper Planes', 'Low Tide', Color(0xffff5c8a), Color(0xff3a1030),
-      Icons.flight),
-  DemoTrack('Slow Burn', 'Ember & Oak', Color(0xffffc857), Color(0xff3d2108),
-      Icons.local_fire_department),
+  DemoTrack(
+    'Midnight Drive',
+    'Neon Harbor',
+    Color(0xff7b5cff),
+    Color(0xff1b1245),
+    Icons.nightlight_round,
+  ),
+  DemoTrack(
+    'Golden Hour',
+    'Sunday Atlas',
+    Color(0xffff9a5c),
+    Color(0xff5c1f2e),
+    Icons.wb_twilight,
+  ),
+  DemoTrack(
+    'Glass Rooms',
+    'Violet Static',
+    Color(0xff2ec4b6),
+    Color(0xff0b2a35),
+    Icons.blur_on,
+  ),
+  DemoTrack(
+    'Paper Planes',
+    'Low Tide',
+    Color(0xffff5c8a),
+    Color(0xff3a1030),
+    Icons.flight,
+  ),
+  DemoTrack(
+    'Slow Burn',
+    'Ember & Oak',
+    Color(0xffffc857),
+    Color(0xff3d2108),
+    Icons.local_fire_department,
+  ),
 ];
 
 class DemoMessage {
