@@ -1,3 +1,6 @@
+## 2.0.0-beta.5
+- Documentation: resized the donation badges in the README so they render at a sensible size on pub.dev
+
 ## 2.0.0-beta.4
 - Documentation: redesigned README with a shared header and footer, a properties table and collapsible guides
 - Aligned issue forms and the pull request template
