@@ -4,28 +4,31 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Tag name (e.g. v7.0.1). Leave empty to use version from pubspec.yaml'
+        description: 'Tag name (e.g. v1.2.3). Leave empty to use version from pubspec.yaml'
         required: false
         type: string
       dry_run:
         description: 'Dry run (validate tests and pubspec without creating tag/release)'
         required: false
-        default: false
         type: boolean
+        default: false
       platforms:
         description: 'Comma-separated integration test platforms to pass before releasing: web, linux, android, ios, macos, windows'
         required: false
-        default: 'android,ios,macos,linux,web'
         type: string
+        default: web,linux,android,ios,macos
+
+permissions:
+  contents: read
 
 jobs:
   release:
+    permissions:
+      contents: write
+      actions: write
     uses: Tkko/better-actions/.github/workflows/create-release.yml@main
     with:
       tag_name: ${{ inputs.tag_name }}
       dry_run: ${{ inputs.dry_run }}
       platforms: ${{ inputs.platforms }}
       integration-test-target: integration_test/dismissible_flow_test.dart
-    permissions:
-      contents: write
-      actions: write

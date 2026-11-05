@@ -1,3 +1,7 @@
+## 2.0.0-beta.4
+- Documentation: redesigned README with a shared header and footer, a properties table and collapsible guides
+- Aligned issue forms and the pull request template
+
 ## 2.0.0-beta.3
 - Updated minimum SDK constraints to Flutter `>=3.27.0` and Dart `^3.6.0` to match Flutter's modernized `Color` APIs (`Color.withValues()`, `Color.a`).
 
