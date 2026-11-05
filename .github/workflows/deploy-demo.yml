@@ -3,7 +3,7 @@ name: Deploy Demo
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 jobs:

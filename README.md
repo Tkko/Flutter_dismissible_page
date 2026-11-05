@@ -36,6 +36,10 @@ plain transitions.
 ## Support
 
 #### PRs Welcome
+
+Target `main` when opening pull requests. CI and performance benchmarks run for
+pull requests targeting `main`; demo deployment runs on pushes to `main`.
+
 #### Discord [Channel](https://rebrand.ly/qwc3s0d)
 #### Don't forget to give it a star ⭐
 
