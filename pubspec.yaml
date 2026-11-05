@@ -9,7 +9,7 @@ screenshots:
   - description: 'Dismissible page demo'
     path: dismissible_page_demo.webp
 funding:
-  - https://ko-fi.com/flutterman
+  - https://ko-fi.com/tornike_dev
 
 environment:
   sdk: ^3.6.0
