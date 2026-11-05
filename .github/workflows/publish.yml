@@ -6,9 +6,12 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   publish:
-    uses: Tkko/better-actions/.github/workflows/publish.yml@main
     permissions:
       contents: read
       id-token: write
+    uses: Tkko/better-actions/.github/workflows/publish.yml@main
