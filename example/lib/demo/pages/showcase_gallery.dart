@@ -2,7 +2,7 @@ import 'package:dismissible_page/dismissible_page.dart';
 import 'package:dismissible_page_example/demo/models/models.dart';
 import 'package:dismissible_page_example/demo/pages/dismissible_page_demo.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 /// Interactive gallery showcasing all possible child widget scenarios
 /// inside a [DismissiblePage]:
@@ -27,20 +27,14 @@ class ShowcaseGallery extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Child Widget Scenarios',
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: DemoText.heading,
               ),
               const SizedBox(height: 4),
               Text(
                 'Verify seamless dismiss coordination across all widget types',
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  color: Colors.black54,
-                ),
+                style: DemoText.caption.copyWith(color: Colors.black54),
               ),
             ],
           ),
@@ -169,18 +163,12 @@ class _ShowcaseCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: DemoText.bodyStrong,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.black54,
-                      ),
+                      style: DemoText.label.copyWith(color: Colors.black54),
                     ),
                   ],
                 ),
@@ -309,21 +297,15 @@ class NonScrollableShowcasePage extends StatelessWidget {
                   size: 88,
                 ),
                 const SizedBox(height: 16),
-                Text(
+                const Text(
                   'Non-Scrollable Widget',
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: DemoText.heading,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'This is a simple Column/Container. Drag anywhere on the card or background to dismiss the route.',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.black54,
-                  ),
+                  style: DemoText.caption.copyWith(color: Colors.black54),
                 ),
                 const SizedBox(height: 20),
                 // A Builder, so the context is below the DismissiblePage.
@@ -369,10 +351,9 @@ class ListViewShowcasePage extends StatelessWidget {
             icon: Icons.view_agenda_outlined,
             color: Color(0xff26a69a),
           ),
-          title: Text(
+          title: const Text(
             'ListView Showcase',
-            style:
-                GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+            style: DemoText.subheading,
           ),
         ),
         body: ListView.builder(
@@ -430,12 +411,9 @@ class SliversShowcasePage extends StatelessWidget {
               ),
               backgroundColor: const Color(0xffef5350),
               flexibleSpace: FlexibleSpaceBar(
-                title: Text(
+                title: const Text(
                   'Slivers Showcase',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: DemoText.lead,
                 ),
                 background: Container(
                   decoration: const BoxDecoration(
@@ -451,15 +429,12 @@ class SliversShowcasePage extends StatelessWidget {
                 ),
               ),
             ),
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 child: Text(
                   'SliverGrid Section',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: DemoText.lead,
                 ),
               ),
             ),
@@ -482,15 +457,12 @@ class SliversShowcasePage extends StatelessWidget {
                 childCount: 6,
               ),
             ),
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 child: Text(
                   'SliverList Section',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: DemoText.lead,
                 ),
               ),
             ),
@@ -546,8 +518,7 @@ class _PageViewShowcasePageState extends State<PageViewShowcasePage> {
           ),
           title: Text(
             'PageView Showcase (Page ${_currentPage + 1}/3)',
-            style:
-                GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+            style: DemoText.lead,
           ),
         ),
         body: PageView.builder(
@@ -575,11 +546,7 @@ class _PageViewShowcasePageState extends State<PageViewShowcasePage> {
                     const SizedBox(height: 16),
                     Text(
                       'Page ${index + 1}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: colors[index],
-                      ),
+                      style: DemoText.titleLarge.copyWith(color: colors[index]),
                     ),
                     const SizedBox(height: 8),
                     Padding(
@@ -589,10 +556,8 @@ class _PageViewShowcasePageState extends State<PageViewShowcasePage> {
                             ? 'Swipe left for next page.\nSwipe right to dismiss!'
                             : 'Swipe between pages normally.',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
+                        style:
+                            DemoText.bodySmall.copyWith(color: Colors.black54),
                       ),
                     ),
                   ],
@@ -625,10 +590,9 @@ class GridViewShowcasePage extends StatelessWidget {
             icon: Icons.grid_view_outlined,
             color: Color(0xffff7043),
           ),
-          title: Text(
+          title: const Text(
             'GridView Showcase',
-            style:
-                GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+            style: DemoText.subheading,
           ),
         ),
         body: GridView.builder(
@@ -654,10 +618,7 @@ class GridViewShowcasePage extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       'Card #$index',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
+                      style: DemoText.bodyStrong,
                     ),
                   ],
                 ),
@@ -691,12 +652,9 @@ class TabBarViewShowcasePage extends StatelessWidget {
               icon: Icons.tab_outlined,
               color: Color(0xff42a5f5),
             ),
-            title: Text(
+            title: const Text(
               'TabBarView Showcase',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: DemoText.subheading,
             ),
             bottom: const TabBar(
               tabs: [

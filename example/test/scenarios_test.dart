@@ -11,7 +11,6 @@ import 'package:dismissible_page_example/demo/widgets/dismissible_screen.dart';
 import 'package:dismissible_page_example/demo/widgets/expanding_hero.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 Future<void> pumpApp(WidgetTester tester, Widget home) async {
   tester.view
@@ -37,24 +36,6 @@ Future<void> dragAndSettle(
 }
 
 void main() {
-  setUpAll(() {
-    // Fonts are not available offline in tests; the fallback is fine.
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
-  // google_fonts reports missing font files as errors; they are irrelevant
-  // to layout, so only real exceptions should fail a test.
-  void ignoreFontErrors() {
-    final original = FlutterError.onError;
-    FlutterError.onError = (details) {
-      if (details.exceptionAsString().contains('google_fonts')) return;
-      original?.call(details);
-    };
-    addTearDown(() => FlutterError.onError = original);
-  }
-
-  setUp(ignoreFontErrors);
-
   testWidgets('home lists every real-world scenario', (tester) async {
     await pumpApp(tester, const DismissiblePageDemo());
 

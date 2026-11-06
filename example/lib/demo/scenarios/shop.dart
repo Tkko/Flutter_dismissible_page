@@ -5,7 +5,7 @@ import 'package:dismissible_page_example/demo/widgets/demo_image.dart';
 import 'package:dismissible_page_example/demo/widgets/dismissible_screen.dart';
 import 'package:dismissible_page_example/demo/widgets/expanding_hero.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 /// A small print shop. The product page is a long, scrollable screen: pull
 /// down while it is at the top and it dismisses, otherwise it just scrolls.
@@ -19,9 +19,9 @@ class ShopPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xfff6f4f0),
         leading: const DismissibleBackButton(),
-        title: Text(
+        title: const Text(
           'Prints',
-          style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w700),
+          style: DemoText.title,
         ),
       ),
       body: GridView.builder(
@@ -65,14 +65,11 @@ class _ProductCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             product.name,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: DemoText.bodySmallStrong,
           ),
           Text(
             '\$${product.price}',
-            style: GoogleFonts.poppins(fontSize: 13, color: Colors.black54),
+            style: DemoText.caption.copyWith(color: Colors.black54),
           ),
         ],
       ),
@@ -137,18 +134,12 @@ class _ProductPageState extends State<ProductPage> {
                           Expanded(
                             child: Text(
                               product.name,
-                              style: GoogleFonts.poppins(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: DemoText.titleXLarge,
                             ),
                           ),
                           Text(
                             '\$${product.price}',
-                            style: GoogleFonts.poppins(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: DemoText.titleSemiBold,
                           ),
                         ],
                       ),
@@ -162,10 +153,8 @@ class _ProductPageState extends State<ProductPage> {
                           ),
                           Text(
                             ' 4.9  ·  218 reviews',
-                            style: GoogleFonts.poppins(
-                              color: Colors.black54,
-                              fontSize: 13,
-                            ),
+                            style: DemoText.caption
+                                .copyWith(color: Colors.black54),
                           ),
                         ],
                       ),
@@ -173,19 +162,13 @@ class _ProductPageState extends State<ProductPage> {
                       Text(
                         '${product.blurb} Ships flat in a protective '
                         'sleeve within two working days.',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          height: 1.6,
-                          color: Colors.black87,
-                        ),
+                        style: DemoText.bodySmall
+                            .copyWith(height: 1.6, color: Colors.black87),
                       ),
                       const SizedBox(height: 20),
-                      Text(
+                      const Text(
                         'Size',
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: DemoText.bodyStrong,
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -200,12 +183,9 @@ class _ProductPageState extends State<ProductPage> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      Text(
+                      const Text(
                         'Reviews',
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: DemoText.subheading,
                       ),
                       for (final (name, text) in _reviews)
                         ListTile(
@@ -216,10 +196,7 @@ class _ProductPageState extends State<ProductPage> {
                           ),
                           title: Text(
                             name,
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
+                            style: DemoText.bodySmallStrong,
                           ),
                           subtitle: Text(text),
                         ),
@@ -268,10 +245,7 @@ class _ProductPageState extends State<ProductPage> {
                       onPressed: () {},
                       child: Text(
                         'Add to cart  ·  \$${product.price}',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                        ),
+                        style: DemoText.bodyStrong,
                       ),
                     ),
                   ),

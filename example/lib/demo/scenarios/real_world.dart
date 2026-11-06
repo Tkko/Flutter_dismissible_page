@@ -8,7 +8,7 @@ import 'package:dismissible_page_example/demo/widgets/dismissible_screen.dart';
 import 'package:dismissible_page_example/demo/widgets/scenario_card.dart';
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 /// The home screen section that opens one mini-app per real-world pattern.
 class RealWorldScenarios extends StatelessWidget {
@@ -28,17 +28,14 @@ class RealWorldScenarios extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Real-world patterns',
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: DemoText.heading,
               ),
               const SizedBox(height: 4),
               Text(
                 'Small apps that use a dismissible page the way yours would',
-                style: GoogleFonts.poppins(fontSize: 13, color: Colors.black54),
+                style: DemoText.caption.copyWith(color: Colors.black54),
               ),
             ],
           ),

@@ -4,7 +4,7 @@ import 'package:dismissible_page_example/demo/models/demo_settings.dart';
 import 'package:dismissible_page_example/demo/models/models.dart';
 import 'package:dismissible_page_example/demo/pages/dismissible_page_demo.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
@@ -68,14 +68,11 @@ class _AppViewState extends State<AppView> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Directionality(
+                const Directionality(
                   textDirection: TextDirection.ltr,
                   child: Text(
                     'Dismissible Examples',
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: DemoText.titleLarge,
                   ),
                 ),
                 Flexible(

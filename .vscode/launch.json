@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Demo",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "example",
+      "program": "lib/demo/demo.dart"
+    },
+    {
+      "name": "Demo (profile)",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "example",
+      "program": "lib/demo/demo.dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "Demo (release)",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "example",
+      "program": "lib/demo/demo.dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "Simple example",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "example",
+      "program": "lib/main.dart"
+    }
+  ]
+}

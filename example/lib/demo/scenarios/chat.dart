@@ -3,7 +3,7 @@ import 'package:dismissible_page_example/demo/pages/dismissible_page_demo.dart';
 import 'package:dismissible_page_example/demo/scenarios/demo_data.dart';
 import 'package:dismissible_page_example/demo/widgets/dismissible_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 /// Conversations that open as a screen you swipe back from: drag right
 /// anywhere on the page and it follows your finger like a native push.
@@ -16,9 +16,9 @@ class ChatListPage extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: const DismissibleBackButton(),
-        title: Text(
+        title: const Text(
           'Messages',
-          style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w700),
+          style: DemoText.title,
         ),
       ),
       body: ListView.separated(
@@ -34,13 +34,13 @@ class ChatListPage extends StatelessWidget {
             leading: _Avatar(contact: contact, radius: 26),
             title: Text(
               contact.name,
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+              style: DemoText.plainSemiBold,
             ),
             subtitle: Text(
               contact.preview,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.poppins(fontSize: 13),
+              style: DemoText.caption,
             ),
             trailing: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -48,10 +48,7 @@ class ChatListPage extends StatelessWidget {
               children: [
                 Text(
                   contact.time,
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.black45,
-                  ),
+                  style: DemoText.label.copyWith(color: Colors.black45),
                 ),
                 const SizedBox(height: 4),
                 if (contact.unread > 0)
@@ -137,10 +134,7 @@ class _ChatPageState extends State<ChatPage> {
               const SizedBox(width: 10),
               Text(
                 contact.name,
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: DemoText.lead,
               ),
             ],
           ),
@@ -227,10 +221,8 @@ class _Bubble extends StatelessWidget {
         ),
         child: Text(
           message.text,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: mine ? Colors.white : Colors.black87,
-          ),
+          style: DemoText.bodySmall
+              .copyWith(color: mine ? Colors.white : Colors.black87),
         ),
       ),
     );
@@ -250,11 +242,8 @@ class _Avatar extends StatelessWidget {
       backgroundColor: contact.color.withValues(alpha: 0.18),
       child: Text(
         contact.initials,
-        style: GoogleFonts.poppins(
-          color: contact.color,
-          fontWeight: FontWeight.w700,
-          fontSize: radius * 0.7,
-        ),
+        style: DemoText.plainBold
+            .copyWith(color: contact.color, fontSize: radius * 0.7),
       ),
     );
   }
