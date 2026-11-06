@@ -2,7 +2,7 @@ import 'package:dismissible_page/dismissible_page.dart';
 import 'package:dismissible_page_example/demo/models/models.dart';
 import 'package:dismissible_page_example/demo/pages/stories_wrapper.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 class StoryWidget extends StatelessWidget {
   final StoryModel story;
@@ -77,7 +77,7 @@ class _StoryImageState extends State<StoryImage> {
           ),
           child: Text(
             widget.story.title,
-            style: GoogleFonts.poppins(color: Colors.white),
+            style: DemoText.plain.copyWith(color: Colors.white),
           ),
         ),
       ),
@@ -107,10 +107,7 @@ class DurationSlider extends StatelessWidget {
             Expanded(
               child: Text(
                 '$title - ${duration.inMilliseconds}ms',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: DemoText.leadMedium,
               ),
             ),
           ],

@@ -7,7 +7,7 @@ import 'package:dismissible_page_example/demo/pages/dismissible_page_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 const _labBackground = Color(0xff111318);
 const _labSurface = Color(0xff1b1e26);
@@ -51,18 +51,12 @@ class MotionLabCard extends StatelessWidget {
                     children: [
                       Text(
                         'Motion Lab',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: DemoText.subheadingBold
+                            .copyWith(color: Colors.white),
                       ),
                       Text(
                         'Tune the spring live, then drag the page to feel it',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
+                        style: DemoText.label.copyWith(color: Colors.white70),
                       ),
                     ],
                   ),
@@ -166,11 +160,8 @@ class _MotionLabPageState extends State<MotionLabPage> {
                       Expanded(
                         child: Text(
                           'Motion Lab',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style:
+                              DemoText.headline.copyWith(color: Colors.white),
                         ),
                       ),
                       // A Builder, so the context is below the DismissiblePage.
@@ -185,10 +176,7 @@ class _MotionLabPageState extends State<MotionLabPage> {
                   Text(
                     'Drag this page down and let go. It rebounds with the '
                     'spring you are tuning below.',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white60,
-                      fontSize: 13,
-                    ),
+                    style: DemoText.caption.copyWith(color: Colors.white60),
                   ),
                   const SizedBox(height: 20),
                   _Panel(
@@ -222,10 +210,8 @@ class _MotionLabPageState extends State<MotionLabPage> {
                         : Text(
                             'A fixed easeOutCubic curve ignores release '
                             'velocity. Pick a spring to see its response.',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white60,
-                              fontSize: 13,
-                            ),
+                            style: DemoText.caption
+                                .copyWith(color: Colors.white60),
                           ),
                   ),
                   const SizedBox(height: 16),
@@ -251,10 +237,7 @@ class _MotionLabPageState extends State<MotionLabPage> {
                   const SizedBox(height: 16),
                   Text(
                     'Exit animation',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white70,
-                      fontSize: 13,
-                    ),
+                    style: DemoText.caption.copyWith(color: Colors.white70),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
@@ -363,9 +346,9 @@ class _MotionLabPageState extends State<MotionLabPage> {
                         );
                       },
                       icon: const Icon(Icons.code_rounded),
-                      label: Text(
+                      label: const Text(
                         'Copy as code',
-                        style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                        style: DemoText.plainSemiBold,
                       ),
                     ),
                   ),
@@ -412,15 +395,11 @@ class _Stat extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.poppins(color: Colors.white54, fontSize: 11),
+            style: DemoText.micro.copyWith(color: Colors.white54),
           ),
           Text(
             value,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: DemoText.lead.copyWith(color: Colors.white),
           ),
         ],
       ),
@@ -456,16 +435,12 @@ class _LabSlider extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: GoogleFonts.poppins(color: Colors.white70, fontSize: 13),
+                style: DemoText.caption.copyWith(color: Colors.white70),
               ),
             ),
             Text(
               format(value),
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
+              style: DemoText.captionStrong.copyWith(color: Colors.white),
             ),
           ],
         ),
@@ -500,7 +475,7 @@ class _LabSwitch extends StatelessWidget {
       onChanged: onChanged,
       title: Text(
         title,
-        style: GoogleFonts.poppins(color: Colors.white70, fontSize: 13),
+        style: DemoText.caption.copyWith(color: Colors.white70),
       ),
     );
   }

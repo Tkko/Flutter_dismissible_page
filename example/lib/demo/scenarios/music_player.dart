@@ -6,7 +6,7 @@ import 'package:dismissible_page_example/demo/scenarios/demo_data.dart';
 import 'package:dismissible_page_example/demo/widgets/dismissible_screen.dart';
 import 'package:dismissible_page_example/demo/widgets/expanding_hero.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 String _artworkTag(DemoTrack track) => 'artwork-${track.title}';
 
@@ -42,9 +42,9 @@ class _MusicHomePageState extends State<MusicHomePage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: const DismissibleBackButton(),
-        title: Text(
+        title: const Text(
           'Your library',
-          style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w700),
+          style: DemoText.title,
         ),
       ),
       body: Stack(
@@ -63,12 +63,13 @@ class _MusicHomePageState extends State<MusicHomePage> {
                 leading: _Artwork(track: track, size: 52, radius: 12),
                 title: Text(
                   track.title,
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    color: selected ? track.top : null,
-                  ),
+                  style: DemoText.plainSemiBold
+                      .copyWith(color: selected ? track.top : null),
                 ),
-                subtitle: Text(track.artist, style: GoogleFonts.poppins()),
+                subtitle: Text(
+                  track.artist,
+                  style: DemoText.plain,
+                ),
                 trailing: selected && _playing
                     ? Icon(Icons.graphic_eq_rounded, color: track.top)
                     : null,
@@ -132,18 +133,12 @@ class _MiniPlayer extends StatelessWidget {
                   children: [
                     Text(
                       track.title,
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
+                      style: DemoText.bodySmallStrong
+                          .copyWith(color: Colors.white),
                     ),
                     Text(
                       track.artist,
-                      style: GoogleFonts.poppins(
-                        color: Colors.white60,
-                        fontSize: 12,
-                      ),
+                      style: DemoText.label.copyWith(color: Colors.white60),
                     ),
                   ],
                 ),
@@ -260,11 +255,9 @@ class _NowPlayingPageState extends State<NowPlayingPage>
                         child: Text(
                           'NOW PLAYING',
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
+                          style: DemoText.labelStrong.copyWith(
                             color: Colors.white70,
-                            fontSize: 12,
                             letterSpacing: 2,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -291,18 +284,13 @@ class _NowPlayingPageState extends State<NowPlayingPage>
                       children: [
                         Text(
                           track.title,
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: DemoText.titleXLarge
+                              .copyWith(color: Colors.white),
                         ),
                         Text(
                           track.artist,
-                          style: GoogleFonts.poppins(
-                            color: Colors.white70,
-                            fontSize: 16,
-                          ),
+                          style: DemoText.leadRegular
+                              .copyWith(color: Colors.white70),
                         ),
                       ],
                     ),
@@ -332,17 +320,13 @@ class _NowPlayingPageState extends State<NowPlayingPage>
                           children: [
                             Text(
                               _format(_progress.value),
-                              style: GoogleFonts.poppins(
-                                color: Colors.white60,
-                                fontSize: 12,
-                              ),
+                              style: DemoText.label
+                                  .copyWith(color: Colors.white60),
                             ),
                             Text(
                               '-${_format(1 - _progress.value)}',
-                              style: GoogleFonts.poppins(
-                                color: Colors.white60,
-                                fontSize: 12,
-                              ),
+                              style: DemoText.label
+                                  .copyWith(color: Colors.white60),
                             ),
                           ],
                         ),

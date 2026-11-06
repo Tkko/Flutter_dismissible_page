@@ -7,8 +7,8 @@ import 'package:dismissible_page_example/demo/scenarios/real_world.dart';
 import 'package:dismissible_page_example/demo/pages/showcase_gallery.dart';
 import 'package:dismissible_page_example/demo/widgets/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 class DismissiblePageDemo extends StatefulWidget {
   const DismissiblePageDemo({super.key});
@@ -229,21 +229,15 @@ class Contacts extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Tornike',
-                style: GoogleFonts.poppins(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: DemoText.titleLargeMedium,
               ),
               Padding(
                 padding: const EdgeInsets.all(2),
                 child: Text(
                   'Find me on',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.black54,
-                  ),
+                  style: DemoText.bodySmall.copyWith(color: Colors.black54),
                 ),
               ),
             ],
@@ -256,7 +250,10 @@ class Contacts extends StatelessWidget {
               children: pageModel.contacts.entries.map((item) {
                 return ActionChip(
                   onPressed: () => launchUrl(Uri.parse(item.value)),
-                  label: Text(item.key, style: GoogleFonts.poppins()),
+                  label: Text(
+                    item.key,
+                    style: DemoText.plain,
+                  ),
                 );
               }).toList(),
             ),
@@ -374,10 +371,7 @@ class Title extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.poppins(
-        fontSize: 18,
-        fontWeight: FontWeight.w500,
-      ),
+      style: DemoText.subheadingMedium,
     );
   }
 }
@@ -410,7 +404,7 @@ class AppChip extends StatelessWidget {
         padding: padding,
         label: Text(
           title,
-          style: GoogleFonts.poppins(
+          style: DemoText.plain.copyWith(
             color: isSelected ? Colors.white : Colors.black,
             fontSize: fontSize,
             fontWeight: fontWeight,

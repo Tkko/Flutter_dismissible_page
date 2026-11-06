@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 class ScenarioCard extends StatelessWidget {
   const ScenarioCard({
@@ -59,18 +59,12 @@ class ScenarioCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: DemoText.bodyStrong,
                       ),
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.black54,
-                        ),
+                        style: DemoText.label.copyWith(color: Colors.black54),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -89,9 +83,7 @@ class ScenarioCard extends StatelessWidget {
                               ),
                               child: Text(
                                 tag,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w500,
+                                style: DemoText.microMedium.copyWith(
                                   color: Color.lerp(color, Colors.black, 0.3),
                                 ),
                               ),

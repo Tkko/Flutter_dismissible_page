@@ -4,7 +4,7 @@ import 'package:dismissible_page_example/demo/scenarios/demo_data.dart';
 import 'package:dismissible_page_example/demo/widgets/demo_image.dart';
 import 'package:dismissible_page_example/demo/widgets/dismissible_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 /// A masonry photo grid. Tapping a photo opens it full screen through a
 /// [Hero]; drag it in any direction and it flies back into the grid.
@@ -32,9 +32,9 @@ class PhotoGalleryPage extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: const DismissibleBackButton(),
-        title: Text(
+        title: const Text(
           'Photos',
-          style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w700),
+          style: DemoText.title,
         ),
       ),
       body: SingleChildScrollView(
@@ -164,11 +164,8 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                           children: [
                             Text(
                               photo.title,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 26,
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: DemoText.titleXLarge
+                                  .copyWith(color: Colors.white),
                             ),
                             Row(
                               children: [
@@ -180,20 +177,16 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                                 const SizedBox(width: 4),
                                 Text(
                                   photo.place,
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.white70,
-                                    fontSize: 14,
-                                  ),
+                                  style: DemoText.bodySmall
+                                      .copyWith(color: Colors.white70),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 6),
                             Text(
                               'Drag in any direction to let go',
-                              style: GoogleFonts.poppins(
-                                color: Colors.white38,
-                                fontSize: 12,
-                              ),
+                              style: DemoText.label
+                                  .copyWith(color: Colors.white38),
                             ),
                           ],
                         ),
@@ -229,11 +222,8 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                       ),
                       child: Text(
                         'Release to close',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: DemoText.captionMedium
+                            .copyWith(color: Colors.white),
                       ),
                     ),
                   ),

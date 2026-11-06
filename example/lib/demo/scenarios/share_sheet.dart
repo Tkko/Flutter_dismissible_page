@@ -4,7 +4,7 @@ import 'package:dismissible_page_example/demo/scenarios/demo_data.dart';
 import 'package:dismissible_page_example/demo/widgets/demo_image.dart';
 import 'package:dismissible_page_example/demo/widgets/dismissible_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 /// An article with a share sheet: a partial-height sheet over a dimmed
 /// scrim. Drag it down, tap the scrim or press Cancel to close it.
@@ -44,21 +44,13 @@ class ArticlePage extends StatelessWidget {
         children: [
           Text(
             'DESIGN NOTES',
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              letterSpacing: 2,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xff00a35a),
-            ),
+            style: DemoText.microStrong
+                .copyWith(letterSpacing: 2, color: const Color(0xff00a35a)),
           ),
           const SizedBox(height: 6),
           Text(
             'Why motion matters',
-            style: GoogleFonts.poppins(
-              fontSize: 30,
-              height: 1.15,
-              fontWeight: FontWeight.w700,
-            ),
+            style: DemoText.headlineLarge.copyWith(height: 1.15),
           ),
           const SizedBox(height: 16),
           ClipRRect(
@@ -71,11 +63,8 @@ class ArticlePage extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 16),
               child: Text(
                 paragraph,
-                style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  height: 1.7,
-                  color: Colors.black87,
-                ),
+                style:
+                    DemoText.body.copyWith(height: 1.7, color: Colors.black87),
               ),
             ),
         ],
@@ -137,24 +126,19 @@ class ShareSheetPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        Align(
+                        const Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
                             'Share',
-                            style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: DemoText.heading,
                           ),
                         ),
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
                             title,
-                            style: GoogleFonts.poppins(
-                              color: Colors.black54,
-                              fontSize: 13,
-                            ),
+                            style: DemoText.caption
+                                .copyWith(color: Colors.black54),
                           ),
                         ),
                         const SizedBox(height: 18),
@@ -176,7 +160,7 @@ class ShareSheetPage extends StatelessWidget {
                                   const SizedBox(height: 6),
                                   Text(
                                     label,
-                                    style: GoogleFonts.poppins(fontSize: 12),
+                                    style: DemoText.label,
                                   ),
                                 ],
                               ),
@@ -186,8 +170,10 @@ class ShareSheetPage extends StatelessWidget {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(Icons.link_rounded),
-                          title:
-                              Text('Copy link', style: GoogleFonts.poppins()),
+                          title: const Text(
+                            'Copy link',
+                            style: DemoText.plain,
+                          ),
                           onTap: () => DismissiblePage.dismiss(context),
                         ),
                         SizedBox(
@@ -202,11 +188,9 @@ class ShareSheetPage extends StatelessWidget {
                               ),
                             ),
                             onPressed: () => DismissiblePage.dismiss(context),
-                            child: Text(
+                            child: const Text(
                               'Cancel',
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: DemoText.plainSemiBold,
                             ),
                           ),
                         ),

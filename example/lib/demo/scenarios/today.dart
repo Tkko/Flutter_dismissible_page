@@ -4,7 +4,7 @@ import 'package:dismissible_page_example/demo/scenarios/demo_data.dart';
 import 'package:dismissible_page_example/demo/widgets/demo_image.dart';
 import 'package:dismissible_page_example/demo/widgets/expanding_hero.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:dismissible_page_example/demo/theme/demo_text.dart';
 
 const _cardRadius = 26.0;
 const _background = Color(0xfff2f2f7);
@@ -39,11 +39,7 @@ class TodayPage extends StatelessWidget {
                   child: Text(
                     '${_weekdays[now.weekday - 1]}, ${_months[now.month - 1]} '
                     '${now.day}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black45,
-                    ),
+                    style: DemoText.labelStrong.copyWith(color: Colors.black45),
                   ),
                 ),
                 IconButton(
@@ -53,12 +49,9 @@ class TodayPage extends StatelessWidget {
                 ),
               ],
             ),
-            Text(
+            const Text(
               'Today',
-              style: GoogleFonts.poppins(
-                fontSize: 36,
-                fontWeight: FontWeight.w800,
-              ),
+              style: DemoText.display,
             ),
             const SizedBox(height: 14),
             for (final story in demoStories)
@@ -164,28 +157,20 @@ class StoryVisual extends StatelessWidget {
             children: [
               Text(
                 story.category,
-                style: GoogleFonts.poppins(
-                  color: Colors.white70,
-                  fontSize: 11,
-                  letterSpacing: 1.6,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: DemoText.microStrong
+                    .copyWith(color: Colors.white70, letterSpacing: 1.6),
               ),
               const SizedBox(height: 4),
               Text(
                 story.title,
                 maxLines: 3,
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 28,
-                  height: 1.12,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: DemoText.headline
+                    .copyWith(color: Colors.white, height: 1.12),
               ),
               const SizedBox(height: 6),
               Text(
                 story.subtitle,
-                style: GoogleFonts.poppins(color: Colors.white70, fontSize: 14),
+                style: DemoText.bodySmall.copyWith(color: Colors.white70),
               ),
             ],
           ),
@@ -321,11 +306,7 @@ class _Paragraph extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 18),
       child: Text(
         text,
-        style: GoogleFonts.poppins(
-          fontSize: 15.5,
-          height: 1.7,
-          color: Colors.black87,
-        ),
+        style: DemoText.bodyLarge.copyWith(height: 1.7, color: Colors.black87),
       ),
     );
   }
@@ -364,19 +345,13 @@ class _FeaturedApp extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Golden Hour',
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
+                  style: DemoText.bodyStrong,
                 ),
                 Text(
                   'Plan your light',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12.5,
-                    color: Colors.black54,
-                  ),
+                  style: DemoText.labelLarge.copyWith(color: Colors.black54),
                 ),
               ],
             ),
@@ -388,9 +363,9 @@ class _FeaturedApp extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
             ),
             onPressed: () {},
-            child: Text(
+            child: const Text(
               'GET',
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
+              style: DemoText.plainBold,
             ),
           ),
         ],
