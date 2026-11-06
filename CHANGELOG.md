@@ -1,22 +1,17 @@
-## 2.0.0-beta.5
-- Documentation: resized the donation badges in the README so they render at a sensible size on pub.dev
+## 2.0.0
 
-## 2.0.0-beta.4
-- Documentation: redesigned README with a shared header and footer, a properties table and collapsible guides
-- Aligned issue forms and the pull request template
-
-## 2.0.0-beta.3
-- Updated minimum SDK constraints to Flutter `>=3.27.0` and Dart `^3.6.0` to match Flutter's modernized `Color` APIs (`Color.withValues()`, `Color.a`).
-
-## 2.0.0-beta.2
+See the [Migration](README.md#migration) section of the README for upgrade steps.
 
 ### Breaking Changes
-- `DismissiblePage.direction` now defaults to `DismissiblePageDismissDirection.all` (was `vertical`). Pass `direction: DismissiblePageDismissDirection.vertical` to keep the previous behavior.
-- Missing `dismissThresholds` sides default to `0.18` of the page dimension (was `0.15`).
+- Require `child` on `DismissiblePage` and move builder content to `DismissiblePage.builder`.
+- Rename `DismissiblePageDismissDirection.multi` to `DismissiblePageDismissDirection.all`. `direction` now defaults to `all` (was `vertical`); pass `direction: DismissiblePageDismissDirection.vertical` to keep the previous behavior.
+- Rename `overallDragValue` to `progress` in `DismissiblePageDragUpdateDetails` (including `toMap()`).
+- Key `dismissThresholds` by directional destination sides (`DismissiblePageSide.up`, `down`, `start`, `end`) instead of directions. Missing sides default to `0.18` of the page dimension.
 - Group `dragSensitivity`, `minScale` and `maxTransformValue` into `transform: DismissiblePageTransform`, and `dismissThresholds` into `gesture: DismissiblePageGesture`. The range checks live in these classes.
 - Remove `reverseDuration`; use `DismissiblePageRebound.curve(duration: ...)`.
 - Remove `GlobalKeyExtension.globalPaintBounds`.
 - `DismissiblePageDragUpdateDetails` now compares and hashes all of its fields instead of only `offset`.
+- Updated minimum SDK constraints to Flutter `>=3.27.0` and Dart `^3.6.0`, to match Flutter's modernized `Color` APIs (`Color.withValues()`, `Color.a`).
 
 ### New Features & Enhancements
 - **`DismissiblePage.of(context)` / `maybeOf`**: A `DismissiblePageHandle` with `isDragging`, `isDismissing`, `progress`, `offset` and `dismiss()`. It is a `Listenable`, so UI can follow the drag.
@@ -34,17 +29,6 @@
 - **Accessibility**: Screen readers get a dismiss action, and `semanticLabel` names the page.
 - **`TransparentRoute` options**: `barrierDismissible`, `opaque` and `transitionBuilder` (also on `pushTransparentRoute`).
 - **`DismissiblePageBackground.custom` / `DismissiblePageRadius.custom`**: Compute the value from the drag progress.
-
-## 2.0.0-beta.1
-
-### Breaking Changes
-- Require `child` on `DismissiblePage` and move builder content to `DismissiblePage.builder`.
-- Rename `DismissiblePageDismissDirection.multi` to `DismissiblePageDismissDirection.all`.
-- Rename `overallDragValue` to `progress` in `DismissiblePageDragUpdateDetails` (including `toMap()`).
-- Key `dismissThresholds` by directional destination sides (`DismissiblePageSide.up`, `down`, `start`, `end`) instead of directions. Missing sides default to `0.15`.
-- Updated minimum SDK constraints to Dart `>=3.0.0 <5.0.0` and Flutter `>=3.10.0`.
-
-### New Features & Enhancements
 - **`DismissiblePageBackground`**: Introduced a structured class with `.color()`, `.widget()`, and `.custom()` factories for animated background rendering and opacity blending.
 - **`DismissiblePageRadius`**: Introduced a dedicated model (`.circular()`, `.all()`, etc.) for managing corner radius transformations during drag interactions.
 - **`onDragCancel` callback**: Added callback invoked when a drag gesture is cancelled or released without triggering a dismissal.
@@ -67,31 +51,15 @@
 - Updated example app with cross-platform support (Android, iOS, macOS, Windows, Linux, Web).
 - Modernized codebase to `very_good_analysis ^11.0.0` and Flutter's `Color.withValues()` API.
 
-### Example
-```dart
-// Standard widget usage with new properties:
-DismissiblePage(
-  onDismissed: () => Navigator.of(context).pop(),
-  direction: DismissiblePageDismissDirection.all, // renamed from .multi
-  dismissThresholds: const {
-    DismissiblePageSide.down: 0.2, // keyed by DismissiblePageSide
-  },
-  background: DismissiblePageBackground.fadeOut(Colors.black),
-  borderRadius: const DismissiblePageRadius.transition(from: 0.0, to: 28.0),
-  onDragCancel: () => debugPrint('Cancelled'),
-  onDragUpdate: (details) => debugPrint('Progress: ${details.progress}'),
-  child: const MyPageContent(),
-)
+### Closed Issues
+- [#14](https://github.com/Tkko/Flutter_dismissible_page/issues/14) Not working with `CustomScrollView`
+- [#32](https://github.com/Tkko/Flutter_dismissible_page/issues/32) `ListView` behaviour while being dismissed
+- [#33](https://github.com/Tkko/Flutter_dismissible_page/issues/33) `BouncingScrollPhysics` mode does not work inside `DismissiblePage`
+- [#36](https://github.com/Tkko/Flutter_dismissible_page/issues/36) Inner scrollable also scrolls while reversing the dismissal
+- [#37](https://github.com/Tkko/Flutter_dismissible_page/issues/37) Add `onDragCancel` callback
 
-// With explicit scroll coordination:
-DismissiblePage.builder(
-  onDismissed: () => Navigator.of(context).pop(),
-  builder: (context, controller) => ListView(
-    controller: controller,
-    children: [...],
-  ),
-)
-```
+### Pull Requests
+[#41](https://github.com/Tkko/Flutter_dismissible_page/pull/41), [#42](https://github.com/Tkko/Flutter_dismissible_page/pull/42), [#43](https://github.com/Tkko/Flutter_dismissible_page/pull/43), [#44](https://github.com/Tkko/Flutter_dismissible_page/pull/44), [#46](https://github.com/Tkko/Flutter_dismissible_page/pull/46), [#52](https://github.com/Tkko/Flutter_dismissible_page/pull/52), [#53](https://github.com/Tkko/Flutter_dismissible_page/pull/53), [#54](https://github.com/Tkko/Flutter_dismissible_page/pull/54)
 
 ## 1.0.3
 - Fixed unexpected behavior of dismissing the page when user is scrolling the opposite direction [Issue](https://github.com/Tkko/Flutter_dismissible_page/issues/14#issuecomment-1599097053)
