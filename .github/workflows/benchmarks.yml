@@ -71,9 +71,10 @@ jobs:
 
       - name: Upload Performance Artifact
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: ./.github/workflow-actions/.github/actions/upload-test-diagnostics
         with:
           name: performance-summary-macos
+          retention-days: 90
           path: |
             example/build/*.timeline.json
             example/build/*.timeline_summary.json
