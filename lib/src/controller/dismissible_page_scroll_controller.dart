@@ -56,7 +56,9 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
 
   // Where the scrollable was when the finger went down. A pull only dismisses
   // the page when the gesture began at that edge: scrolling quickly to the top
-  // and carrying on must not turn into a dismissal.
+  // and carrying on must not turn into a dismissal. Neither does grabbing the
+  // list during a bounce: that drag belongs to the bounce, which would
+  // otherwise stay frozen under the moving page.
   bool _dragBeganAtStart = false;
   bool _dragBeganAtEnd = false;
 
@@ -67,8 +69,10 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
   @override
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
     _dragInRegion = _arbiter?.isInDragRegion(details.globalPosition) ?? true;
-    _dragBeganAtStart = pixels <= minScrollExtent + _kEdgeTolerance;
-    _dragBeganAtEnd = pixels >= maxScrollExtent - _kEdgeTolerance;
+    _dragBeganAtStart =
+        !outOfRange && pixels <= minScrollExtent + _kEdgeTolerance;
+    _dragBeganAtEnd =
+        !outOfRange && pixels >= maxScrollExtent - _kEdgeTolerance;
     return super.drag(details, dragCancelCallback);
   }
 
@@ -114,7 +118,7 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
           _isDismissDragging = false;
           arbiter.endDrag();
           if (leftover != 0.0) {
-            super.applyUserOffset(leftover);
+            applyUserOffset(leftover);
           }
           return;
         }
@@ -129,15 +133,22 @@ class _DismissiblePageScrollPosition extends ScrollPositionWithSingleContext {
     }
 
     // 2. At edges (top or bottom):
-    final atStart = pixels <= minScrollExtent;
-    final atEnd = pixels >= maxScrollExtent;
+    // The list scrolls up to the edge and the page takes what is beyond it, so
+    // bouncing physics never overscroll underneath a displaced page.
+    final isArmed = delta > 0 ? _dragBeganAtStart : _dragBeganAtEnd;
+    final toEdge = delta > 0
+        ? max(pixels - minScrollExtent, 0.0)
+        : min(pixels - maxScrollExtent, 0.0);
+    final beyondEdge = delta - toEdge;
 
-    if ((delta > 0 && atStart && _dragBeganAtStart) ||
-        (delta < 0 && atEnd && _dragBeganAtEnd)) {
-      final physicalDelta = _physicalScrollDelta(delta, axisDirection);
+    if (isArmed && beyondEdge * delta > 0) {
+      final physicalDelta = _physicalScrollDelta(beyondEdge, axisDirection);
       final offsetDelta =
           isVertical ? Offset(0, physicalDelta) : Offset(physicalDelta, 0);
       if (arbiter.isDeltaAllowed(offsetDelta)) {
+        if (toEdge != 0) {
+          super.applyUserOffset(toEdge);
+        }
         if (!_isDismissDragging) {
           _isDismissDragging = true;
           arbiter.startDrag();

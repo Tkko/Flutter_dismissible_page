@@ -85,7 +85,6 @@ class SecondPage extends StatelessWidget {
       // End of the optional properties
       child: Scaffold(
         body: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
           child: Column(
             children: [
               Hero(
