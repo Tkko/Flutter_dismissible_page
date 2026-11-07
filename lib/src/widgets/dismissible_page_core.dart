@@ -226,6 +226,19 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
     }
   }
 
+  // A reverse scroll that reaches the origin stops the page there, and the rest
+  // of the gesture belongs to the list. Carrying on through the origin would
+  // drag the page away on the other side, and dismiss it. Taking the drag first
+  // stops a running rebound, and a page held by a pending confirmation stays.
+  void _settleAtOrigin(bool isVertical) {
+    _arbiter.startDrag();
+    if (!_arbiter.isDragging) return;
+    final offset = _arbiter.offset;
+    _arbiter
+      ..setOffset(isVertical ? Offset(offset.dx, 0) : Offset(0, offset.dy))
+      ..endDrag();
+  }
+
   void _handlePanCancel() {
     _arbiter.cancelDrag();
   }
@@ -254,8 +267,15 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
       return false;
     }
 
-    // ScrollPosition managed by DismissiblePageScrollController handles deltas directly.
-    if (notification.metrics is _DismissiblePageScrollPosition) {
+    // A position of this page's controller moves the page itself, in
+    // applyUserOffset. Handling its notifications too would apply every delta
+    // twice. The notification's metrics are a copy, so the position is matched
+    // by context. A DismissiblePageScrollController that was not given to this
+    // page has no arbiter and still relies on the notifications below.
+    final scrollContext = notification.context;
+    if (_effectiveController.positions.any(
+      (position) => position.context.notificationContext == scrollContext,
+    )) {
       return false;
     }
 
@@ -318,13 +338,26 @@ class _DismissiblePageCoreState extends State<_DismissiblePageCore>
           -(notification.scrollDelta ?? 0),
           notification.metrics.axisDirection,
         );
+        final nextCoord =
+            currentCoord + physicalDelta * _arbiter.dragSensitivity;
+        if (currentCoord * nextCoord <= 0) {
+          _settleAtOrigin(isVertical);
+          return false;
+        }
         final delta =
             isVertical ? Offset(0, physicalDelta) : Offset(physicalDelta, 0);
         _applyScrollDelta(delta, dragDetails.sourceTimeStamp);
         return false;
       }
 
-      if (notification.metrics.outOfRange && _isArmed(notification.metrics)) {
+      // Only a drag further out of range pulls the page. Pushing back into
+      // range is the list recovering from its overscroll.
+      final metrics = notification.metrics;
+      final scrollDelta = notification.scrollDelta ?? 0;
+      final isLeavingRange = metrics.pixels < metrics.minScrollExtent
+          ? scrollDelta < 0
+          : metrics.pixels > metrics.maxScrollExtent && scrollDelta > 0;
+      if (isLeavingRange && _isArmed(metrics)) {
         if (_arbiter.isDeltaAllowed(dragDetails.delta)) {
           _applyScrollDelta(dragDetails.delta, dragDetails.sourceTimeStamp);
         }

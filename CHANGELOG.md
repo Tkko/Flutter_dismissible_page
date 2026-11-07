@@ -1,3 +1,10 @@
+## 2.1.0
+
+### Scroll Coordination & Performance
+- Fixed `BouncingScrollPhysics` dismissing the page while scrolling with a `DismissiblePageScrollController`. The page also handled the scroll notifications of its own controller, so a drag could move it twice, and pushing back after crossing the top edge could lift the page past its origin and dismiss it.
+- Fixed the page being dismissed while scrolling a list that is not driven by the page's controller, with any scroll physics. A scroll back towards the origin now stops the page there instead of carrying it through to the other side, and pushing a list out of its overscroll no longer moves the page.
+- A list that bounces no longer overscrolls under a displaced page: it stops at the edge and the page takes the rest of the drag. Grabbing a list during a bounce now stays with the bounce, and the next pull moves the page.
+
 ## 2.0.0
 
 See the [Migration](README.md#migration) section of the README for upgrade steps.
