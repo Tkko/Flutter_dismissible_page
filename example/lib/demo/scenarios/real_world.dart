@@ -1,4 +1,5 @@
 import 'package:dismissible_page_example/demo/scenarios/chat.dart';
+import 'package:dismissible_page_example/demo/scenarios/fade_dismiss.dart';
 import 'package:dismissible_page_example/demo/scenarios/music_player.dart';
 import 'package:dismissible_page_example/demo/scenarios/photo_gallery.dart';
 import 'package:dismissible_page_example/demo/scenarios/share_sheet.dart';
@@ -87,6 +88,14 @@ class RealWorldScenarios extends StatelessWidget {
           color: const Color(0xffff9f0a),
           tags: const ['Scrim', 'Tap outside', 'Fling to close'],
           onTap: () => _open(context, const ArticlePage()),
+        ),
+        ScenarioCard(
+          title: 'Fade on dismiss',
+          subtitle: 'Content fades out smoothly as you drag the page away',
+          icon: Icons.opacity_rounded,
+          color: const Color(0xff00d573),
+          tags: const ['Fade out', 'ListenableBuilder', 'DismissiblePage.of'],
+          onTap: () => context.pushTransparentRoute(const FadeDismissPage()),
         ),
         const SizedBox(height: 14),
       ],

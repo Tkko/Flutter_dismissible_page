@@ -305,6 +305,32 @@ ListenableBuilder(
 </details>
 
 <details>
+<summary><b>Fading the page on dismiss</b></summary>
+
+To fade out the page content as it is dragged away, wrap your content in a `ListenableBuilder` driven by `DismissiblePage.of(context)`. Pass your page content to `child` so it is cached and never rebuilt during drag updates:
+
+```dart
+DismissiblePage(
+  onDismissed: () => Navigator.of(context).pop(),
+  child: Builder(
+    builder: (context) {
+      final handle = DismissiblePage.of(context);
+      return ListenableBuilder(
+        listenable: handle,
+        builder: (context, child) => Opacity(
+          opacity: (1.0 - handle.progress).clamp(0.0, 1.0),
+          child: child,
+        ),
+        child: const MyPageContent(), // Cached: zero rebuilds while dragging!
+      );
+    },
+  ),
+)
+```
+
+</details>
+
+<details>
 <summary><b>Custom backgrounds and radii</b></summary>
 
 `DismissiblePageBackground.custom((progress) => color)` and `DismissiblePageRadius.custom((progress) => radius)` compute the value from the drag progress (0 to 1), for transitions the presets can't express.
