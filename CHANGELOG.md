@@ -1,6 +1,7 @@
 ## 2.1.1
 
 - Added "Fade on dismiss" example to the demo app and README showing how to smoothly fade out page content as it is dismissed using `DismissiblePage.of(context)` with `ListenableBuilder`.
+- Added `DismissibleInteractiveViewer` example in the demo app and README showing how to coordinate `DismissiblePage` with Flutter's `InteractiveViewer` for pinch-to-zoom, pan, and pull-down-to-dismiss via overscroll notifications.
 
 ## 2.1.0
 

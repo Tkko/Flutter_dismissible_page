@@ -5,6 +5,7 @@ import 'package:dismissible_page_example/demo/scenarios/photo_gallery.dart';
 import 'package:dismissible_page_example/demo/scenarios/share_sheet.dart';
 import 'package:dismissible_page_example/demo/scenarios/today.dart';
 import 'package:dismissible_page_example/demo/scenarios/shop.dart';
+import 'package:dismissible_page_example/demo/scenarios/dismissible_interactive_viewer.dart';
 import 'package:dismissible_page_example/demo/widgets/dismissible_screen.dart';
 import 'package:dismissible_page_example/demo/widgets/scenario_card.dart';
 import 'package:dismissible_page/dismissible_page.dart';
@@ -96,6 +97,14 @@ class RealWorldScenarios extends StatelessWidget {
           color: const Color(0xff00d573),
           tags: const ['Fade out', 'ListenableBuilder', 'DismissiblePage.of'],
           onTap: () => context.pushTransparentRoute(const FadeDismissPage()),
+        ),
+        ScenarioCard(
+          title: 'InteractiveViewer zoom',
+          subtitle: 'Pinch and pan a photo, pull down to dismiss when at top',
+          icon: Icons.zoom_in_rounded,
+          color: const Color(0xff00b4d8),
+          tags: const ['InteractiveViewer', 'Pinch to zoom', 'Overscroll'],
+          onTap: () => context.pushTransparentRoute(const ZoomableImagePage()),
         ),
         const SizedBox(height: 14),
       ],

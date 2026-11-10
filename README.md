@@ -331,6 +331,33 @@ DismissiblePage(
 </details>
 
 <details>
+<summary><b>Zoomable images with InteractiveViewer</b></summary>
+
+Flutter's `InteractiveViewer` absorbs multi-touch pinches and single-finger pans, and does not emit `ScrollNotification`s.
+
+> [!NOTE]
+> `DismissibleInteractiveViewer` is **not part of the core package**—it is an example component provided in the demo app that bridges `InteractiveViewer` with `DismissiblePage` by dispatching standard Flutter scroll notifications.
+
+To coordinate pinch-to-zoom, panning, and pull-down-to-dismiss without gesture arena conflicts, drop [`DismissibleInteractiveViewer`](example/lib/demo/scenarios/dismissible_interactive_viewer.dart) into your project:
+
+```dart
+DismissiblePage(
+  onDismissed: () => Navigator.of(context).pop(),
+  direction: DismissiblePageDismissDirection.down,
+  gesture: const DismissiblePageGesture(
+    dragRegion: DismissibleInteractiveViewer.dragRegion,
+  ),
+  child: DismissibleInteractiveViewer(
+    child: Image.network(imageUrl),
+  ),
+)
+```
+
+See the full implementation in [dismissible_interactive_viewer.dart](example/lib/demo/scenarios/dismissible_interactive_viewer.dart).
+
+</details>
+
+<details>
 <summary><b>Custom backgrounds and radii</b></summary>
 
 `DismissiblePageBackground.custom((progress) => color)` and `DismissiblePageRadius.custom((progress) => radius)` compute the value from the drag progress (0 to 1), for transitions the presets can't express.
