@@ -72,14 +72,6 @@ class TransparentRoute<T> extends PageRoute<T> {
   Widget buildContent(BuildContext context) => builder(context);
 
   @override
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    // The route below a fullscreen dialog stays still.
-    if (nextRoute is PageRoute<T> && nextRoute.fullscreenDialog) return false;
-    return nextRoute is TransparentRoute ||
-        (nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null);
-  }
-
-  @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) =>
       previousRoute is PageRoute && !fullscreenDialog;
 

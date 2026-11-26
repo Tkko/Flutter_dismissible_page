@@ -9,6 +9,7 @@
   - The back button of a following Cupertino page no longer shows that `title`.
   - With `fullscreenDialog: false`, the back button inside the route no longer has a label, such as the previous page's title.
   - With `fullscreenDialog: false`, a Cupertino page below no longer runs its outgoing transition for this route.
+  - It now uses `PageRoute`'s default rule when deciding whether to react to a route opened on top. A custom `transitionBuilder` that uses `secondaryAnimation` may behave differently.
 
 ## 2.1.1
 
