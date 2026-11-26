@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 part 'constants.dart';
 
@@ -57,8 +56,8 @@ class DismissiblePage extends StatelessWidget {
     this.isFullScreen = true,
     this.enabled = true,
     this.background = const DismissiblePageBackground.transition(
-      from: Colors.black,
-      to: Colors.transparent,
+      from: Color(0xFF000000),
+      to: _kTransparent,
     ),
     this.borderRadius = const DismissiblePageRadius.transition(),
     this.direction = DismissiblePageDismissDirection.all,
@@ -90,8 +89,8 @@ class DismissiblePage extends StatelessWidget {
     this.isFullScreen = true,
     this.enabled = true,
     this.background = const DismissiblePageBackground.transition(
-      from: Colors.black,
-      to: Colors.transparent,
+      from: Color(0xFF000000),
+      to: _kTransparent,
     ),
     this.borderRadius = const DismissiblePageRadius.transition(),
     this.direction = DismissiblePageDismissDirection.all,

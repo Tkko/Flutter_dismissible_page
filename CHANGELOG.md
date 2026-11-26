@@ -1,3 +1,16 @@
+## 3.0.0
+
+### Breaking Changes
+
+- Removed the imports of `package:flutter/material.dart` and `package:flutter/cupertino.dart`, which are deprecated after Flutter 3.47. The package now depends only on the widgets layer, with no new dependencies and the same minimum SDK versions.
+- `TransparentRoute` no longer mixes in `CupertinoRouteTransitionMixin`. Its default transition remains, but:
+  - `route is CupertinoRouteTransitionMixin` is now false, and the `previousTitle` getter is gone.
+  - The `title` parameter and field are removed. A `CupertinoNavigationBar` inside the route, and the back button of a following Cupertino page, can no longer take a title from the route.
+  - The `buildContent` method is removed. The route builds its content with `builder`.
+  - With `fullscreenDialog: false`, the back button inside the route no longer has a label, such as the previous page's title.
+  - With `fullscreenDialog: false`, a Cupertino page below no longer runs its outgoing transition for this route.
+  - It now uses `PageRoute`'s default rule when deciding whether to react to a route opened on top. A custom `transitionBuilder` that uses `secondaryAnimation` may behave differently.
+
 ## 2.1.1
 
 - Added "Fade on dismiss" example to the demo app and README showing how to smoothly fade out page content as it is dismissed using `DismissiblePage.of(context)` with `ListenableBuilder`.

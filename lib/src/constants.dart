@@ -48,3 +48,6 @@ const double _kSpringDistanceTolerance = 0.25;
 const double _kSpringVelocityTolerance = 5;
 
 const Duration _transitionDuration = Duration(milliseconds: 250);
+
+/// Fully transparent, the same value as Material's `Colors.transparent`.
+const Color _kTransparent = Color(0x00000000);
