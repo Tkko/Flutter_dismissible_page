@@ -3,8 +3,9 @@
 - Removed the imports of `package:flutter/material.dart` and `package:flutter/cupertino.dart`, which are deprecated after Flutter 3.47. The package now depends only on the widgets layer, with no new dependencies and the same minimum SDK versions.
 - `TransparentRoute` no longer mixes in `CupertinoRouteTransitionMixin`. Its default transition and `title` field remain, but:
   - `route is CupertinoRouteTransitionMixin` is now false, and the `previousTitle` getter is gone.
-  - A following Cupertino page no longer reads the route's `title` for its navigation bar back button.
-  - With `fullscreenDialog: false`, a Material or Cupertino page below no longer runs its outgoing transition for this route.
+  - A `CupertinoNavigationBar` inside the route no longer shows the route's `title` when `middle` is omitted.
+  - The back button of a following Cupertino page no longer shows that `title`.
+  - With `fullscreenDialog: false`, a Cupertino page below no longer runs its outgoing transition for this route.
 
 ## 2.1.1
 
