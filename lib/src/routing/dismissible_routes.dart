@@ -74,9 +74,9 @@ class TransparentRoute<T> extends PageRoute<T> {
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // The route below a fullscreen dialog stays still.
-    if (nextRoute is PageRoute && nextRoute.fullscreenDialog) return false;
+    if (nextRoute is PageRoute<T> && nextRoute.fullscreenDialog) return false;
     return nextRoute is TransparentRoute ||
-        (nextRoute is ModalRoute && nextRoute.delegatedTransition != null);
+        (nextRoute is ModalRoute<T> && nextRoute.delegatedTransition != null);
   }
 
   @override
