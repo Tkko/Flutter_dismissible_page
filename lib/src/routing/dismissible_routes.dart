@@ -22,7 +22,6 @@ class TransparentRoute<T> extends PageRoute<T> {
     this.backgroundColor = _kTransparent,
     this.transitionDuration = _transitionDuration,
     this.reverseTransitionDuration = _transitionDuration,
-    this.title,
     super.settings,
     this.maintainState = true,
     super.fullscreenDialog = true,
@@ -32,9 +31,6 @@ class TransparentRoute<T> extends PageRoute<T> {
   });
 
   final WidgetBuilder builder;
-
-  /// A title for this route.
-  final String? title;
 
   /// Builds the primary contents of the route.
   @override
@@ -67,10 +63,6 @@ class TransparentRoute<T> extends PageRoute<T> {
   @override
   String? get barrierLabel => null;
 
-  /// Builds the content of the route.
-  @protected
-  Widget buildContent(BuildContext context) => builder(context);
-
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) =>
       previousRoute is PageRoute && !fullscreenDialog;
@@ -84,7 +76,7 @@ class TransparentRoute<T> extends PageRoute<T> {
       Semantics(
         scopesRoute: true,
         explicitChildNodes: true,
-        child: buildContent(context),
+        child: builder(context),
       );
 
   @override
