@@ -403,9 +403,12 @@ void main() {
         binding,
         () async {
           // 1. Swipe horizontally to test cross-axis gesture disambiguation
+          // Swipe past half the width, so the page turns even if a stall on
+          // a slow machine makes the release register with no velocity.
+          final pageWidth = tester.getSize(find.byType(PageView)).width;
           await tester.fling(
             find.text('Story Page #0'),
-            const Offset(-300, 0),
+            Offset(-pageWidth * 0.6, 0),
             1000,
           );
           await tester.pumpAndSettle();
