@@ -16,11 +16,10 @@ Widget _fadeTransition(
 ) =>
     FadeTransition(opacity: animation, child: child);
 
-class TransparentRoute<T> extends PageRoute<T>
-    with CupertinoRouteTransitionMixin<T> {
+class TransparentRoute<T> extends PageRoute<T> {
   TransparentRoute({
     required this.builder,
-    this.backgroundColor = Colors.transparent,
+    this.backgroundColor = _kTransparent,
     this.transitionDuration = _transitionDuration,
     this.reverseTransitionDuration = _transitionDuration,
     this.title,
@@ -34,7 +33,7 @@ class TransparentRoute<T> extends PageRoute<T>
 
   final WidgetBuilder builder;
 
-  @override
+  /// A title for this route.
   final String? title;
 
   /// Builds the primary contents of the route.
@@ -66,7 +65,35 @@ class TransparentRoute<T> extends PageRoute<T>
   Color get barrierColor => backgroundColor;
 
   @override
+  String? get barrierLabel => null;
+
+  /// Builds the content of the route.
+  @protected
   Widget buildContent(BuildContext context) => builder(context);
+
+  @override
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    // The route below a fullscreen dialog stays still.
+    if (nextRoute is PageRoute && nextRoute.fullscreenDialog) return false;
+    return nextRoute is TransparentRoute ||
+        (nextRoute is ModalRoute && nextRoute.delegatedTransition != null);
+  }
+
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) =>
+      previousRoute is PageRoute && !fullscreenDialog;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) =>
+      Semantics(
+        scopesRoute: true,
+        explicitChildNodes: true,
+        child: buildContent(context),
+      );
 
   @override
   String get debugLabel => '${super.debugLabel}(${settings.name})';

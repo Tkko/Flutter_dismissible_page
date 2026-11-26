@@ -69,7 +69,7 @@ class SecondPage extends StatelessWidget {
         minScale: .8,
       ),
       direction: DismissiblePageDismissDirection.all,
-      background: const DismissiblePageBackground.solid(Colors.black),
+      background: DismissiblePageBackground.fadeOut(const Color(0x00000000)),
       gesture: const DismissiblePageGesture(
         dismissThresholds: {
           DismissiblePageSide.up: .2,
